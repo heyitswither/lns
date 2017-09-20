@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6"/>
+	<Project>
+		<Option title="CppLNS"/>
+		<Option makefile_is_custom="1"/>
+		<Option compiler="gcc"/>
+		<Option virtualFolders="CMake Files\;"/>
+		<Build>
+			<Target title="all">
+				<Option working_dir="/home/lorenzo/Scrivania/LNS/source_cl/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/lorenzo/Scrivania/LNS/source_cl/cmake-build-debug/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/lorenzo/Scrivania/LNS/source_cl/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/lorenzo/Scrivania/LNS/source_cl/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/lorenzo/Scrivania/LNS/source_cl/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="rebuild_cache">
+				<Option working_dir="/home/lorenzo/Scrivania/LNS/source_cl/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/lorenzo/Scrivania/LNS/source_cl/cmake-build-debug/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/lorenzo/Scrivania/LNS/source_cl/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/lorenzo/Scrivania/LNS/source_cl/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/lorenzo/Scrivania/LNS/source_cl/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="edit_cache">
+				<Option working_dir="/home/lorenzo/Scrivania/LNS/source_cl/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/lorenzo/Scrivania/LNS/source_cl/cmake-build-debug/Makefile&quot;  VERBOSE=1 edit_cache"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/lorenzo/Scrivania/LNS/source_cl/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/lorenzo/Scrivania/LNS/source_cl/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/lorenzo/Scrivania/LNS/source_cl/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="CppLNS">
+				<Option output="/home/lorenzo/Scrivania/LNS/source_cl/cmake-build-debug/CppLNS" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/lorenzo/Scrivania/LNS/source_cl/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/usr/include/c++/6"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/6"/>
+					<Add directory="/usr/include/c++/6/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/6/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/6/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/lorenzo/Scrivania/LNS/source_cl/cmake-build-debug/Makefile&quot;  VERBOSE=1 CppLNS"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/lorenzo/Scrivania/LNS/source_cl/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/lorenzo/Scrivania/LNS/source_cl/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/lorenzo/Scrivania/LNS/source_cl/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="CppLNS/fast">
+				<Option output="/home/lorenzo/Scrivania/LNS/source_cl/cmake-build-debug/CppLNS" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/lorenzo/Scrivania/LNS/source_cl/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/usr/include/c++/6"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/6"/>
+					<Add directory="/usr/include/c++/6/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/6/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/6/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/lorenzo/Scrivania/LNS/source_cl/cmake-build-debug/Makefile&quot;  VERBOSE=1 CppLNS/fast"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/lorenzo/Scrivania/LNS/source_cl/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/lorenzo/Scrivania/LNS/source_cl/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/lorenzo/Scrivania/LNS/source_cl/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+		</Build>
+		<Unit filename="/home/lorenzo/Scrivania/LNS/source_cl/defs.h">
+			<Option target="CppLNS"/>
+		</Unit>
+		<Unit filename="/home/lorenzo/Scrivania/LNS/source_cl/environments.h">
+			<Option target="CppLNS"/>
+		</Unit>
+		<Unit filename="/home/lorenzo/Scrivania/LNS/source_cl/errors.h">
+			<Option target="CppLNS"/>
+		</Unit>
+		<Unit filename="/home/lorenzo/Scrivania/LNS/source_cl/exceptions.h">
+			<Option target="CppLNS"/>
+		</Unit>
+		<Unit filename="/home/lorenzo/Scrivania/LNS/source_cl/expr.h">
+			<Option target="CppLNS"/>
+		</Unit>
+		<Unit filename="/home/lorenzo/Scrivania/LNS/source_cl/interpreter.h">
+			<Option target="CppLNS"/>
+		</Unit>
+		<Unit filename="/home/lorenzo/Scrivania/LNS/source_cl/main.cpp">
+			<Option target="CppLNS"/>
+		</Unit>
+		<Unit filename="/home/lorenzo/Scrivania/LNS/source_cl/options.h">
+			<Option target="CppLNS"/>
+		</Unit>
+		<Unit filename="/home/lorenzo/Scrivania/LNS/source_cl/parser.h">
+			<Option target="CppLNS"/>
+		</Unit>
+		<Unit filename="/home/lorenzo/Scrivania/LNS/source_cl/scanner.h">
+			<Option target="CppLNS"/>
+		</Unit>
+		<Unit filename="/home/lorenzo/Scrivania/LNS/source_cl/stmt.h">
+			<Option target="CppLNS"/>
+		</Unit>
+		<Unit filename="/home/lorenzo/Scrivania/LNS/source_cl/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\"/>
+		</Unit>
+	</Project>
+</CodeBlocks_project_file>

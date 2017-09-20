@@ -1,0 +1,3 @@
+/home/lorenzo/Scrivania/LNS/source_cl/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/home/lorenzo/Scrivania/LNS/source_cl/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/lorenzo/Scrivania/LNS/source_cl/cmake-build-debug/CMakeFiles/CppLNS.dir

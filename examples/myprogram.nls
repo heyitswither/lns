@@ -1,0 +1,8 @@
+#!/usr/bin/lns
+
+var i;
+for(i=0;i<100;i=i+1){
+	println(i-100);
+}
+
+print("Done!");

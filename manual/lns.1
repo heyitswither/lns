@@ -1,0 +1,147 @@
+.TH lns 1
+.SH NAME
+lns - scripting language
+.SH SYNOPSIS
+.B lns
+[\fIoptions\fR] [\fIscript\fR]
+.SH DESCRIPTION	
+Starts a new instance of the lns interpreter. If a source file is not specified, the interpreter will be run in prompt mode.
+.SH OPTIONS
+.TP
+.BR \-p ", " \-\-skip\-preprocessing
+skips preprocessing and goes direcly to execution
+.TP
+.BR \-s ", " \-\-silent\-execution
+in case of runtime error, silently quits the program without printing error summary and/or stack trace to stderr
+.TP
+.BR \-S ", " \-\-silent\-full
+in case of any error, silently quits the program without printing error summary and/or stack trace to stderr
+.TP
+.BR \-\-permissive
+enables auto-correction of errors, which can avoid program termination in some occasions that would normally cause an error, such as:
+.nf
+\-assignment of non-existing variable (definition of the variable);
+\-duplicate definition of a variable (override);
+\-redundant specifiers for declarations.
+.fi
+.TP
+.BR \-t ", " \-\-time
+shows time statistics after execution
+.TP
+.BR \-o ", " \-\-parse-only
+quits the program before execution
+
+.SH LANGUAGE
+.TP
+.BR Comments:
+\fB\-\fRC standard (// for line comment, /**/ for block)\;
+.nf
+.fi
+\fB\-\fRbash\-like (# for line comment): on Linux, put "#!/usr/bin/lns" as first line in a lns file and give execution permissions to automatically run the script\.
+.TP
+.BR Syntax:
+\fB\-\fRC-like syntax for strings and if,while, switch and for statements;
+.nf
+.fi
+\fB\-\fRfunctions are declared with keyword 'function';
+.nf
+.fi
+\fB\-\fRvariables are declared with keyword 'var';
+.nf
+.fi
+\fB\-\fRfunctions and variables can have the access specifier 'global', that will have the variable or function registered in the outer-most scope;
+.nf
+.fi
+\fB\-\fRvariables can be declared as constants with the keyword 'final';
+.nf
+.fi
+\fB\-\fRreferences to other script files can be done with the 'use' statement, in the form 'use "path/to/file";';
+.nf
+.fi
+\fB\-\fRreferences to native files can be done with the 'use native' statement (same form as the standard 'use')';
+.nf
+.fi
+\fB\-\fRboolean operators are literals: 'and','nand','or','nor','xor','xnor';
+.nf
+.fi
+\fB\-\fRoperator '^' for number is 'at the power of';
+.nf
+.fi
+\fB\-\fRthe language is not strictly-typed, although the currently exising types are string, number, boolean, map and null;
+.nf
+.fi
+\fB\-\fRto initialize a map use the native function 'map()';
+.nf
+.fi
+\fB\-\fRto access a map value use the [] operator;
+.nf
+.fi
+\fB\-\fRany object can be used as key for a map, but be aware that keys will always be converted to strings (e.g- 1.245 and "1.245" would point to the same map field, same as true and "true", null and "null");
+.nf
+.fi
+\fB\-\fRin statements that require to specify a boolean condition, expressions evaluate to true in the following cases:
+.nf
+.RS
+	\. the expression is the string "true";
+	\. the expression is the integer value 1;
+	\. the expression is the boolean value true.
+.RE
+.fi
+.TP
+.BR Built\-in\ \fBnative\ functions\fR:
+.nf
+.fi
+\- \fBexit(number)\fR: quits the program with the specified status;
+.nf
+.fi
+\- \fBprint(any)\fR: writes to stdout;
+.nf
+.fi
+\- \fBprintln(any)\fR: writes to stdout and appends a line feed character;
+.nf
+.fi
+\- \fBmillis()\fR: returns the number of milliseconds elapsed since the program was started;
+.nf
+.fi
+\- \fBtype(any)\fR: returns the argument's type, one of the following: "string", "number", "boolean", "map" or "null";
+.nf
+.fi
+\- \fBcall(string)\fR: calls the specified command and waits for the process to end;
+.nf
+.fi
+\- \fBsleep(number)\fR: waits for the specified amount of time, in milliseconds.
+.nf
+.fi
+\- \fBstr(any)\fR: returns the string form of the argument;
+.nf
+.fi
+\- \fBnum(any)\fR: tries to cast the argument to a number, returns  the result or null if the argument could not be cast to a number;
+.nf
+.fi
+\- \fBint(number)\fR: floors the specified number and returns null if the argument is not a number;
+.nf
+.fi
+\- \fBread()\fR: reads and returns the next token from stdin;
+.nf
+.fi
+\- \fBreadln()\fR: reads and returns the next string from stdin;
+.nf
+.fi
+\- \fBreadnr()\fR: reads and returns the next number from stdin, or null if the input is not a number;
+.nf
+.fi
+\- \fBreadbool():\fR reads and returns the next boolean from stdin, or null if the input is not a boolean;
+.nf
+.fi
+\- \fBmap()\fR: returns a new map instance.
+.TP
+.SH KNOWN BUGS
+\- "for(;;)" doesn't produce an infinite loop. Use while(true)
+.nf
+.fi
+\- natives aren't currently implemented
+.nf
+.fi
+\- the implementation is still crawling with memory leaks. Please keep your stack trace short and avoid extremely long loops.
+.SH AUTHOR
+Lorenzo Notaro (lorynot@gmail.com), 2017

@@ -1,0 +1,1 @@
+/usr/bin/c++  -Wall -fpermissive -g   CMakeFiles/CppLNS.dir/main.cpp.o  -o CppLNS 
