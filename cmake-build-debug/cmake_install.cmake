@@ -1,4 +1,4 @@
-# Install script for directory: /home/lorenzo/Scrivania/LNS/source_cl
+# Install script for directory: /mnt/F48CABC18CAB7CAC/Documents and Settings/Paolo/Documenti/homeNAS/Workspaces/CLion/lns
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -40,5 +40,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/lorenzo/Scrivania/LNS/source_cl/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/mnt/F48CABC18CAB7CAC/Documents and Settings/Paolo/Documents/homeNAS/Workspaces/CLion/lns/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
