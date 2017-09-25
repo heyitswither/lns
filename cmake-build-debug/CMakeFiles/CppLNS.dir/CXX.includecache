@@ -6,23 +6,23 @@
 
 #IncludeRegexTransform: 
 
-/mnt/F48CABC18CAB7CAC/Documents and Settings/Paolo/Documenti/homeNAS/Workspaces/CLion/lns/defs.h
+/home/lorenzo/Scrivania/LNS/git/lns/defs.h
 sstream
 -
 string
 -
 errors.h
-/mnt/F48CABC18CAB7CAC/Documents and Settings/Paolo/Documenti/homeNAS/Workspaces/CLion/lns/errors.h
+/home/lorenzo/Scrivania/LNS/git/lns/errors.h
 map
 -
 
-/mnt/F48CABC18CAB7CAC/Documents and Settings/Paolo/Documenti/homeNAS/Workspaces/CLion/lns/environments.h
+/home/lorenzo/Scrivania/LNS/git/lns/environments.h
 defs.h
-/mnt/F48CABC18CAB7CAC/Documents and Settings/Paolo/Documenti/homeNAS/Workspaces/CLion/lns/defs.h
+/home/lorenzo/Scrivania/LNS/git/lns/defs.h
 expr.h
-/mnt/F48CABC18CAB7CAC/Documents and Settings/Paolo/Documenti/homeNAS/Workspaces/CLion/lns/expr.h
+/home/lorenzo/Scrivania/LNS/git/lns/expr.h
 stmt.h
-/mnt/F48CABC18CAB7CAC/Documents and Settings/Paolo/Documenti/homeNAS/Workspaces/CLion/lns/stmt.h
+/home/lorenzo/Scrivania/LNS/git/lns/stmt.h
 map
 -
 string
@@ -34,17 +34,17 @@ utility
 set
 -
 
-/mnt/F48CABC18CAB7CAC/Documents and Settings/Paolo/Documenti/homeNAS/Workspaces/CLion/lns/errors.h
+/home/lorenzo/Scrivania/LNS/git/lns/errors.h
 exception
 -
 vector
 -
 exceptions.h
-/mnt/F48CABC18CAB7CAC/Documents and Settings/Paolo/Documenti/homeNAS/Workspaces/CLion/lns/exceptions.h
+/home/lorenzo/Scrivania/LNS/git/lns/exceptions.h
 options.h
-/mnt/F48CABC18CAB7CAC/Documents and Settings/Paolo/Documenti/homeNAS/Workspaces/CLion/lns/options.h
+/home/lorenzo/Scrivania/LNS/git/lns/options.h
 
-/mnt/F48CABC18CAB7CAC/Documents and Settings/Paolo/Documenti/homeNAS/Workspaces/CLion/lns/exceptions.h
+/home/lorenzo/Scrivania/LNS/git/lns/exceptions.h
 exception
 -
 string
@@ -52,33 +52,33 @@ string
 string.h
 -
 defs.h
-/mnt/F48CABC18CAB7CAC/Documents and Settings/Paolo/Documenti/homeNAS/Workspaces/CLion/lns/defs.h
+/home/lorenzo/Scrivania/LNS/git/lns/defs.h
 
-/mnt/F48CABC18CAB7CAC/Documents and Settings/Paolo/Documenti/homeNAS/Workspaces/CLion/lns/expr.h
+/home/lorenzo/Scrivania/LNS/git/lns/expr.h
 defs.h
-/mnt/F48CABC18CAB7CAC/Documents and Settings/Paolo/Documenti/homeNAS/Workspaces/CLion/lns/defs.h
+/home/lorenzo/Scrivania/LNS/git/lns/defs.h
 list
 -
 string
 -
 
-/mnt/F48CABC18CAB7CAC/Documents and Settings/Paolo/Documenti/homeNAS/Workspaces/CLion/lns/interpreter.h
+/home/lorenzo/Scrivania/LNS/git/lns/interpreter.h
 defs.h
-/mnt/F48CABC18CAB7CAC/Documents and Settings/Paolo/Documenti/homeNAS/Workspaces/CLion/lns/defs.h
+/home/lorenzo/Scrivania/LNS/git/lns/defs.h
 expr.h
-/mnt/F48CABC18CAB7CAC/Documents and Settings/Paolo/Documenti/homeNAS/Workspaces/CLion/lns/expr.h
+/home/lorenzo/Scrivania/LNS/git/lns/expr.h
 stmt.h
-/mnt/F48CABC18CAB7CAC/Documents and Settings/Paolo/Documenti/homeNAS/Workspaces/CLion/lns/stmt.h
+/home/lorenzo/Scrivania/LNS/git/lns/stmt.h
 vector
 -
 math.h
-/mnt/F48CABC18CAB7CAC/Documents and Settings/Paolo/Documenti/homeNAS/Workspaces/CLion/lns/math.h
+/home/lorenzo/Scrivania/LNS/git/lns/math.h
 ctime
 -
 environments.h
-/mnt/F48CABC18CAB7CAC/Documents and Settings/Paolo/Documenti/homeNAS/Workspaces/CLion/lns/environments.h
+/home/lorenzo/Scrivania/LNS/git/lns/environments.h
 exceptions.h
-/mnt/F48CABC18CAB7CAC/Documents and Settings/Paolo/Documenti/homeNAS/Workspaces/CLion/lns/exceptions.h
+/home/lorenzo/Scrivania/LNS/git/lns/exceptions.h
 string
 -
 chrono
@@ -86,11 +86,11 @@ chrono
 thread
 -
 
-/mnt/F48CABC18CAB7CAC/Documents and Settings/Paolo/Documenti/homeNAS/Workspaces/CLion/lns/main.cpp
+/home/lorenzo/Scrivania/LNS/git/lns/main.cpp
 iostream
 -
 errors.h
-/mnt/F48CABC18CAB7CAC/Documents and Settings/Paolo/Documenti/homeNAS/Workspaces/CLion/lns/errors.h
+/home/lorenzo/Scrivania/LNS/git/lns/errors.h
 exception
 -
 fstream
@@ -98,41 +98,41 @@ fstream
 sstream
 -
 scanner.h
-/mnt/F48CABC18CAB7CAC/Documents and Settings/Paolo/Documenti/homeNAS/Workspaces/CLion/lns/scanner.h
+/home/lorenzo/Scrivania/LNS/git/lns/scanner.h
 expr.h
-/mnt/F48CABC18CAB7CAC/Documents and Settings/Paolo/Documenti/homeNAS/Workspaces/CLion/lns/expr.h
+/home/lorenzo/Scrivania/LNS/git/lns/expr.h
 parser.h
-/mnt/F48CABC18CAB7CAC/Documents and Settings/Paolo/Documenti/homeNAS/Workspaces/CLion/lns/parser.h
+/home/lorenzo/Scrivania/LNS/git/lns/parser.h
 options.h
-/mnt/F48CABC18CAB7CAC/Documents and Settings/Paolo/Documenti/homeNAS/Workspaces/CLion/lns/options.h
+/home/lorenzo/Scrivania/LNS/git/lns/options.h
 interpreter.h
-/mnt/F48CABC18CAB7CAC/Documents and Settings/Paolo/Documenti/homeNAS/Workspaces/CLion/lns/interpreter.h
+/home/lorenzo/Scrivania/LNS/git/lns/interpreter.h
 chrono
 -
 iomanip
 -
 
-/mnt/F48CABC18CAB7CAC/Documents and Settings/Paolo/Documenti/homeNAS/Workspaces/CLion/lns/options.h
+/home/lorenzo/Scrivania/LNS/git/lns/options.h
 
-/mnt/F48CABC18CAB7CAC/Documents and Settings/Paolo/Documenti/homeNAS/Workspaces/CLion/lns/parser.h
+/home/lorenzo/Scrivania/LNS/git/lns/parser.h
 string
 -
 vector
 -
 defs.h
-/mnt/F48CABC18CAB7CAC/Documents and Settings/Paolo/Documenti/homeNAS/Workspaces/CLion/lns/defs.h
+/home/lorenzo/Scrivania/LNS/git/lns/defs.h
 expr.h
-/mnt/F48CABC18CAB7CAC/Documents and Settings/Paolo/Documenti/homeNAS/Workspaces/CLion/lns/expr.h
+/home/lorenzo/Scrivania/LNS/git/lns/expr.h
 stmt.h
-/mnt/F48CABC18CAB7CAC/Documents and Settings/Paolo/Documenti/homeNAS/Workspaces/CLion/lns/stmt.h
+/home/lorenzo/Scrivania/LNS/git/lns/stmt.h
 options.h
-/mnt/F48CABC18CAB7CAC/Documents and Settings/Paolo/Documenti/homeNAS/Workspaces/CLion/lns/options.h
+/home/lorenzo/Scrivania/LNS/git/lns/options.h
 scanner.h
-/mnt/F48CABC18CAB7CAC/Documents and Settings/Paolo/Documenti/homeNAS/Workspaces/CLion/lns/scanner.h
+/home/lorenzo/Scrivania/LNS/git/lns/scanner.h
 initializer_list
 -
 
-/mnt/F48CABC18CAB7CAC/Documents and Settings/Paolo/Documenti/homeNAS/Workspaces/CLion/lns/scanner.h
+/home/lorenzo/Scrivania/LNS/git/lns/scanner.h
 string
 -
 vector
@@ -140,17 +140,17 @@ vector
 map
 -
 defs.h
-/mnt/F48CABC18CAB7CAC/Documents and Settings/Paolo/Documenti/homeNAS/Workspaces/CLion/lns/defs.h
+/home/lorenzo/Scrivania/LNS/git/lns/defs.h
 
-/mnt/F48CABC18CAB7CAC/Documents and Settings/Paolo/Documenti/homeNAS/Workspaces/CLion/lns/stmt.h
+/home/lorenzo/Scrivania/LNS/git/lns/stmt.h
 defs.h
-/mnt/F48CABC18CAB7CAC/Documents and Settings/Paolo/Documenti/homeNAS/Workspaces/CLion/lns/defs.h
+/home/lorenzo/Scrivania/LNS/git/lns/defs.h
 list
 -
 string
 -
 expr.h
-/mnt/F48CABC18CAB7CAC/Documents and Settings/Paolo/Documenti/homeNAS/Workspaces/CLion/lns/expr.h
+/home/lorenzo/Scrivania/LNS/git/lns/expr.h
 memory
 -
 

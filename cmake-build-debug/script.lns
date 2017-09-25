@@ -1,39 +1,7 @@
 #!/usr/bin/lns
-function get_name(){
-    var name;
-    print("Hi, what's your name?");
-    while(num(name = readln()) != null){
-        print("Hey! Your name can't be a number! What's your name?");
-    }
-    return name;
+var i = 0;
+for(i=0;i<100;i = i + 1){
+    println(i-100);
 }
 
-function get_age(){
-    var n;
-    print("How old are you?");
-    while(true){
-        n = ask_age();
-        if(n < 0){
-            println("Dude, you can't have negative age!");
-            return get_age();
-        }
-        if(n  > 90 or n <= 6){
-            println("What?! I dont believe you!");
-            return get_age();
-        }
-        return n;
-    }
-    //unreachable
-}
-
-function ask_age(){
-    var n;
-    while((n = readnr()) == null){
-        print("Enter a number:");
-    }
-    return n;
-}
-
-var name = get_name();
-var age = get_age();
-println("Got it! Your name is " + name + " and you are " + age + " years old.");
+print("Done!");

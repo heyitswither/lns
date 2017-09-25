@@ -161,7 +161,8 @@ namespace lns {
             if(match({BREAK})) return break_statement();
             if(match({CONTINUE})) return continue_statement();
             if(match({WHILE})) return while_statement();
-            if(match({FOR})) return for_statement();
+            if(match({FOR}))
+                return for_statement();
             if(match({LEFT_BRACE})) return new block_stmt(block());
             return expression_statement();
         }
@@ -204,40 +205,40 @@ namespace lns {
         }
         stmt* for_statement(){
             consume(LEFT_PAREN,"expected '(' after 'for'");
-            stmt* initializer = new null_stmt(previous());
+            stmt* initializer = nullptr;
             if(match({SEMICOLON})){
-                initializer = new null_stmt(previous());
+                //initializer = new null_stmt(previous());
             }else if(match({VAR})) {
                 initializer = var_declaration(false,false);
             }else{
                 initializer = expression_statement();
             }
-            expr * condition = new null_expr(previous());
+            expr * condition = nullptr;
             if(!check({SEMICOLON})){
                 condition = expression();
             }
             consume(SEMICOLON,"expected ';' after loop condition");
-            expr * increment = new null_expr(previous());
+            expr * increment = nullptr;
             if(!check(RIGHT_PAREN)){
                 increment = expression();
             }
             consume(RIGHT_PAREN,"expected ')' after for increment");
             stmt* body = statement();
-            if(dynamic_cast<null_expr*>(increment) == nullptr){
-                vector<stmt*> b;
+            if(increment != nullptr){
+                vector<stmt*> b = *new vector<stmt*>();
                 b.push_back(body);
                 b.push_back(new expression_stmt(*increment));
                 body = new block_stmt(b);
             }
-            if(dynamic_cast<null_expr*>(condition) == nullptr){
+            if(condition == nullptr){
                 condition = new literal_expr(new bool_o(true));
             }
             body = new s_while_stmt(*condition,body);
-            if(dynamic_cast<null_expr*>(initializer) != nullptr){
-                vector<stmt*> b;
-                b.push_back(initializer);
+            if(initializer != nullptr){
+                vector<stmt*> b = *new vector<stmt*>();
+                b.push_back(move(initializer));
                 b.push_back(body);
-                body = new block_stmt(b);
+                return new block_stmt(b);
             }
             return body;
         }
