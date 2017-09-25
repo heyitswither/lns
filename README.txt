@@ -2,7 +2,7 @@
 ------------------LNS 0.1-------------------
 --------------------------------------------
 
-FOLDER "source_cl" IS A CLION PROJECT FOLDER
+FOLDER "lns" IS A CLION PROJECT FOLDER
 
 --------------------------------------------
 ----------------INSTALLATION----------------
