@@ -116,12 +116,12 @@ namespace lns {
             //delete env;
         }
         object *visit_increment_expr(increment_expr *i) override {
-            return nullptr;
-        } //TODO: implement increment in interpreter
+            return environment->increment(i->name);;
+        }
 
         object *visit_decrement_expr(decrement_expr *d) override {
-            return nullptr;
-        } //TODO: implement decrement in interpreter
+            return environment->decrement(d->name);
+        }
 
         object *visit_assign_expr(assign_expr *a) override {
             object *value = evaluate(const_cast<expr *>(a->value));
@@ -313,7 +313,14 @@ namespace lns {
             runtime_environment* env = new runtime_environment(environment);
             execute_block(b->statements,env);
         } //
-
+        void visit_s_for_stmt(s_for_stmt *s) override {
+            execute(const_cast<stmt *>(s->init));
+            while(is_bool_true_eq(evaluate(const_cast<expr *>(s->condition)))){
+                execute(const_cast<stmt *>(s->body));
+                evaluate(const_cast<expr *>(s->increment));
+            }
+        }
+    public:
         void visit_expression_stmt(expression_stmt *e) override {
             object *o = evaluate((expr *) &(e->exprs));
             if(!lns::prompt) return;

@@ -34,7 +34,8 @@ public class generate {
                 "break      : token& keyword",
                 "continue   : token& keyword",
                 "var        : token& name, expr& initializer, bool isglobal, bool isfinal",
-                "s_while      : expr& condition, stmt* body",
+                "s_while    : expr& condition, stmt* body",
+                "s_for     : stmt* init, expr* condition, expr* increment, stmt* body",
                 "uses_native : token& token, string& path",
                 "null       : token& where"
         ), Arrays.asList("\"expr.h\"","<memory>"), "void");

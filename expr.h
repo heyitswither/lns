@@ -12,7 +12,7 @@ class expr_visitor;
 class expr{
 public:
 
-virtual object * accept(expr_visitor* v) = 0;
+virtual object* accept(expr_visitor* v) = 0;
 };
 class increment_expr;
 class decrement_expr;

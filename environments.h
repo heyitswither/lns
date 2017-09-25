@@ -139,8 +139,42 @@ namespace lns {
         void add_native(const string& s){
             natives.insert(s);
         }
-        bool is_native(const string &basic_string) { //TODO: implement natives registration
+        bool is_native(const string &basic_string) {
             return natives.find(basic_string) != natives.end();
+        }
+
+        object *increment(const token &name) {
+            object* ret = get(name);
+            if(values[name.lexeme].isfinal){
+                string& s = *new string();
+                s += "variable '" + name.lexeme + "' is final";
+                throw runtime_exception(name, s);
+            }
+            variable o = values[name.lexeme];
+            if(o.value->type != NUMBER_T){
+                string& s = *new string();
+                s+="variable '" + name.lexeme + "' is not a number";
+                throw runtime_exception(name,s);
+            }
+            ++dynamic_cast<number_o*>(o.value)->value;
+            return ret;
+        }
+
+        object *decrement(const token &name) {
+            object* ret = get(name);
+            if(values[name.lexeme].isfinal){
+                string& s = *new string();
+                s += "variable '" + name.lexeme + "' is final";
+                throw runtime_exception(name, s);
+            }
+            variable o = values[name.lexeme];
+            if(o.value->type != NUMBER_T){
+                string& s = *new string();
+                s+="variable '" + name.lexeme + "' is not a number";
+                throw runtime_exception(name,s);
+            }
+            --dynamic_cast<number_o*>(o.value)->value;
+            return ret;
         }
     };
 }
