@@ -70,6 +70,7 @@ namespace lns {
                     case IF:
                     case WHILE:
                     case RETURN:
+                    case CONTEXT:
                         return;
                     default:
                         break;
@@ -116,6 +117,45 @@ namespace lns {
             return nullptr;
         }
 
+        vector<stmt *> &context_block() {
+            int line = previous().line;
+            stmt* s;
+            vector<stmt *> &stmts = *new vector<stmt *>();
+            while(!check(RIGHT_BRACE) && !is_at_end()){
+                s = declaration();
+                if(s->type == CONTEXT_STMT_T || s->type == VAR_STMT_T || s->type == FUNCTION_STMT_T){
+                    stmts.push_back(s);
+                    continue;
+                }
+                throw error(previous(),"contexts can only contain declarations");
+            }
+            string str = *new string("expected '}' to close block (opening brace at line ");
+            str += to_string(line);
+            str += ")";
+            consume(RIGHT_BRACE, str.c_str());
+            return stmts;
+        }
+
+        vector<stmt *> &block() {
+            int line = previous().line;
+            vector<stmt *> &stmts = *new vector<stmt *>();
+            while (!check(RIGHT_BRACE) && !is_at_end()) {
+                stmts.push_back(declaration());
+            }
+            string str = *new string("expected '}' to close block (opening brace at line ");
+            str += to_string(line);
+            str += ")";
+            consume(RIGHT_BRACE, str.c_str());
+            return stmts;
+        }
+
+        stmt *context_declaration(bool global, bool final) {
+            token& name = consume(IDENTIFIER,"expected context name");
+            token& open = consume(LEFT_BRACE,"expected opening brace");
+            vector<stmt*>& stmts = context_block();
+            return new context_stmt(name,stmts,global,final);
+        }
+
         stmt *declaration() {
             try {
                 if (match({USE})) {
@@ -127,6 +167,7 @@ namespace lns {
                     is_global = previous().type == GLOBAL;
                     is_final = previous().type == FINAL;
                 }
+                if(match({CONTEXT})) return context_declaration(is_global,is_final);
                 if (match({VAR})) return var_declaration(is_global, is_final);
                 if (match({FUNCTION})) {
                     if (is_final) {
@@ -237,19 +278,6 @@ namespace lns {
             return s;
         }
 
-        vector<stmt *> &block() {
-            int line = previous().line;
-            vector<stmt *> &stmts = *new vector<stmt *>();
-            while (!check(RIGHT_BRACE) && !is_at_end()) {
-                stmts.push_back(declaration());
-            }
-            string str = *new string("expected '}' to close block (opening brace at line ");
-            str += to_string(line);
-            str += ")";
-            consume(RIGHT_BRACE, str.c_str());
-            return stmts;
-        }
-
         stmt *expression_statement() {
             expr *expr = expression();
             consume(SEMICOLON, "expected ';' after expression");
@@ -275,6 +303,7 @@ namespace lns {
         expr *assignment() {
             variable_expr *var;
             map_field_expr *map;
+            context_expr* context;
             expr *expr = logical(), *value, *key;
             if (match({EQUAL})) {
                 token &equals = previous();
@@ -286,7 +315,11 @@ namespace lns {
                 if (!((map = dynamic_cast<map_field_expr *>(expr)) == nullptr)) {
                     token &name = const_cast<token &>(map->name);
                     return new assign_map_field_expr(name, map->key, value);
-                }//ciao
+                }
+                if (!((context = dynamic_cast<context_expr *>(expr)) == nullptr)) {
+                    token &name = const_cast<token &>(context->context_name);
+                    return new context_assign_expr(name, const_cast<token &>(context->context_identifier), value);
+                }
                 throw error(equals, "invalid assignment target.");
             }
             if(match({PLUS_PLUS})){
@@ -373,9 +406,13 @@ namespace lns {
             vector<expr *> &args = *new vector<expr *>();
             expr *expr = primary(), *keyexpr;
             token &identifier = previous();
+            if(match({DOT})){
+                token &context_identifier = consume(IDENTIFIER,"expected identifier for context call");
+                return new context_expr(identifier,context_identifier);
+            }
             if (match({LEFT_SQR})) {
                 keyexpr = expression();
-                consume(RIGHT_SQR, "expected ']' after key expression.");
+                consume(RIGHT_SQR, "expected ']' after key expression");
                 return new map_field_expr(identifier, keyexpr);
             }
             while (true)
@@ -385,7 +422,7 @@ namespace lns {
                             args.push_back(expression());
                         } while (match({COMMA}));
                     }
-                    token &paren = consume(RIGHT_PAREN, "expected ')' after arguments.");
+                    token &paren = consume(RIGHT_PAREN, "expected ')' after arguments");
                     expr = new call_expr(expr, paren, args);
                 } else break;
             return expr;
@@ -398,7 +435,7 @@ namespace lns {
                     args.push_back(expression());
                 } while (match({COMMA}));
             }
-            token paren = consume(RIGHT_PAREN, "expected ')' after arguments.");
+            token paren = consume(RIGHT_PAREN, "expected ')' after arguments");
             call_expr *expr = new call_expr(callee, paren, args);
             return expr;
         }

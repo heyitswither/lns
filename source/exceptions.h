@@ -39,7 +39,7 @@ public:
 class wrong_usage_exception : public std::exception{
 public:
     virtual const char* what() const throw(){
-        return createDescription(FATAL_ERROR ": wrong usage. Usage:\n        - lns [script] [-d|-s]");
+        return createDescription(FATAL_ERROR ": wrong usage. Usage:\n        - lns [script] [-p|q-s|-S|--permissive|-t|-o]");
     }
 };
 class file_not_found_exception : public std::exception{

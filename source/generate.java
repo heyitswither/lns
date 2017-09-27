@@ -5,6 +5,7 @@ import java.util.List;
 
 public class generate {
     static String visitorName;
+    static String enumName;
     public static void main(String[] args) throws IOException {
         if (args.length != 1) {
             System.err.println("Usage: generate <output directory>");
@@ -23,12 +24,15 @@ public class generate {
                 "variable  : token& name",
                 "map_field : token& name, expr* key",
                 "assign_map_field : token& name, expr* key, expr* value",
+                "context : token& context_name, token& context_identifier",
+                "context_assign : token& context_name, token& context_identifier, expr* value",
                 "null      : token& where"
         ), Arrays.asList(), "object*");
         defineAst(outputDir, "stmt", Arrays.asList(
                 "block      : vector<stmt*>& statements",
                 "expression : expr& exprs",
                 "function   : token& name, vector<token>& parameters, vector<stmt*>& body, bool isglobal",
+                "context    : token& name, vector<stmt*> body, bool is_global, bool isfinal",
                 "if         : expr& condition, stmt* thenBranch, stmt* elseBranch",
                 "return     : token& keyword, expr& value",
                 "break      : token& keyword",
@@ -49,17 +53,27 @@ public class generate {
         writer.println("#include \"defs.h\"");
         writer.println("#include <list>");
         writer.println("#include <string>");
+        writer.println("#include <iostream>");
         for (String include : addIncludes) {
             writer.println("#include " + include);
         }
         visitorName = baseName + "_visitor";
+        enumName = baseName + "_type";
         writer.println("using namespace std;\nusing namespace lns;");
         writer.println("\n");
         writer.println("namespace lns{");
+        writer.println("enum " + enumName + "{");
+        for(String type : types){
+            String className = type.split(":")[0].trim();
+            writer.print(className.toUpperCase() + "_" + baseName.toUpperCase() + "_T, ");
+        }
+        writer.println("\n};");
         writer.println("class " + visitorName + ";");
         writer.println("class " + baseName + "{");
         writer.println("public:\n");
+        writer.println(baseName + "(" + enumName + " type) : type(type) {}");
         writer.println("virtual " + vReturnType + " accept(" + visitorName + "* v) = 0;");
+        writer.println(enumName + " type;");
         writer.println("};"); //class
         declareAll(writer,baseName,types);
         defineVisitor(writer,baseName,vReturnType,types);
@@ -106,7 +120,7 @@ public class generate {
         writer.println("public:");
         String[] fieldArray = types.split(", ");
         writer.print(fieldArray.length == 1 ? "explicit " : "");
-        writer.println(className + "_" + baseName + "(" + types + ") : " + genFieldsAssign(fieldArray) + " {}");
+        writer.println(className + "_" + baseName + "(" + types + ") : " + genFieldsAssign(fieldArray) + ", " + baseName + "(" + className.toUpperCase() + "_" + baseName.toUpperCase() + "_T" + ") {}");
         writer.println(vReturnType + " accept(" + visitorName + " *v) override{");
         writer.println((vReturnType == "void" ? "" : "return ") +  "v->visit_" + className + "_" + baseName + "(this);");
         writer.println("}");

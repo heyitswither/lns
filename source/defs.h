@@ -27,12 +27,12 @@ enum token_type {
 
     // Keywords.
             NATIVES,AND, CLASS, ELSE, FALSE, FUNCTION, FOR, IF, NUL, OR, XOR, NOR, XNOR, NAND, RETURN, SUPER, THIS, TRUE, VAR, WHILE, GLOBAL, FINAL, USE,
-    BREAK, CONTINUE,
+    BREAK, CONTINUE, CONTEXT,
     UNRECOGNIZED,
     EOF_
 };
 enum objtype{
-    NUMBER_T, STRING_T, BOOL_T, NULL_T, MAP_T, CALLABLE_T
+    NUMBER_T, STRING_T, BOOL_T, NULL_T, MAP_T, CALLABLE_T, CONTEXT_T
 };
 namespace lns{
     const string KEYWORDS_S_VALUES[] = {// Single-character tokens.
@@ -51,7 +51,7 @@ namespace lns{
             "NATIVES","AND", "CLASS", "ELSE", "FALSE", "FUNCTION", "FOR", "IF", "NUL", "OR", "XOR", "NOR", "XNOR"
             , "NAND", "RETURN", "SUPER", "THIS", "TRUE", "VAR", "WHILE"
             , "GLOBAL", "FINAL", "USE",
-            "BREAK", "CONTINUE",
+            "BREAK", "CONTINUE", "CONTEXT",
             "UNRECOGNIZED",
             "EOF"};
     class object{

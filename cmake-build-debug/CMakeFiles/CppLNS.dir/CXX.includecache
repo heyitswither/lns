@@ -6,23 +6,23 @@
 
 #IncludeRegexTransform: 
 
-/home/lorenzo/Scrivania/LNS/git/lns/defs.h
+/home/lorenzo/Scrivania/LNS/git/lns/source/defs.h
 sstream
 -
 string
 -
 errors.h
-/home/lorenzo/Scrivania/LNS/git/lns/errors.h
+/home/lorenzo/Scrivania/LNS/git/lns/source/errors.h
 map
 -
 
-/home/lorenzo/Scrivania/LNS/git/lns/environments.h
+/home/lorenzo/Scrivania/LNS/git/lns/source/environments.h
 defs.h
-/home/lorenzo/Scrivania/LNS/git/lns/defs.h
+/home/lorenzo/Scrivania/LNS/git/lns/source/defs.h
 expr.h
-/home/lorenzo/Scrivania/LNS/git/lns/expr.h
+/home/lorenzo/Scrivania/LNS/git/lns/source/expr.h
 stmt.h
-/home/lorenzo/Scrivania/LNS/git/lns/stmt.h
+/home/lorenzo/Scrivania/LNS/git/lns/source/stmt.h
 map
 -
 string
@@ -34,17 +34,17 @@ utility
 set
 -
 
-/home/lorenzo/Scrivania/LNS/git/lns/errors.h
+/home/lorenzo/Scrivania/LNS/git/lns/source/errors.h
 exception
 -
 vector
 -
 exceptions.h
-/home/lorenzo/Scrivania/LNS/git/lns/exceptions.h
+/home/lorenzo/Scrivania/LNS/git/lns/source/exceptions.h
 options.h
-/home/lorenzo/Scrivania/LNS/git/lns/options.h
+/home/lorenzo/Scrivania/LNS/git/lns/source/options.h
 
-/home/lorenzo/Scrivania/LNS/git/lns/exceptions.h
+/home/lorenzo/Scrivania/LNS/git/lns/source/exceptions.h
 exception
 -
 string
@@ -52,33 +52,35 @@ string
 string.h
 -
 defs.h
-/home/lorenzo/Scrivania/LNS/git/lns/defs.h
+/home/lorenzo/Scrivania/LNS/git/lns/source/defs.h
 
-/home/lorenzo/Scrivania/LNS/git/lns/expr.h
+/home/lorenzo/Scrivania/LNS/git/lns/source/expr.h
 defs.h
-/home/lorenzo/Scrivania/LNS/git/lns/defs.h
+/home/lorenzo/Scrivania/LNS/git/lns/source/defs.h
 list
 -
 string
 -
+iostream
+-
 
-/home/lorenzo/Scrivania/LNS/git/lns/interpreter.h
+/home/lorenzo/Scrivania/LNS/git/lns/source/interpreter.h
 defs.h
-/home/lorenzo/Scrivania/LNS/git/lns/defs.h
+/home/lorenzo/Scrivania/LNS/git/lns/source/defs.h
 expr.h
-/home/lorenzo/Scrivania/LNS/git/lns/expr.h
+/home/lorenzo/Scrivania/LNS/git/lns/source/expr.h
 stmt.h
-/home/lorenzo/Scrivania/LNS/git/lns/stmt.h
+/home/lorenzo/Scrivania/LNS/git/lns/source/stmt.h
 vector
 -
 math.h
-/home/lorenzo/Scrivania/LNS/git/lns/math.h
+/home/lorenzo/Scrivania/LNS/git/lns/source/math.h
 ctime
 -
 environments.h
-/home/lorenzo/Scrivania/LNS/git/lns/environments.h
+/home/lorenzo/Scrivania/LNS/git/lns/source/environments.h
 exceptions.h
-/home/lorenzo/Scrivania/LNS/git/lns/exceptions.h
+/home/lorenzo/Scrivania/LNS/git/lns/source/exceptions.h
 string
 -
 chrono
@@ -86,11 +88,11 @@ chrono
 thread
 -
 
-/home/lorenzo/Scrivania/LNS/git/lns/main.cpp
+/home/lorenzo/Scrivania/LNS/git/lns/source/main.cpp
 iostream
 -
 errors.h
-/home/lorenzo/Scrivania/LNS/git/lns/errors.h
+/home/lorenzo/Scrivania/LNS/git/lns/source/errors.h
 exception
 -
 fstream
@@ -98,41 +100,41 @@ fstream
 sstream
 -
 scanner.h
-/home/lorenzo/Scrivania/LNS/git/lns/scanner.h
+/home/lorenzo/Scrivania/LNS/git/lns/source/scanner.h
 expr.h
-/home/lorenzo/Scrivania/LNS/git/lns/expr.h
+/home/lorenzo/Scrivania/LNS/git/lns/source/expr.h
 parser.h
-/home/lorenzo/Scrivania/LNS/git/lns/parser.h
+/home/lorenzo/Scrivania/LNS/git/lns/source/parser.h
 options.h
-/home/lorenzo/Scrivania/LNS/git/lns/options.h
+/home/lorenzo/Scrivania/LNS/git/lns/source/options.h
 interpreter.h
-/home/lorenzo/Scrivania/LNS/git/lns/interpreter.h
+/home/lorenzo/Scrivania/LNS/git/lns/source/interpreter.h
 chrono
 -
 iomanip
 -
 
-/home/lorenzo/Scrivania/LNS/git/lns/options.h
+/home/lorenzo/Scrivania/LNS/git/lns/source/options.h
 
-/home/lorenzo/Scrivania/LNS/git/lns/parser.h
+/home/lorenzo/Scrivania/LNS/git/lns/source/parser.h
 string
 -
 vector
 -
 defs.h
-/home/lorenzo/Scrivania/LNS/git/lns/defs.h
+/home/lorenzo/Scrivania/LNS/git/lns/source/defs.h
 expr.h
-/home/lorenzo/Scrivania/LNS/git/lns/expr.h
+/home/lorenzo/Scrivania/LNS/git/lns/source/expr.h
 stmt.h
-/home/lorenzo/Scrivania/LNS/git/lns/stmt.h
+/home/lorenzo/Scrivania/LNS/git/lns/source/stmt.h
 options.h
-/home/lorenzo/Scrivania/LNS/git/lns/options.h
+/home/lorenzo/Scrivania/LNS/git/lns/source/options.h
 scanner.h
-/home/lorenzo/Scrivania/LNS/git/lns/scanner.h
+/home/lorenzo/Scrivania/LNS/git/lns/source/scanner.h
 initializer_list
 -
 
-/home/lorenzo/Scrivania/LNS/git/lns/scanner.h
+/home/lorenzo/Scrivania/LNS/git/lns/source/scanner.h
 string
 -
 vector
@@ -140,17 +142,19 @@ vector
 map
 -
 defs.h
-/home/lorenzo/Scrivania/LNS/git/lns/defs.h
+/home/lorenzo/Scrivania/LNS/git/lns/source/defs.h
 
-/home/lorenzo/Scrivania/LNS/git/lns/stmt.h
+/home/lorenzo/Scrivania/LNS/git/lns/source/stmt.h
 defs.h
-/home/lorenzo/Scrivania/LNS/git/lns/defs.h
+/home/lorenzo/Scrivania/LNS/git/lns/source/defs.h
 list
 -
 string
 -
+iostream
+-
 expr.h
-/home/lorenzo/Scrivania/LNS/git/lns/expr.h
+/home/lorenzo/Scrivania/LNS/git/lns/source/expr.h
 memory
 -
 

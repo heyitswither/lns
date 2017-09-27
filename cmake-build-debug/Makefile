@@ -123,32 +123,32 @@ CppLNS/fast:
 	$(MAKE) -f CMakeFiles/CppLNS.dir/build.make CMakeFiles/CppLNS.dir/build
 .PHONY : CppLNS/fast
 
-main.o: main.cpp.o
+source/main.o: source/main.cpp.o
 
-.PHONY : main.o
+.PHONY : source/main.o
 
 # target to build an object file
-main.cpp.o:
-	$(MAKE) -f CMakeFiles/CppLNS.dir/build.make CMakeFiles/CppLNS.dir/main.cpp.o
-.PHONY : main.cpp.o
+source/main.cpp.o:
+	$(MAKE) -f CMakeFiles/CppLNS.dir/build.make CMakeFiles/CppLNS.dir/source/main.cpp.o
+.PHONY : source/main.cpp.o
 
-main.i: main.cpp.i
+source/main.i: source/main.cpp.i
 
-.PHONY : main.i
+.PHONY : source/main.i
 
 # target to preprocess a source file
-main.cpp.i:
-	$(MAKE) -f CMakeFiles/CppLNS.dir/build.make CMakeFiles/CppLNS.dir/main.cpp.i
-.PHONY : main.cpp.i
+source/main.cpp.i:
+	$(MAKE) -f CMakeFiles/CppLNS.dir/build.make CMakeFiles/CppLNS.dir/source/main.cpp.i
+.PHONY : source/main.cpp.i
 
-main.s: main.cpp.s
+source/main.s: source/main.cpp.s
 
-.PHONY : main.s
+.PHONY : source/main.s
 
 # target to generate assembly for a file
-main.cpp.s:
-	$(MAKE) -f CMakeFiles/CppLNS.dir/build.make CMakeFiles/CppLNS.dir/main.cpp.s
-.PHONY : main.cpp.s
+source/main.cpp.s:
+	$(MAKE) -f CMakeFiles/CppLNS.dir/build.make CMakeFiles/CppLNS.dir/source/main.cpp.s
+.PHONY : source/main.cpp.s
 
 # Help Target
 help:
@@ -159,9 +159,9 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... edit_cache"
 	@echo "... CppLNS"
-	@echo "... main.o"
-	@echo "... main.i"
-	@echo "... main.s"
+	@echo "... source/main.o"
+	@echo "... source/main.i"
+	@echo "... source/main.s"
 .PHONY : help
 
 

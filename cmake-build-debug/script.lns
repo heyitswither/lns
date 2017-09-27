@@ -1,7 +1,7 @@
 #!/usr/bin/lns
-var i = 0;
-for(i=0;i<100;i++){
-    println(i-100);
+context prova
+{
+    final var x = 12;
+    var y = 44;
 }
-
-print("Done in " + millis() + " ms.");
+println(type(prova.x));

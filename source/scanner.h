@@ -36,6 +36,7 @@ namespace lns{
         if(key == "final") return FINAL;
         if(key == "break") return BREAK;
         if(key == "continue") return CONTINUE;
+        if(key == "context") return CONTEXT;
         return UNRECOGNIZED;
     }
     class scanner{

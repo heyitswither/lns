@@ -84,37 +84,37 @@
 				</MakeCommands>
 			</Target>
 		</Build>
-		<Unit filename="/home/lorenzo/Scrivania/LNS/git/lns/defs.h">
+		<Unit filename="/home/lorenzo/Scrivania/LNS/git/lns/source/defs.h">
 			<Option target="CppLNS"/>
 		</Unit>
-		<Unit filename="/home/lorenzo/Scrivania/LNS/git/lns/environments.h">
+		<Unit filename="/home/lorenzo/Scrivania/LNS/git/lns/source/environments.h">
 			<Option target="CppLNS"/>
 		</Unit>
-		<Unit filename="/home/lorenzo/Scrivania/LNS/git/lns/errors.h">
+		<Unit filename="/home/lorenzo/Scrivania/LNS/git/lns/source/errors.h">
 			<Option target="CppLNS"/>
 		</Unit>
-		<Unit filename="/home/lorenzo/Scrivania/LNS/git/lns/exceptions.h">
+		<Unit filename="/home/lorenzo/Scrivania/LNS/git/lns/source/exceptions.h">
 			<Option target="CppLNS"/>
 		</Unit>
-		<Unit filename="/home/lorenzo/Scrivania/LNS/git/lns/expr.h">
+		<Unit filename="/home/lorenzo/Scrivania/LNS/git/lns/source/expr.h">
 			<Option target="CppLNS"/>
 		</Unit>
-		<Unit filename="/home/lorenzo/Scrivania/LNS/git/lns/interpreter.h">
+		<Unit filename="/home/lorenzo/Scrivania/LNS/git/lns/source/interpreter.h">
 			<Option target="CppLNS"/>
 		</Unit>
-		<Unit filename="/home/lorenzo/Scrivania/LNS/git/lns/main.cpp">
+		<Unit filename="/home/lorenzo/Scrivania/LNS/git/lns/source/main.cpp">
 			<Option target="CppLNS"/>
 		</Unit>
-		<Unit filename="/home/lorenzo/Scrivania/LNS/git/lns/options.h">
+		<Unit filename="/home/lorenzo/Scrivania/LNS/git/lns/source/options.h">
 			<Option target="CppLNS"/>
 		</Unit>
-		<Unit filename="/home/lorenzo/Scrivania/LNS/git/lns/parser.h">
+		<Unit filename="/home/lorenzo/Scrivania/LNS/git/lns/source/parser.h">
 			<Option target="CppLNS"/>
 		</Unit>
-		<Unit filename="/home/lorenzo/Scrivania/LNS/git/lns/scanner.h">
+		<Unit filename="/home/lorenzo/Scrivania/LNS/git/lns/source/scanner.h">
 			<Option target="CppLNS"/>
 		</Unit>
-		<Unit filename="/home/lorenzo/Scrivania/LNS/git/lns/stmt.h">
+		<Unit filename="/home/lorenzo/Scrivania/LNS/git/lns/source/stmt.h">
 			<Option target="CppLNS"/>
 		</Unit>
 		<Unit filename="/home/lorenzo/Scrivania/LNS/git/lns/CMakeLists.txt">

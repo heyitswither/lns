@@ -115,6 +115,30 @@ namespace lns {
             }
             //delete env;
         }
+
+        object *visit_context_expr(context_expr *c) override {
+            object* o = environment->get(c->context_name);
+            if(o->type != CONTEXT_T) {
+                string s = *new string();
+                s+="object '" + c->context_name.lexeme + "' is not a context.";
+                throw runtime_exception(c->context_name,s);
+            }
+            return dynamic_cast<context*>(o)->get(c->context_identifier);
+        }
+
+        object *visit_context_assign_expr(context_assign_expr *c) override {
+            object* o = environment->get(c->context_name);
+            if(o->type != CONTEXT_T) {
+                string s = *new string();
+                s+="object '" + c->context_name.lexeme + "' is not a context.";
+                throw runtime_exception(c->context_name,s);
+            }
+            object* value = evaluate(const_cast<expr *>(c->value));
+            dynamic_cast<context*>(o)->assign(c->context_identifier,value);
+            return value;
+        }
+
+
         object *visit_increment_expr(increment_expr *i) override {
             return environment->increment(i->name);;
         }
@@ -286,12 +310,7 @@ namespace lns {
 
         object *visit_map_field_expr(map_field_expr *m) override {
             object *o = evaluate(const_cast<expr *>(m->key));
-            string str;
-            if (dynamic_cast<string_o *>(o) == nullptr) {
-                str = (o->str());
-            } else {
-                str = dynamic_cast<string_o *>(o)->str();
-            }
+            string str = o->str();
             return environment->get_map_field(m->name, str);
         } //
 
@@ -324,12 +343,16 @@ namespace lns {
         void visit_expression_stmt(expression_stmt *e) override {
             object *o = evaluate((expr *) &(e->exprs));
             if(!lns::prompt) return;
-            if(dynamic_cast<assign_expr*>(const_cast<expr*>(&e->exprs)) != nullptr) return;
-            if(dynamic_cast<call_expr*>(const_cast<expr*>(&e->exprs)) != nullptr) return;
-            if(dynamic_cast<null_expr*>(const_cast<expr*>(&e->exprs)) != nullptr) return;
-            if(dynamic_cast<assign_map_field_expr*>(const_cast<expr*>(&e->exprs)) != nullptr) return;
-            if(dynamic_cast<increment_expr*>(const_cast<expr*>(&e->exprs)) != nullptr) return;
-            if(dynamic_cast<decrement_expr*>(const_cast<expr*>(&e->exprs)) != nullptr) return;
+            expr_type type = e->exprs.type;
+            switch(type){
+                case ASSIGN_EXPR_T:
+                case CALL_EXPR_T:
+                case NULL_EXPR_T:
+                case ASSIGN_MAP_FIELD_EXPR_T:
+                case INCREMENT_EXPR_T:
+                case DECREMENT_EXPR_T:
+                    return;
+            }
             cout << o->str() << endl;
         } //
 
@@ -343,7 +366,9 @@ namespace lns {
             //boolean definitions for the language are in function is_bool_true_eq()
             if(is_bool_true_eq(eval)){
                 execute(const_cast<stmt *>(i->thenBranch));
-            }else if (dynamic_cast<null_stmt*>(const_cast<stmt*>(i->elseBranch)) == nullptr){
+                return;
+            }
+            if (i->elseBranch != nullptr && i->elseBranch->type != NULL_STMT_T){
                 execute(const_cast<stmt *>(i->elseBranch));
             }
         } //
@@ -366,7 +391,7 @@ namespace lns {
 
         void visit_var_stmt(var_stmt *v) override {
             object* val = lns::GET_DEFAULT_NULL();
-            if(dynamic_cast<null_expr*>(const_cast<expr*>(&v->initializer)) == nullptr){
+            if(v->initializer.type != NULL_STMT_T){
                 delete val;
                 val = evaluate(const_cast<expr *>(&v->initializer));
             }
@@ -394,6 +419,16 @@ namespace lns {
         void visit_null_stmt(null_stmt *n) override {
 
         } //
+        void visit_context_stmt(context_stmt *c) override {
+            runtime_environment* previous = environment;
+            context* ctx = new context(previous);
+            environment = ctx;
+            for(stmt* s : c->body){
+                execute(s);
+            }
+            environment = previous;
+            environment->define(c->name,ctx,c->is_global,c->isfinal);
+        }//
         void register_natives() {
             vector<callable*>* natives = natives::builtin_natives();
             callable* current;
@@ -727,6 +762,21 @@ namespace natives{
             return new map_o();
         }
     };
+    class elems_c : public callable{
+        const int arity() override {
+            return 1;
+        }
+
+        const string &name() override {
+            return *new string("elems");
+        }
+
+        object *call(lns::interpreter *env, vector<object *> args) override {
+            if(args[0]->type != MAP_T) return lns::GET_DEFAULT_NULL();
+            map_o* o = dynamic_cast<map_o*>(args[0]);
+            return new number_o(o->values.size());
+        }
+    };
     static vector<callable*>* builtin_natives(){
         vector<callable*>* natives = new vector<callable*>();
         natives->push_back(new exit_c());
@@ -744,6 +794,7 @@ namespace natives{
         natives->push_back(new readbool_c());
         natives->push_back(new map_c());
         natives->push_back(new call_c());
+        natives->push_back(new elems_c());
         return natives;
     }
 }

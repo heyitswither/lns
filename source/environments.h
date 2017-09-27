@@ -177,5 +177,18 @@ namespace lns {
             return ret;
         }
     };
+    class context : public runtime_environment, public object{
+    public:
+        context(runtime_environment* previous) : runtime_environment(previous),object(CONTEXT_T){}
+
+        string str() override {
+            return "<context>";
+        }
+
+        bool operator==(const object &o) const override {
+            return false;
+        }
+
+    };
 }
 #endif //CPPLNS_ENVIRONMENTS_H
