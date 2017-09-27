@@ -1,0 +1,6 @@
+#!/usr/bin/lns
+var max = 100000;
+for(var i=0;i<max;i++){
+    //println(i);
+}
+println("Done in " + millis() + " milliseconds.");
