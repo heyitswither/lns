@@ -53,24 +53,23 @@ namespace lns {
 
     };
     class interpreter : public expr_visitor, stmt_visitor {
-    private:
-        stmt_visitor *dsv;
-        expr_visitor *dev;
-
-        vector<stack_call*> stack_trace = *new vector<stack_call*>();
-
-
-        void execute(stmt *s) {
+    public:
+        virtual void execute(stmt *s) {
             if(s == nullptr) return;
             s->accept(this);
         }
-
+    protected:
+        vector<stack_call*> stack_trace = *new vector<stack_call*>();
         object *evaluate(expr *e) {
             if(e == nullptr)
                 return lns::GET_DEFAULT_NULL();
             object* o = e->accept(this);
             return o == nullptr ? lns::GET_DEFAULT_NULL() : o;
         }
+    private:
+        stmt_visitor *dsv;
+        expr_visitor *dev;
+
 
         void check_bool_operands(const token &op, object *left, object *right) {
             if (left->type == BOOL_T && right->type == BOOL_T) return;

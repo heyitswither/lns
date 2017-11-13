@@ -12,5 +12,6 @@ namespace lns{
     static bool time_count = false;
     static bool parse_only = false;
     static bool prompt = false;
+    static bool debugger_option = false;
 }
 #endif //CPPLNS_OPTIONS_H

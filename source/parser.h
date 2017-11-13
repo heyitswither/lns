@@ -23,7 +23,7 @@ namespace lns {
         int start;
         int current;
         bool use_allowed = true;
-        vector<token> &tokens;
+        vector<token*> &tokens;
         vector<stmt *> &statements;
 
         bool match(initializer_list<token_type> types) {
@@ -42,7 +42,7 @@ namespace lns {
         }
 
         token &previous() {
-            return tokens.at(current - 1);
+            return *tokens.at(current - 1);
         }
 
         bool check(token_type tokenType) {
@@ -50,12 +50,8 @@ namespace lns {
             return peek().type == tokenType;
         }
 
-        bool is_at_end() {
-            return peek().type == EOF_;
-        }
-
         token &peek() {
-            return tokens[current];
+            return *tokens[current];
         }
 
         void synchronize() {
@@ -96,7 +92,7 @@ namespace lns {
             token &t = consume(STRING, "expected string inside use statement");
             string &s = dynamic_cast<string_o *>(&t.literal)->value;
             consume(SEMICOLON, "expected semicolon after use statement");
-            if (isnatives) return new uses_native_stmt(t, s);
+            if (isnatives) return new uses_native_stmt(t.filename,t.line,t, s);
             ifstream file(s);
             string source;
             stringstream ss;
@@ -107,7 +103,7 @@ namespace lns {
             ss << file.rdbuf();
             source = ss.str();
             scanner scanner = *new lns::scanner(s.c_str(), source);
-            vector<token> tkns = scanner.scan_tokens(true);
+            vector<token*>& tkns = scanner.scan_tokens(true);
             parser p(tkns);
             vector<stmt *> &toadd = p.parse();
             int i = 0;
@@ -153,7 +149,7 @@ namespace lns {
             token& name = consume(IDENTIFIER,"expected context name");
             token& open = consume(LEFT_BRACE,"expected opening brace");
             vector<stmt*>& stmts = context_block();
-            return new context_stmt(name,stmts,global,final);
+            return new context_stmt(name.filename,name.line,name,stmts,global,final);
         }
 
         stmt *declaration() {
@@ -191,13 +187,13 @@ namespace lns {
 
         var_stmt *var_declaration(bool is_global, bool is_final) {
             token &name = consume(IDENTIFIER, "expected identifier in variable declaration.");
-            expr *initializer = new null_expr(name);
+            expr *initializer = new null_expr(name.filename,name.line,name);
             if (match({EQUAL})) {
                 delete initializer;
                 initializer = expression();
             }
             consume(SEMICOLON, "expected ';' after variable declaration");
-            return new var_stmt(name, *initializer, is_global, is_final);
+            return new var_stmt(name.filename,name.line,name, *initializer, is_global, is_final);
         }
 
         stmt *statement() {
@@ -208,50 +204,49 @@ namespace lns {
             if (match({WHILE})) return while_statement();
             if (match({FOR}))
                 return for_statement();
-            if (match({LEFT_BRACE})) return new block_stmt(block());
+            if (match({LEFT_BRACE})) return new block_stmt(previous().filename,previous().line,block());
             return expression_statement();
         }
 
         stmt *return_statement() {
             token &keyword = previous();
-            expr *value = new null_expr(previous());
+            expr *value = new null_expr(keyword.filename,keyword.line,previous());
             if (!check(SEMICOLON)) {
                 value = expression();
             }
             consume(SEMICOLON, "expected ';' after return value.");
-            return new return_stmt(keyword, *value);
+            return new return_stmt(keyword.filename,keyword.line,keyword, *value);
         }
 
         stmt *break_statement() {
             token &t = previous();
             consume(SEMICOLON, "expected ';' after break statement.");
-            return new break_stmt(t);
+            return new break_stmt(t.filename,t.line,t);
         }
 
         stmt *continue_statement() {
             token &t = previous();
             consume(SEMICOLON, "expected ';' after continue statement.");
-            return new continue_stmt(t);
+            return new continue_stmt(t.filename,t.line,t);
         }
 
         stmt *if_statement() {
-            consume(LEFT_PAREN, "expected '(' after 'if'.");
+            token lparen = consume(LEFT_PAREN, "expected '(' after 'if'.");
             expr *condition = expression();
             token rparen = consume(RIGHT_PAREN, "expected ')' after condition.");
             stmt *then_branch = statement();
-            stmt *else_branch = new null_stmt(rparen);
+            stmt *else_branch = new null_stmt(lparen.filename,lparen.line,rparen);
             if (match({ELSE}))
                 else_branch = statement();
-            return new if_stmt(*condition, then_branch, else_branch);
+            return new if_stmt(lparen.filename,lparen.line,*condition, then_branch, else_branch);
         }
 
         stmt *while_statement() {
-            consume(LEFT_PAREN, "expected '(' after 'while'");
+            token p = consume(LEFT_PAREN, "expected '(' after 'while'");
             expr *condition = expression();
             consume(RIGHT_PAREN, "expected ')' after condition.");
             stmt *body = statement();
-
-            return new s_while_stmt(*condition, body);
+            return new s_while_stmt(condition->file,condition->line,*condition, body);
         }
 
         stmt *for_statement() {
@@ -267,21 +262,21 @@ namespace lns {
             if (!check({SEMICOLON})) {
                 condition = expression();
             }
-            consume(SEMICOLON, "expected ';' after loop condition");
+            token p = consume(SEMICOLON, "expected ';' after loop condition");
             expr *increment = nullptr;
             if (!check(RIGHT_PAREN)) {
                 increment = expression();
             }
             consume(RIGHT_PAREN, "expected ')' after for increment");
             stmt *body = statement();
-            s_for_stmt *s = new s_for_stmt(initializer,condition,increment,body);
+            s_for_stmt *s = new s_for_stmt(condition == nullptr ? p.filename : condition->file,condition == nullptr ? p.line : condition->line,initializer,condition,increment,body);
             return s;
         }
 
         stmt *expression_statement() {
             expr *expr = expression();
             consume(SEMICOLON, "expected ';' after expression");
-            return new expression_stmt(*expr);
+            return new expression_stmt(expr->file,expr->line,*expr);
         }
 
         stmt *function(bool isglobal) {
@@ -297,7 +292,7 @@ namespace lns {
             consume(RIGHT_PAREN, "expected ')' after parameter list");
             consume(LEFT_BRACE, "expected '{' for function body");
             vector<stmt *> &body = block();
-            return new function_stmt(name, parameters, body, isglobal);
+            return new function_stmt(name.filename,name.line,name, parameters, body, isglobal);
         }
 
         expr *assignment() {
@@ -310,15 +305,15 @@ namespace lns {
                 value = assignment();
                 if (!((var = dynamic_cast<variable_expr *>(expr)) == nullptr)) {
                     token &name = const_cast<token &>(var->name);
-                    return new assign_expr(name, value);
+                    return new assign_expr(var->file,var->line,name, value);
                 }
                 if (!((map = dynamic_cast<map_field_expr *>(expr)) == nullptr)) {
                     token &name = const_cast<token &>(map->name);
-                    return new assign_map_field_expr(name, map->key, value);
+                    return new assign_map_field_expr(map->file,map->line,name, map->key, value);
                 }
                 if (!((context = dynamic_cast<context_expr *>(expr)) == nullptr)) {
                     token &name = const_cast<token &>(context->context_name);
-                    return new context_assign_expr(name, const_cast<token &>(context->context_identifier), value);
+                    return new context_assign_expr(context->file,context->line,name, const_cast<token &>(context->context_identifier), value);
                 }
                 throw error(equals, "invalid assignment target.");
             }
@@ -326,39 +321,29 @@ namespace lns {
                 token& pp = previous();
                 if((var = dynamic_cast<variable_expr*>(expr)) != nullptr){
                     const token& name = var->name;
-                    return new increment_expr(const_cast<token &>(name), expr);
+                    return new increment_expr(name.filename,name.line,const_cast<token &>(name), expr);
                 }
                 error(pp,"Invalid increment target.");
             }
             if(match({MINUS_MINUS})){
-                token& pp = previous();
+                token& mm = previous();
                 if((var = dynamic_cast<variable_expr*>(expr)) != nullptr){
                     const token& name = var->name;
-                    return new decrement_expr(const_cast<token &>(name), expr);
+                    return new decrement_expr(name.filename,name.line,const_cast<token &>(name), expr);
                 }
-                error(pp,"Invalid decrement target.");
+                error(mm,"Invalid decrement target.");
             }
             return expr;
         }
 
-        expr *expression() { return assignment(); }
 
-        expr *logical() {
-            expr *expr = comparison(), *right;
-            while (match({BANG_EQUAL, EQUAL_EQUAL, AND, OR, NOR, XOR, XNOR, NAND})) {
-                token &op = previous();
-                right = comparison();
-                expr = new binary_expr(expr, op, right);
-            }
-            return expr;
-        }
 
         expr *comparison() {
             expr *expr = addition(), *right;
             while (match({GREATER, GREATER_EQUAL, LESS, LESS_EQUAL})) {
                 token &op = previous();
                 right = addition();
-                expr = new binary_expr(expr, op, right);
+                expr = new binary_expr(op.filename,op.line,expr, op, right);
             }
             return expr;
         }
@@ -368,7 +353,7 @@ namespace lns {
             while (match({MINUS, PLUS})) {
                 token &op = previous();
                 right = multiplication();
-                expr = new binary_expr(expr, op, right);
+                expr = new binary_expr(op.filename,op.line,expr, op, right);
             }
             return expr;
         }
@@ -378,7 +363,7 @@ namespace lns {
             while (match({SLASH, STAR})) {
                 token &op = previous();
                 right = power();
-                expr = new binary_expr(expr, op, right);
+                expr = new binary_expr(op.filename,op.line,expr, op, right);
             }
             return expr;
         }
@@ -388,7 +373,7 @@ namespace lns {
             while (match({HAT})) {
                 token &op = previous();
                 right = unary();
-                expr = new binary_expr(expr, op, right);
+                expr = new binary_expr(op.filename,op.line,expr, op, right);
             }
             return expr;
         }
@@ -397,7 +382,7 @@ namespace lns {
             if (match({BANG, MINUS})) {
                 token &op = previous();
                 expr *right = unary();
-                return new unary_expr(op, right);
+                return new unary_expr(op.filename,op.line,op, right);
             }
             return call();
         }
@@ -408,12 +393,12 @@ namespace lns {
             token &identifier = previous();
             if(match({DOT})){
                 token &context_identifier = consume(IDENTIFIER,"expected identifier for context call");
-                return new context_expr(identifier,context_identifier);
+                return new context_expr(identifier.filename,identifier.line,identifier,context_identifier);
             }
             if (match({LEFT_SQR})) {
                 keyexpr = expression();
                 consume(RIGHT_SQR, "expected ']' after key expression");
-                return new map_field_expr(identifier, keyexpr);
+                return new map_field_expr(identifier.filename,identifier.line,identifier, keyexpr);
             }
             while (true)
                 if (match({LEFT_PAREN})) {
@@ -423,7 +408,7 @@ namespace lns {
                         } while (match({COMMA}));
                     }
                     token &paren = consume(RIGHT_PAREN, "expected ')' after arguments");
-                    expr = new call_expr(expr, paren, args);
+                    expr = new call_expr(paren.filename,paren.line,expr, paren, args);
                 } else break;
             return expr;
         }
@@ -436,29 +421,29 @@ namespace lns {
                 } while (match({COMMA}));
             }
             token paren = consume(RIGHT_PAREN, "expected ')' after arguments");
-            call_expr *expr = new call_expr(callee, paren, args);
+            call_expr *expr = new call_expr(paren.filename,paren.line,callee, paren, args);
             return expr;
         }
 
         expr *primary() {
-            if (match({FALSE})) return new literal_expr(new bool_o(false));
-            if (match({TRUE})) return new literal_expr(new bool_o(true));
-            if (match({NUL})) return new literal_expr(new null_o());
-            if (match({NUMBER, STRING})) return new literal_expr(&previous().literal);
+            if (match({FALSE})) return new literal_expr(previous().filename,previous().line,new bool_o(false));
+            if (match({TRUE})) return new literal_expr(previous().filename,previous().line,new bool_o(true));
+            if (match({NUL})) return new literal_expr(previous().filename,previous().line,new null_o());
+            if (match({NUMBER, STRING})) return new literal_expr(previous().filename,previous().line,&previous().literal);
             if (match({IDENTIFIER})) {
                 token &identifier = previous();
-                return new variable_expr(identifier);
+                return new variable_expr(identifier.filename,identifier.line,identifier);
             }
             if (match({LEFT_PAREN})) {
                 expr *expr = expression();
                 consume(RIGHT_PAREN, "missing closing ')'");
-                return new grouping_expr(expr);
+                return new grouping_expr(expr->file,expr->line,expr);
             }
             throw error(peek(), "expected expression");
         }
 
     public:
-        explicit parser(vector<token> &tokens) : tokens(tokens), start(0), current(0), use_allowed(true),
+        explicit parser(vector<token*> &tokens) : tokens(tokens), start(0), current(0), use_allowed(true),
                                                  statements(*new vector<stmt *>()) {}
 
         parser() = delete;
@@ -476,7 +461,28 @@ namespace lns {
             }
             return statements;
         }
-
+        expr *expression() { return assignment(); }
+        expr *logical() {
+            expr *expr = comparison(), *right;
+            while (match({BANG_EQUAL, EQUAL_EQUAL, AND, OR, NOR, XOR, XNOR, NAND})) {
+                token &op = previous();
+                right = comparison();
+                expr = new binary_expr(op.filename,op.line,expr, op, right);
+            }
+            return expr;
+        }
+        bool is_at_end() {
+            return peek().type == EOF_;
+        }
+        void reset(vector<token*> tokens){
+            this->tokens.clear();
+            for(token* t : tokens){
+                this->tokens.push_back(t);
+            }
+            this->current = 0;
+            this->start = 0;
+        }
     };
+
 }
 #endif //CPPLNS_PARSER_H

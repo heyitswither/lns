@@ -48,7 +48,7 @@ private:
 public:
     file_not_found_exception(string f) : filename(f) {}
     virtual const char* what() const throw(){
-        return createDescription(FATAL_ERROR " file " + filename + " doesn't exist or is unaccessible.");
+        return createDescription("File " + filename + " doesn't exist or is inaccessible.");
     }
 };
 class invalid_operator_exception : public std::exception{
@@ -76,4 +76,5 @@ public:
         return message.c_str();
     }
 };
+
 #endif //CPPLNS_EXCEPTIONS_H

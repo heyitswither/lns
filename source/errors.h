@@ -22,7 +22,7 @@ using namespace std;
         void report(const char* type, const char* filename, int line, const char* where, const char* message) {
             had_parse_error = true;
             if(lns::silent_full) return;
-            cerr << type << " in file " << filename << ":" << line << (where == "" ? "" : ",") << where << ": " << message << ".";
+            cerr << type << " in file " << filename << ":" << line << (where == "" ? "" : ",") << where << ": " << message << "." << endl;
         }
         void parse_error(const char* &file, int line, const char* message) {
             report(PARSE_ERROR, file, line, "", message);

@@ -1,7 +1,5 @@
-#!/usr/bin/lns
-context prova
-{
-    final var x = 12;
-    var y = 44;
+var i;
+for(i=0;i<100;i=i+1){
+	println(i-100);
 }
-println(type(prova.x));
+print("Done!");

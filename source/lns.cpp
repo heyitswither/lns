@@ -1,13 +1,12 @@
 #include <iostream>
 #include "errors.h"
-#include <exception>
 #include <fstream>
-#include <sstream>
 #include "scanner.h"
 #include "expr.h"
 #include "parser.h"
 #include "options.h"
 #include "interpreter.h"
+#include "debug.h"
 #include <chrono>
 #include <iomanip>
 #define COMPILER_VERSION "0.2"
@@ -32,6 +31,8 @@ namespace lns{
             time_count = true;
         }else if(o == "o" || o == "-parse-only"){
             parse_only = true;
+        }else if(o == "d" || o == "-debugger_option"){
+            debugger_option = true;
         }else{
             throw unknown_option_exception(o);
         }
@@ -56,7 +57,7 @@ namespace lns{
     }
     void run(const char* filename,string& source, interpreter * i){
         scanner scn (filename,source);
-        vector<token> tokens = scn.scan_tokens(true);
+        vector<token*> tokens = scn.scan_tokens(true);
         vector<stmt*> stmts;
         if(had_parse_error) throw parse_exception();
         //for(token& t : tokens){
@@ -125,7 +126,10 @@ int main(const int argc, const char* argv[]) {
     cout << endl;
     try{
         lns::inspectArguments(argc - 1,argv);
-        if(lns::file == nullptr){
+        if(debugger_option){
+            debug* d = new debug(file);
+            d->start();
+        }else if(lns::file == nullptr){
             lns::run_prompt();
         }else{
             lns::run_file(lns::file);

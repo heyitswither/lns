@@ -1,5 +1,5 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/CppLNS.dir/source/main.cpp.o"
+  "CMakeFiles/CppLNS.dir/source/lns.cpp.o"
   "CppLNS.pdb"
   "CppLNS"
 )

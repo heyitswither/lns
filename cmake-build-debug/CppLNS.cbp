@@ -8,38 +8,38 @@
 		<Option virtualFolders="CMake Files\;"/>
 		<Build>
 			<Target title="all">
-				<Option working_dir="/home/lorenzo/Scrivania/LNS/git/lns/cmake-build-debug"/>
+				<Option working_dir="/home/lorenzo/CLionProjects/lns/cmake-build-debug"/>
 				<Option type="4"/>
 				<MakeCommands>
-					<Build command="/usr/bin/make -j4 -f &quot;/home/lorenzo/Scrivania/LNS/git/lns/cmake-build-debug/Makefile&quot;  VERBOSE=1 all"/>
-					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/lorenzo/Scrivania/LNS/git/lns/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make -j4 -f &quot;/home/lorenzo/Scrivania/LNS/git/lns/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make -j4 -f &quot;/home/lorenzo/Scrivania/LNS/git/lns/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/lorenzo/CLionProjects/lns/cmake-build-debug/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/lorenzo/CLionProjects/lns/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/lorenzo/CLionProjects/lns/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/lorenzo/CLionProjects/lns/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="rebuild_cache">
-				<Option working_dir="/home/lorenzo/Scrivania/LNS/git/lns/cmake-build-debug"/>
+				<Option working_dir="/home/lorenzo/CLionProjects/lns/cmake-build-debug"/>
 				<Option type="4"/>
 				<MakeCommands>
-					<Build command="/usr/bin/make -j4 -f &quot;/home/lorenzo/Scrivania/LNS/git/lns/cmake-build-debug/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
-					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/lorenzo/Scrivania/LNS/git/lns/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make -j4 -f &quot;/home/lorenzo/Scrivania/LNS/git/lns/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make -j4 -f &quot;/home/lorenzo/Scrivania/LNS/git/lns/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/lorenzo/CLionProjects/lns/cmake-build-debug/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/lorenzo/CLionProjects/lns/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/lorenzo/CLionProjects/lns/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/lorenzo/CLionProjects/lns/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="edit_cache">
-				<Option working_dir="/home/lorenzo/Scrivania/LNS/git/lns/cmake-build-debug"/>
+				<Option working_dir="/home/lorenzo/CLionProjects/lns/cmake-build-debug"/>
 				<Option type="4"/>
 				<MakeCommands>
-					<Build command="/usr/bin/make -j4 -f &quot;/home/lorenzo/Scrivania/LNS/git/lns/cmake-build-debug/Makefile&quot;  VERBOSE=1 edit_cache"/>
-					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/lorenzo/Scrivania/LNS/git/lns/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make -j4 -f &quot;/home/lorenzo/Scrivania/LNS/git/lns/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make -j4 -f &quot;/home/lorenzo/Scrivania/LNS/git/lns/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/lorenzo/CLionProjects/lns/cmake-build-debug/Makefile&quot;  VERBOSE=1 edit_cache"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/lorenzo/CLionProjects/lns/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/lorenzo/CLionProjects/lns/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/lorenzo/CLionProjects/lns/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="CppLNS">
-				<Option output="/home/lorenzo/Scrivania/LNS/git/lns/cmake-build-debug/CppLNS" prefix_auto="0" extension_auto="0"/>
-				<Option working_dir="/home/lorenzo/Scrivania/LNS/git/lns/cmake-build-debug"/>
+				<Option output="/home/lorenzo/CLionProjects/lns/cmake-build-debug/CppLNS" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/lorenzo/CLionProjects/lns/cmake-build-debug"/>
 				<Option object_output="./"/>
 				<Option type="1"/>
 				<Option compiler="gcc"/>
@@ -54,15 +54,15 @@
 					<Add directory="/usr/include"/>
 				</Compiler>
 				<MakeCommands>
-					<Build command="/usr/bin/make -j4 -f &quot;/home/lorenzo/Scrivania/LNS/git/lns/cmake-build-debug/Makefile&quot;  VERBOSE=1 CppLNS"/>
-					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/lorenzo/Scrivania/LNS/git/lns/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make -j4 -f &quot;/home/lorenzo/Scrivania/LNS/git/lns/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make -j4 -f &quot;/home/lorenzo/Scrivania/LNS/git/lns/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/lorenzo/CLionProjects/lns/cmake-build-debug/Makefile&quot;  VERBOSE=1 CppLNS"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/lorenzo/CLionProjects/lns/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/lorenzo/CLionProjects/lns/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/lorenzo/CLionProjects/lns/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="CppLNS/fast">
-				<Option output="/home/lorenzo/Scrivania/LNS/git/lns/cmake-build-debug/CppLNS" prefix_auto="0" extension_auto="0"/>
-				<Option working_dir="/home/lorenzo/Scrivania/LNS/git/lns/cmake-build-debug"/>
+				<Option output="/home/lorenzo/CLionProjects/lns/cmake-build-debug/CppLNS" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/lorenzo/CLionProjects/lns/cmake-build-debug"/>
 				<Option object_output="./"/>
 				<Option type="1"/>
 				<Option compiler="gcc"/>
@@ -77,47 +77,56 @@
 					<Add directory="/usr/include"/>
 				</Compiler>
 				<MakeCommands>
-					<Build command="/usr/bin/make -j4 -f &quot;/home/lorenzo/Scrivania/LNS/git/lns/cmake-build-debug/Makefile&quot;  VERBOSE=1 CppLNS/fast"/>
-					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/lorenzo/Scrivania/LNS/git/lns/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make -j4 -f &quot;/home/lorenzo/Scrivania/LNS/git/lns/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make -j4 -f &quot;/home/lorenzo/Scrivania/LNS/git/lns/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/lorenzo/CLionProjects/lns/cmake-build-debug/Makefile&quot;  VERBOSE=1 CppLNS/fast"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/lorenzo/CLionProjects/lns/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/lorenzo/CLionProjects/lns/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/lorenzo/CLionProjects/lns/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 		</Build>
-		<Unit filename="/home/lorenzo/Scrivania/LNS/git/lns/source/defs.h">
+		<Unit filename="/home/lorenzo/CLionProjects/lns/source/commands.h">
 			<Option target="CppLNS"/>
 		</Unit>
-		<Unit filename="/home/lorenzo/Scrivania/LNS/git/lns/source/environments.h">
+		<Unit filename="/home/lorenzo/CLionProjects/lns/source/debug.h">
 			<Option target="CppLNS"/>
 		</Unit>
-		<Unit filename="/home/lorenzo/Scrivania/LNS/git/lns/source/errors.h">
+		<Unit filename="/home/lorenzo/CLionProjects/lns/source/debugger_defs.h">
 			<Option target="CppLNS"/>
 		</Unit>
-		<Unit filename="/home/lorenzo/Scrivania/LNS/git/lns/source/exceptions.h">
+		<Unit filename="/home/lorenzo/CLionProjects/lns/source/defs.h">
 			<Option target="CppLNS"/>
 		</Unit>
-		<Unit filename="/home/lorenzo/Scrivania/LNS/git/lns/source/expr.h">
+		<Unit filename="/home/lorenzo/CLionProjects/lns/source/environments.h">
 			<Option target="CppLNS"/>
 		</Unit>
-		<Unit filename="/home/lorenzo/Scrivania/LNS/git/lns/source/interpreter.h">
+		<Unit filename="/home/lorenzo/CLionProjects/lns/source/errors.h">
 			<Option target="CppLNS"/>
 		</Unit>
-		<Unit filename="/home/lorenzo/Scrivania/LNS/git/lns/source/main.cpp">
+		<Unit filename="/home/lorenzo/CLionProjects/lns/source/exceptions.h">
 			<Option target="CppLNS"/>
 		</Unit>
-		<Unit filename="/home/lorenzo/Scrivania/LNS/git/lns/source/options.h">
+		<Unit filename="/home/lorenzo/CLionProjects/lns/source/expr.h">
 			<Option target="CppLNS"/>
 		</Unit>
-		<Unit filename="/home/lorenzo/Scrivania/LNS/git/lns/source/parser.h">
+		<Unit filename="/home/lorenzo/CLionProjects/lns/source/interpreter.h">
 			<Option target="CppLNS"/>
 		</Unit>
-		<Unit filename="/home/lorenzo/Scrivania/LNS/git/lns/source/scanner.h">
+		<Unit filename="/home/lorenzo/CLionProjects/lns/source/lns.cpp">
 			<Option target="CppLNS"/>
 		</Unit>
-		<Unit filename="/home/lorenzo/Scrivania/LNS/git/lns/source/stmt.h">
+		<Unit filename="/home/lorenzo/CLionProjects/lns/source/options.h">
 			<Option target="CppLNS"/>
 		</Unit>
-		<Unit filename="/home/lorenzo/Scrivania/LNS/git/lns/CMakeLists.txt">
+		<Unit filename="/home/lorenzo/CLionProjects/lns/source/parser.h">
+			<Option target="CppLNS"/>
+		</Unit>
+		<Unit filename="/home/lorenzo/CLionProjects/lns/source/scanner.h">
+			<Option target="CppLNS"/>
+		</Unit>
+		<Unit filename="/home/lorenzo/CLionProjects/lns/source/stmt.h">
+			<Option target="CppLNS"/>
+		</Unit>
+		<Unit filename="/home/lorenzo/CLionProjects/lns/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\"/>
 		</Unit>
 	</Project>

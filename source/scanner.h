@@ -42,22 +42,31 @@ namespace lns{
     class scanner{
         std::string source;
         const char* filename;
-        vector<token> tokens;
+        vector<token*> tokens;
         int start;
         int current;
         int line;
     public:
         scanner(const char* filename,std::string& source) : source(source), start(0), current(0), line(1){
             this->filename = filename;
+            errors::had_parse_error = false;
         }
         explicit scanner() = delete;
         void add_eof() {
+            
             object& o = *new null_o();
-            token eof = *new token(EOF_,"",o,filename,line+1);
+            token* eof = new token(EOF_,"",o,filename,line+1);
             tokens.push_back(eof);
         }
-
-        vector<token> scan_tokens(bool addEOF){
+        void reset(const char* filename, std::string& source){
+            this->tokens.clear();
+            this->filename = filename;
+            this->source = source;
+            start = 0;
+            current = 0;
+            line = 1;
+        }
+        vector<token*> & scan_tokens(bool addEOF){
             //cout << source << endl;
             while(!is_at_end()){
                 start = current;
@@ -167,7 +176,7 @@ namespace lns{
         }
         void add_token(token_type type,object& f){
             std::string text = source.substr(start, current - start);
-            token t = *new token(type,text.c_str(),f,filename,line);
+            token* t = new token(type,text.c_str(),f,filename,line);
             tokens.push_back(t);
         }
         void add_token(token_type type){

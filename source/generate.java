@@ -71,9 +71,9 @@ public class generate {
         writer.println("class " + visitorName + ";");
         writer.println("class " + baseName + "{");
         writer.println("public:\n");
-        writer.println(baseName + "(" + enumName + " type) : type(type) {}");
+        writer.println(baseName + "(int line, const char* file, " + enumName + " type) : type(type), line(line), file(file){}");
         writer.println("virtual " + vReturnType + " accept(" + visitorName + "* v) = 0;");
-        writer.println(enumName + " type;");
+        writer.println(enumName + " type;\n int line; const char* file;");
         writer.println("};"); //class
         declareAll(writer,baseName,types);
         defineVisitor(writer,baseName,vReturnType,types);
@@ -120,7 +120,7 @@ public class generate {
         writer.println("public:");
         String[] fieldArray = types.split(", ");
         writer.print(fieldArray.length == 1 ? "explicit " : "");
-        writer.println(className + "_" + baseName + "(" + types + ") : " + genFieldsAssign(fieldArray) + ", " + baseName + "(" + className.toUpperCase() + "_" + baseName.toUpperCase() + "_T" + ") {}");
+        writer.println(className + "_" + baseName + "(const char* file,int line, " + types + ") : " + genFieldsAssign(fieldArray) + ", " + baseName + "(line, file, " + className.toUpperCase() + "_" + baseName.toUpperCase() + "_T" + ") {}");
         writer.println(vReturnType + " accept(" + visitorName + " *v) override{");
         writer.println((vReturnType == "void" ? "" : "return ") +  "v->visit_" + className + "_" + baseName + "(this);");
         writer.println("}");

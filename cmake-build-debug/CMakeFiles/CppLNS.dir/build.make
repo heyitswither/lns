@@ -34,19 +34,19 @@ cmake_force:
 SHELL = /bin/sh
 
 # The CMake executable.
-CMAKE_COMMAND = /home/lorenzo/Software/clion-2017.1.3/bin/cmake/bin/cmake
+CMAKE_COMMAND = /home/lorenzo/Desktop/clion-2017.2.3/bin/cmake/bin/cmake
 
 # The command to remove a file.
-RM = /home/lorenzo/Software/clion-2017.1.3/bin/cmake/bin/cmake -E remove -f
+RM = /home/lorenzo/Desktop/clion-2017.2.3/bin/cmake/bin/cmake -E remove -f
 
 # Escaping for special characters.
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/lorenzo/Scrivania/LNS/git/lns
+CMAKE_SOURCE_DIR = /home/lorenzo/CLionProjects/lns
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/lorenzo/Scrivania/LNS/git/lns/cmake-build-debug
+CMAKE_BINARY_DIR = /home/lorenzo/CLionProjects/lns/cmake-build-debug
 
 # Include any dependencies generated for this target.
 include CMakeFiles/CppLNS.dir/depend.make
@@ -57,41 +57,41 @@ include CMakeFiles/CppLNS.dir/progress.make
 # Include the compile flags for this target's objects.
 include CMakeFiles/CppLNS.dir/flags.make
 
-CMakeFiles/CppLNS.dir/source/main.cpp.o: CMakeFiles/CppLNS.dir/flags.make
-CMakeFiles/CppLNS.dir/source/main.cpp.o: ../source/main.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/lorenzo/Scrivania/LNS/git/lns/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/CppLNS.dir/source/main.cpp.o"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/CppLNS.dir/source/main.cpp.o -c /home/lorenzo/Scrivania/LNS/git/lns/source/main.cpp
+CMakeFiles/CppLNS.dir/source/lns.cpp.o: CMakeFiles/CppLNS.dir/flags.make
+CMakeFiles/CppLNS.dir/source/lns.cpp.o: ../source/lns.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/lorenzo/CLionProjects/lns/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/CppLNS.dir/source/lns.cpp.o"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/CppLNS.dir/source/lns.cpp.o -c /home/lorenzo/CLionProjects/lns/source/lns.cpp
 
-CMakeFiles/CppLNS.dir/source/main.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/CppLNS.dir/source/main.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/lorenzo/Scrivania/LNS/git/lns/source/main.cpp > CMakeFiles/CppLNS.dir/source/main.cpp.i
+CMakeFiles/CppLNS.dir/source/lns.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/CppLNS.dir/source/lns.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/lorenzo/CLionProjects/lns/source/lns.cpp > CMakeFiles/CppLNS.dir/source/lns.cpp.i
 
-CMakeFiles/CppLNS.dir/source/main.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/CppLNS.dir/source/main.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/lorenzo/Scrivania/LNS/git/lns/source/main.cpp -o CMakeFiles/CppLNS.dir/source/main.cpp.s
+CMakeFiles/CppLNS.dir/source/lns.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/CppLNS.dir/source/lns.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/lorenzo/CLionProjects/lns/source/lns.cpp -o CMakeFiles/CppLNS.dir/source/lns.cpp.s
 
-CMakeFiles/CppLNS.dir/source/main.cpp.o.requires:
+CMakeFiles/CppLNS.dir/source/lns.cpp.o.requires:
 
-.PHONY : CMakeFiles/CppLNS.dir/source/main.cpp.o.requires
+.PHONY : CMakeFiles/CppLNS.dir/source/lns.cpp.o.requires
 
-CMakeFiles/CppLNS.dir/source/main.cpp.o.provides: CMakeFiles/CppLNS.dir/source/main.cpp.o.requires
-	$(MAKE) -f CMakeFiles/CppLNS.dir/build.make CMakeFiles/CppLNS.dir/source/main.cpp.o.provides.build
-.PHONY : CMakeFiles/CppLNS.dir/source/main.cpp.o.provides
+CMakeFiles/CppLNS.dir/source/lns.cpp.o.provides: CMakeFiles/CppLNS.dir/source/lns.cpp.o.requires
+	$(MAKE) -f CMakeFiles/CppLNS.dir/build.make CMakeFiles/CppLNS.dir/source/lns.cpp.o.provides.build
+.PHONY : CMakeFiles/CppLNS.dir/source/lns.cpp.o.provides
 
-CMakeFiles/CppLNS.dir/source/main.cpp.o.provides.build: CMakeFiles/CppLNS.dir/source/main.cpp.o
+CMakeFiles/CppLNS.dir/source/lns.cpp.o.provides.build: CMakeFiles/CppLNS.dir/source/lns.cpp.o
 
 
 # Object files for target CppLNS
 CppLNS_OBJECTS = \
-"CMakeFiles/CppLNS.dir/source/main.cpp.o"
+"CMakeFiles/CppLNS.dir/source/lns.cpp.o"
 
 # External object files for target CppLNS
 CppLNS_EXTERNAL_OBJECTS =
 
-CppLNS: CMakeFiles/CppLNS.dir/source/main.cpp.o
+CppLNS: CMakeFiles/CppLNS.dir/source/lns.cpp.o
 CppLNS: CMakeFiles/CppLNS.dir/build.make
 CppLNS: CMakeFiles/CppLNS.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/lorenzo/Scrivania/LNS/git/lns/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable CppLNS"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/lorenzo/CLionProjects/lns/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable CppLNS"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/CppLNS.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -99,7 +99,7 @@ CMakeFiles/CppLNS.dir/build: CppLNS
 
 .PHONY : CMakeFiles/CppLNS.dir/build
 
-CMakeFiles/CppLNS.dir/requires: CMakeFiles/CppLNS.dir/source/main.cpp.o.requires
+CMakeFiles/CppLNS.dir/requires: CMakeFiles/CppLNS.dir/source/lns.cpp.o.requires
 
 .PHONY : CMakeFiles/CppLNS.dir/requires
 
@@ -108,6 +108,6 @@ CMakeFiles/CppLNS.dir/clean:
 .PHONY : CMakeFiles/CppLNS.dir/clean
 
 CMakeFiles/CppLNS.dir/depend:
-	cd /home/lorenzo/Scrivania/LNS/git/lns/cmake-build-debug && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/lorenzo/Scrivania/LNS/git/lns /home/lorenzo/Scrivania/LNS/git/lns /home/lorenzo/Scrivania/LNS/git/lns/cmake-build-debug /home/lorenzo/Scrivania/LNS/git/lns/cmake-build-debug /home/lorenzo/Scrivania/LNS/git/lns/cmake-build-debug/CMakeFiles/CppLNS.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/lorenzo/CLionProjects/lns/cmake-build-debug && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/lorenzo/CLionProjects/lns /home/lorenzo/CLionProjects/lns /home/lorenzo/CLionProjects/lns/cmake-build-debug /home/lorenzo/CLionProjects/lns/cmake-build-debug /home/lorenzo/CLionProjects/lns/cmake-build-debug/CMakeFiles/CppLNS.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/CppLNS.dir/depend
 

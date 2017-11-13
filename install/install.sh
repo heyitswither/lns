@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 cd ..
 cd source
 echo Compiling...

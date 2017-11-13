@@ -18,9 +18,10 @@ class stmt_visitor;
 class stmt{
 public:
 
-stmt(stmt_type type) : type(type) {}
+stmt(int line, const char* file, stmt_type type) : type(type), line(line), file(file){}
 virtual void accept(stmt_visitor* v) = 0;
 stmt_type type;
+ int line; const char* file;
 };
 class block_stmt;
 class expression_stmt;
@@ -54,7 +55,7 @@ virtual void visit_null_stmt(null_stmt *n) = 0;
 
 class block_stmt : public stmt {
 public:
-explicit block_stmt(vector<stmt*>& statements) : statements(statements), stmt(BLOCK_STMT_T) {}
+explicit block_stmt(const char* file,int line, vector<stmt*>& statements) : statements(statements), stmt(line, file, BLOCK_STMT_T) {}
 void accept(stmt_visitor *v) override{
 v->visit_block_stmt(this);
 }
@@ -65,7 +66,7 @@ const vector<stmt*>& statements;
 
 class expression_stmt : public stmt {
 public:
-explicit expression_stmt(expr& exprs) : exprs(exprs), stmt(EXPRESSION_STMT_T) {}
+explicit expression_stmt(const char* file,int line, expr& exprs) : exprs(exprs), stmt(line, file, EXPRESSION_STMT_T) {}
 void accept(stmt_visitor *v) override{
 v->visit_expression_stmt(this);
 }
@@ -76,7 +77,7 @@ const expr& exprs;
 
 class function_stmt : public stmt {
 public:
-function_stmt(token& name, vector<token>& parameters, vector<stmt*>& body, bool isglobal) : name(name), parameters(parameters), body(body), isglobal(isglobal), stmt(FUNCTION_STMT_T) {}
+function_stmt(const char* file,int line, token& name, vector<token>& parameters, vector<stmt*>& body, bool isglobal) : name(name), parameters(parameters), body(body), isglobal(isglobal), stmt(line, file, FUNCTION_STMT_T) {}
 void accept(stmt_visitor *v) override{
 v->visit_function_stmt(this);
 }
@@ -90,7 +91,7 @@ const bool isglobal;
 
 class context_stmt : public stmt {
 public:
-context_stmt(token& name, vector<stmt*> body, bool is_global, bool isfinal) : name(name), body(body), is_global(is_global), isfinal(isfinal), stmt(CONTEXT_STMT_T) {}
+context_stmt(const char* file,int line, token& name, vector<stmt*> body, bool is_global, bool isfinal) : name(name), body(body), is_global(is_global), isfinal(isfinal), stmt(line, file, CONTEXT_STMT_T) {}
 void accept(stmt_visitor *v) override{
 v->visit_context_stmt(this);
 }
@@ -104,7 +105,7 @@ const bool isfinal;
 
 class if_stmt : public stmt {
 public:
-if_stmt(expr& condition, stmt* thenBranch, stmt* elseBranch) : condition(condition), thenBranch(thenBranch), elseBranch(elseBranch), stmt(IF_STMT_T) {}
+if_stmt(const char* file,int line, expr& condition, stmt* thenBranch, stmt* elseBranch) : condition(condition), thenBranch(thenBranch), elseBranch(elseBranch), stmt(line, file, IF_STMT_T) {}
 void accept(stmt_visitor *v) override{
 v->visit_if_stmt(this);
 }
@@ -117,7 +118,7 @@ const stmt* elseBranch;
 
 class return_stmt : public stmt {
 public:
-return_stmt(token& keyword, expr& value) : keyword(keyword), value(value), stmt(RETURN_STMT_T) {}
+return_stmt(const char* file,int line, token& keyword, expr& value) : keyword(keyword), value(value), stmt(line, file, RETURN_STMT_T) {}
 void accept(stmt_visitor *v) override{
 v->visit_return_stmt(this);
 }
@@ -129,7 +130,7 @@ const expr& value;
 
 class break_stmt : public stmt {
 public:
-explicit break_stmt(token& keyword) : keyword(keyword), stmt(BREAK_STMT_T) {}
+explicit break_stmt(const char* file,int line, token& keyword) : keyword(keyword), stmt(line, file, BREAK_STMT_T) {}
 void accept(stmt_visitor *v) override{
 v->visit_break_stmt(this);
 }
@@ -140,7 +141,7 @@ const token& keyword;
 
 class continue_stmt : public stmt {
 public:
-explicit continue_stmt(token& keyword) : keyword(keyword), stmt(CONTINUE_STMT_T) {}
+explicit continue_stmt(const char* file,int line, token& keyword) : keyword(keyword), stmt(line, file, CONTINUE_STMT_T) {}
 void accept(stmt_visitor *v) override{
 v->visit_continue_stmt(this);
 }
@@ -151,7 +152,7 @@ const token& keyword;
 
 class var_stmt : public stmt {
 public:
-var_stmt(token& name, expr& initializer, bool isglobal, bool isfinal) : name(name), initializer(initializer), isglobal(isglobal), isfinal(isfinal), stmt(VAR_STMT_T) {}
+var_stmt(const char* file,int line, token& name, expr& initializer, bool isglobal, bool isfinal) : name(name), initializer(initializer), isglobal(isglobal), isfinal(isfinal), stmt(line, file, VAR_STMT_T) {}
 void accept(stmt_visitor *v) override{
 v->visit_var_stmt(this);
 }
@@ -165,7 +166,7 @@ const bool isfinal;
 
 class s_while_stmt : public stmt {
 public:
-s_while_stmt(expr& condition, stmt* body) : condition(condition), body(body), stmt(S_WHILE_STMT_T) {}
+s_while_stmt(const char* file,int line, expr& condition, stmt* body) : condition(condition), body(body), stmt(line, file, S_WHILE_STMT_T) {}
 void accept(stmt_visitor *v) override{
 v->visit_s_while_stmt(this);
 }
@@ -177,7 +178,7 @@ const stmt* body;
 
 class s_for_stmt : public stmt {
 public:
-s_for_stmt(stmt* init, expr* condition, expr* increment, stmt* body) : init(init), condition(condition), increment(increment), body(body), stmt(S_FOR_STMT_T) {}
+s_for_stmt(const char* file,int line, stmt* init, expr* condition, expr* increment, stmt* body) : init(init), condition(condition), increment(increment), body(body), stmt(line, file, S_FOR_STMT_T) {}
 void accept(stmt_visitor *v) override{
 v->visit_s_for_stmt(this);
 }
@@ -191,7 +192,7 @@ const stmt* body;
 
 class uses_native_stmt : public stmt {
 public:
-uses_native_stmt(token& token, string& path) : token(token), path(path), stmt(USES_NATIVE_STMT_T) {}
+uses_native_stmt(const char* file,int line, token& token, string& path) : token(token), path(path), stmt(line, file, USES_NATIVE_STMT_T) {}
 void accept(stmt_visitor *v) override{
 v->visit_uses_native_stmt(this);
 }
@@ -203,7 +204,7 @@ const string& path;
 
 class null_stmt : public stmt {
 public:
-explicit null_stmt(token& where) : where(where), stmt(NULL_STMT_T) {}
+explicit null_stmt(const char* file,int line, token& where) : where(where), stmt(line, file, NULL_STMT_T) {}
 void accept(stmt_visitor *v) override{
 v->visit_null_stmt(this);
 }

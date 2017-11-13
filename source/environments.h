@@ -176,6 +176,11 @@ namespace lns {
             --dynamic_cast<number_o*>(o.value)->value;
             return ret;
         }
+
+        void reset() {
+            values.clear();
+            if(enclosing != nullptr) enclosing->reset();
+        }
     };
     class context : public runtime_environment, public object{
     public:

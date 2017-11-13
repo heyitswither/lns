@@ -1,4 +1,4 @@
-# Install script for directory: /home/lorenzo/Scrivania/LNS/git/lns
+# Install script for directory: /home/lorenzo/CLionProjects/lns
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -40,5 +40,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/lorenzo/Scrivania/LNS/git/lns/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/lorenzo/CLionProjects/lns/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
