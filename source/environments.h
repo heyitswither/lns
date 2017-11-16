@@ -36,7 +36,7 @@ namespace lns {
     public:
         explicit runtime_environment() : enclosing(nullptr), values(*new map<string,variable>()) {}
 
-        explicit runtime_environment(runtime_environment *enc) : enclosing(enc) {}
+        explicit runtime_environment(runtime_environment *enc) : enclosing(enc) , values(*new map<string,variable>){}
 
         object *get(const token &name) {
             if (contains_key(name.lexeme)) {
@@ -144,37 +144,51 @@ namespace lns {
         }
 
         object *increment(const token &name) {
-            object* ret = get(name);
-            if(values[name.lexeme].isfinal){
-                string& s = *new string();
-                s += "variable '" + name.lexeme + "' is final";
-                throw runtime_exception(name, s);
+            if (contains_key(name.lexeme)) {
+                variable s = values[name.lexeme];
+                if(s.isfinal){
+                    string& s = *new string();
+                    s += "variable '" + name.lexeme + "' is final";
+                    throw runtime_exception(name, s);
+                }
+                if(s.value->type != NUMBER_T){
+                    string& s = *new string();
+                    s+="variable '" + name.lexeme + "' is not a number";
+                    throw runtime_exception(name,s);
+                }
+                number_o* n = dynamic_cast<number_o*>(s.value);
+                ++n->value;
+                return n;
             }
-            variable o = values[name.lexeme];
-            if(o.value->type != NUMBER_T){
-                string& s = *new string();
-                s+="variable '" + name.lexeme + "' is not a number";
-                throw runtime_exception(name,s);
-            }
-            ++dynamic_cast<number_o*>(o.value)->value;
-            return ret;
+            if (enclosing != nullptr) return enclosing->increment(name);
+            if(permissive) { return lns::GET_DEFAULT_NULL();}
+            string &s = *new string();
+            s += "'" + name.lexeme + "' is undefined";
+            throw runtime_exception(name, s);
         }
 
         object *decrement(const token &name) {
-            object* ret = get(name);
-            if(values[name.lexeme].isfinal){
-                string& s = *new string();
-                s += "variable '" + name.lexeme + "' is final";
-                throw runtime_exception(name, s);
+            if (contains_key(name.lexeme)) {
+                variable s = values[name.lexeme];
+                if(s.isfinal){
+                    string& s = *new string();
+                    s += "variable '" + name.lexeme + "' is final";
+                    throw runtime_exception(name, s);
+                }
+                if(s.value->type != NUMBER_T){
+                    string& s = *new string();
+                    s+="variable '" + name.lexeme + "' is not a number";
+                    throw runtime_exception(name,s);
+                }
+                number_o* n = dynamic_cast<number_o*>(s.value);
+                ++n->value;
+                return n;
             }
-            variable o = values[name.lexeme];
-            if(o.value->type != NUMBER_T){
-                string& s = *new string();
-                s+="variable '" + name.lexeme + "' is not a number";
-                throw runtime_exception(name,s);
-            }
-            --dynamic_cast<number_o*>(o.value)->value;
-            return ret;
+            if (enclosing != nullptr) return enclosing->increment(name);
+            if(permissive) { return lns::GET_DEFAULT_NULL();}
+            string &s = *new string();
+            s += "'" + name.lexeme + "' is undefined";
+            throw runtime_exception(name, s);
         }
 
         void reset() {

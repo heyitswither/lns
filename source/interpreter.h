@@ -58,8 +58,9 @@ namespace lns {
             if(s == nullptr) return;
             s->accept(this);
         }
-    protected:
+
         vector<stack_call*> stack_trace = *new vector<stack_call*>();
+    protected:
         object *evaluate(expr *e) {
             if(e == nullptr)
                 return lns::GET_DEFAULT_NULL();
@@ -278,8 +279,11 @@ namespace lns {
             if(!globals->is_native(function->name())){
                 stack_call* call = new stack_call(c->paren.filename, c->paren.line, function->name());
                 stack_trace.push_back(call);
+                object* p = function->call(this,args);
+                stack_trace.pop_back();
+            }else{
+                return function->call(this,args);
             }
-            return function->call(this,args);
         } //
 
         object *visit_grouping_expr(grouping_expr *g) override {
@@ -376,7 +380,6 @@ namespace lns {
             object* value = lns::GET_DEFAULT_NULL();
             null_expr* null =  dynamic_cast<null_expr*>(const_cast<expr*>(&r->value));
             if(null == nullptr) value = evaluate(const_cast<expr *>(&r->value));
-            if(stack_trace.size() > 0) stack_trace.pop_back();
             throw return_signal(value,r->keyword);
         } //
 
@@ -488,6 +491,7 @@ namespace lns {
         try{
             i->execute_block(declaration->body,env);
         }catch(return_signal& r){
+            i->stack_trace.pop_back();
             return r.value;
         }
         return lns::GET_DEFAULT_NULL();
