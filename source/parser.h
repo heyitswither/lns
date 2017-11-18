@@ -13,6 +13,7 @@
 #include "options.h"
 #include "scanner.h"
 #include <initializer_list>
+#include <fstream>
 
 #define PARSE_ERROR (-1)
 using namespace std;
@@ -300,22 +301,22 @@ namespace lns {
             map_field_expr *map;
             context_expr* context;
             expr *expr = logical(), *value, *key;
-            if (match({EQUAL})) {
-                token &equals = previous();
+            if (match({EQUAL,PLUS_EQUALS,MINUS_EQUALS,STAR_EQUALS,SLASH_EQUALS})) {
+                token &op = previous();
                 value = assignment();
                 if (!((var = dynamic_cast<variable_expr *>(expr)) == nullptr)) {
                     token &name = const_cast<token &>(var->name);
-                    return new assign_expr(var->file,var->line,name, value);
+                    return new assign_expr(var->file,var->line,name,op.type,value);
                 }
                 if (!((map = dynamic_cast<map_field_expr *>(expr)) == nullptr)) {
                     token &name = const_cast<token &>(map->name);
-                    return new assign_map_field_expr(map->file,map->line,name, map->key, value);
+                    return new assign_map_field_expr(map->file,map->line,name,op.type,map->key, value);
                 }
                 if (!((context = dynamic_cast<context_expr *>(expr)) == nullptr)) {
                     token &name = const_cast<token &>(context->context_name);
-                    return new context_assign_expr(context->file,context->line,name, const_cast<token &>(context->context_identifier), value);
+                    return new context_assign_expr(context->file,context->line,name,op.type, const_cast<token &>(context->context_identifier), value);
                 }
-                throw error(equals, "invalid assignment target.");
+                throw error(op, "invalid assignment target");
             }
             if(match({PLUS_PLUS})){
                 token& pp = previous();
@@ -323,7 +324,7 @@ namespace lns {
                     const token& name = var->name;
                     return new increment_expr(name.filename,name.line,const_cast<token &>(name), expr);
                 }
-                error(pp,"Invalid increment target.");
+                error(pp,"invalid increment target");
             }
             if(match({MINUS_MINUS})){
                 token& mm = previous();
@@ -464,7 +465,7 @@ namespace lns {
         expr *expression() { return assignment(); }
         expr *logical() {
             expr *expr = comparison(), *right;
-            while (match({BANG_EQUAL, EQUAL_EQUAL, AND, OR, NOR, XOR, XNOR, NAND})) {
+            while (match({BANG_EQUAL, EQUAL_EQUAL, AND, OR, NOR, XOR, NAND})) {
                 token &op = previous();
                 right = comparison();
                 expr = new binary_expr(op.filename,op.line,expr, op, right);
