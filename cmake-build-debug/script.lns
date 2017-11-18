@@ -1,5 +1,13 @@
-var i;
-for(i=0;i<100;i=i+1){
-	println(i-100);
+function genau(k) {
+	if (i > 0) {
+		println("Genau! " + i);
+	} else {
+		println("Abaaaa.... " + i);
+	}
 }
-print("Done!");
+
+var i = -4;
+while (i<15) {
+	genau(i);
+	i++;
+}

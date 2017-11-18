@@ -47,6 +47,8 @@ errors.h
 /home/lorenzo/CLionProjects/lns/source/errors.h
 map
 -
+cmath
+-
 
 /home/lorenzo/CLionProjects/lns/source/environments.h
 defs.h
@@ -162,6 +164,8 @@ options.h
 scanner.h
 /home/lorenzo/CLionProjects/lns/source/scanner.h
 initializer_list
+-
+fstream
 -
 
 /home/lorenzo/CLionProjects/lns/source/scanner.h
