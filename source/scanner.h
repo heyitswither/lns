@@ -23,7 +23,6 @@ namespace lns{
         if(key == "nor") return NOR;
         if(key == "xor") return XOR;
         if(key == "nand") return NAND;
-        if(key == "xnor") return XNOR;
         if(key == "return") return RETURN;
         if(key == "super") return SUPER;
         if(key == "this") return THIS;
@@ -131,11 +130,11 @@ namespace lns{
                 case ']': add_token(RIGHT_SQR); break;
                 case ',': add_token(COMMA); break;
                 case '.': add_token(DOT); break;
-                case '-': add_token(match('-') ? MINUS_MINUS : MINUS); break;
+                case '-': add_token(match('-') ? MINUS_MINUS : (match('=') ? MINUS_EQUALS : MINUS)); break;
                 case '^': add_token(HAT); break;
-                case '+': add_token(match('+') ? PLUS_PLUS : PLUS); break;
+                case '+': add_token(match('+') ? PLUS_PLUS : (match('=') ? PLUS_EQUALS : PLUS)); break;
                 case ';': add_token(SEMICOLON); break;
-                case '*': add_token(STAR); break;
+                case '*': add_token(match('=') ? STAR_EQUALS : STAR); break;
                 case '!': add_token(match('=') ? BANG_EQUAL : BANG); break;
                 case '=': add_token(match('=') ? EQUAL_EQUAL : EQUAL); break;
                 case '<': add_token(match('=') ? LESS_EQUAL : LESS); break;
@@ -152,6 +151,8 @@ namespace lns{
                         line_comment();
                     }else if(match('*')){
                         block_comment();
+                    }else if(match('=')){
+                        add_token(SLASH_EQUALS);
                     } else {
                         add_token(SLASH);
                     }
