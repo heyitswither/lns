@@ -15,7 +15,7 @@ public class generate {
         defineAst(outputDir, "expr", Arrays.asList(
                 "increment : token& name, expr* value",
                 "decrement : token& name, expr* value",
-                "assign    : token& name, expr* value",
+                "assign    : token& name, token_type op, expr* value",
                 "binary    : expr* left, token& op, expr* right",
                 "call	   : expr* callee, token& paren, vector<expr*>& args",
                 "grouping  : expr* expression",
@@ -23,9 +23,9 @@ public class generate {
                 "unary     : token& op, expr* right",
                 "variable  : token& name",
                 "map_field : token& name, expr* key",
-                "assign_map_field : token& name, expr* key, expr* value",
+                "assign_map_field : token& name, token_type op, expr* key, expr* value",
                 "context : token& context_name, token& context_identifier",
-                "context_assign : token& context_name, token& context_identifier, expr* value",
+                "context_assign : token& context_name, token_type op, token& context_identifier, expr* value",
                 "null      : token& where"
         ), Arrays.asList(), "object*");
         defineAst(outputDir, "stmt", Arrays.asList(
