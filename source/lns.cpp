@@ -27,11 +27,11 @@ namespace lns{
             silent_full = true;
         }else if(o == "-permissive"){
             permissive = true;
-        }else if(o == "t" || o == "-time"){
+        }else if(o == "t" || o == "-time-info"){
             time_count = true;
         }else if(o == "o" || o == "-parse-only"){
             parse_only = true;
-        }else if(o == "d" || o == "-debugger_option"){
+        }else if(o == "d" || o == "-debugger"){
             debugger_option = true;
         }else{
             throw unknown_option_exception(o);
