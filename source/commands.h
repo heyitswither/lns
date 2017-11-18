@@ -83,7 +83,7 @@ namespace lns{
                 string& sub = advance_or_throw();
                 if(sub == "list" && !has_next())
                     handler->list_break_points();
-                else if(sub == "add"){
+                else if(sub == "set"){
                     string& file = advance_or_throw();
                     stringstream nrs(consume());
                     int n;
@@ -155,7 +155,7 @@ namespace lns{
             if(command == "run")
                 return "    - run|r";
             if(command == "breakpoint")
-                return "    - breakpoint list | add <filename> <line> | remove <id> | load <file>";
+                return "    - breakpoint list | set <filename> <line> | remove <id> | load <file>";
             if(command == "watch")
                 return "    - watch add <expression> | remove <id> | list";
             if(command == "exit")
@@ -221,8 +221,8 @@ namespace lns{
                 else if(command == "breakpoint" || command == "b") breakpoint();
                 else if(command == "watch" || command == "w") watch();
                 else if(command == "exit" || command == "quit" || command == "q" || command == "e") exit();
-                    else if(command == "step" || command == "s") step();
-                    else if(command == "continue" || command == "c") continue_();
+                else if(command == "step" || command == "s") step();
+                else if(command == "continue" || command == "c") continue_();
                 else if(command == "help" || command == "h") help();
                 else throw "";
             }catch(const char* e){
