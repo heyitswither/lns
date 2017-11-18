@@ -31,26 +31,104 @@ namespace lns {
     class callable : public object{
     public:
         callable() : object(objtype::CALLABLE_T) {}
-        virtual const int arity() = 0;
-        virtual const string& name() = 0;
+        virtual const int arity() const = 0;
+        virtual const string& name() const = 0;
         virtual object* call(lns::interpreter* env, vector<object*> args) = 0;
         bool operator==(const object &o) const override {
             return false;
         }
-        string str() override{
+        string str() const override{
             string s = *new string();
-            s+="<function '" + name() + "'>";
+            s+="<function@";
+            s+=(long)this;
+            s+=  "'" + name() + "'>";
             return s;
+        }
+        bool operator&&(const object &o) const override {
+            WRONG_OP(&&)
+        }
+
+        bool operator||(const object &o) const override {
+            WRONG_OP(||)
+        }
+
+        object *operator!() const override {
+            WRONG_OP(!)
+        }
+
+        bool operator>(const object &o2) const override {
+            WRONG_OP(>)
+        }
+
+        bool operator>=(const object &o2) const override {
+            WRONG_OP(>=)
+        }
+
+        bool operator<=(const object &o2) const override {
+            WRONG_OP(<=)
+        }
+
+        bool operator<(const object &o2) const override {
+            WRONG_OP(<)
+        }
+
+        object *operator+=(const object &o) override {
+            WRONG_OP(+=)
+        }
+
+        object *operator-=(const object &o) override {
+            WRONG_OP(-=)
+        }
+
+        object *operator*=(const object &o) override {
+            WRONG_OP(*=)
+        }
+
+        object *operator/=(const object &o) override {
+            WRONG_OP(/=)
+        }
+
+        object *operator+(const object &o2) const override {
+            WRONG_OP(+)
+        }
+
+        object *operator-(const object &o2) const override {
+            WRONG_OP(-)
+        }
+
+        object *operator*(const object &o2) const override {
+            WRONG_OP(*)
+        }
+
+        object *operator/(const object &o2) const override {
+            WRONG_OP(/)
+        }
+
+        object *operator^(const object &o2) const override {
+            WRONG_OP(^)
+        }
+
+        object *operator-() const override {
+            WRONG_OP(-)
+        }
+
+        object *operator++() override {
+            WRONG_OP(++)
+        }
+
+        object *operator--() override {
+            WRONG_OP(--)
         }
     };
     class function : public callable{
         function_stmt* declaration;
     public:
-        const string& name();
-        const int arity();
+        const string & name()const;
+        const int arity() const;
         object* call(interpreter* i, vector<object*> args);
         explicit function(function_stmt *f) : declaration(f), callable(){}
 
+        string str() const override;
     };
     class interpreter : public expr_visitor, stmt_visitor {
     public:
@@ -134,7 +212,7 @@ namespace lns {
                 throw runtime_exception(c->context_name,s);
             }
             object* value = evaluate(const_cast<expr *>(c->value));
-            dynamic_cast<context*>(o)->assign(c->context_identifier,value);
+            dynamic_cast<context*>(o)->assign(c->context_identifier,c->op,value);
             return value;
         }
 
@@ -149,7 +227,7 @@ namespace lns {
 
         object *visit_assign_expr(assign_expr *a) override {
             object *value = evaluate(const_cast<expr *>(a->value));
-            environment->assign(a->name, value);
+            environment->assign(a->name,a->op,value);
             return value;
         } //
 
@@ -162,101 +240,46 @@ namespace lns {
                 right = lns::GET_DEFAULT_NULL();
             }
             token_type type = b->op.type;
-            switch (type) {
-                case AND:
-                    check_bool_operands(b->op, left, right);
-                    return (new bool_o(dynamic_cast<bool_o *>(left)->value && (dynamic_cast<bool_o *>(right)->value)));
-                case NAND:
-                    check_bool_operands(b->op, left, right);
-                    return (new bool_o(
-                            !(dynamic_cast<bool_o *>(left)->value && (dynamic_cast<bool_o *>(right)->value))));
-                case NOR:
-                    check_bool_operands(b->op, left, right);
-                    return (new bool_o(
-                            !(dynamic_cast<bool_o *>(left)->value || (dynamic_cast<bool_o *>(right)->value))));
-                case OR:
-                    check_bool_operands(b->op, left, right);
-                    return (new bool_o(
-                            (dynamic_cast<bool_o *>(left)->value || (dynamic_cast<bool_o *>(right)->value))));
-                case XOR:
-                    check_bool_operands(b->op, left, right);
-                    return (new bool_o(
-                            (dynamic_cast<bool_o *>(left)->value && !(dynamic_cast<bool_o *>(right)->value)) ||
-                            !(dynamic_cast<bool_o *>(left)->value && (dynamic_cast<bool_o *>(right)->value))));
-                case XNOR:
-                    check_bool_operands(b->op, left, right);
-                    return (new bool_o(
-                            (dynamic_cast<bool_o *>(left)->value == (dynamic_cast<bool_o *>(right)->value))));
-                case EQUAL_EQUAL:
-                    return new bool_o(((*left) == (*right)));
-                case BANG_EQUAL:
-                    return new bool_o(!((*left) == (*right)));
-                case GREATER:
-                    if (left->type == NUMBER_T && right->type == NUMBER_T) {
-                        return new bool_o(
-                                dynamic_cast<number_o *>(left)->value > dynamic_cast<number_o *>(right)->value);
-                    }
-                    if (left->type == NUMBER && right->type == NUMBER) {
-                        return new bool_o(
-                                dynamic_cast<string_o *>(left)->value > dynamic_cast<string_o *>(right)->value);
-                    }
-                    throw runtime_exception(b->op, *new string("operands bust be either two numbers or two strings"));
-                case GREATER_EQUAL:
-                    if (left->type == NUMBER_T && right->type == NUMBER_T) {
-                        return new bool_o(
-                                dynamic_cast<number_o *>(left)->value >= dynamic_cast<number_o *>(right)->value);
-                    }
-                    if (left->type == STRING_T && right->type == STRING_T) {
-                        return new bool_o(
-                                dynamic_cast<string_o *>(left)->value >= dynamic_cast<string_o *>(right)->value);
-                    }
-                    throw runtime_exception(b->op, *new string("operands bust be either two numbers or two strings"));
-                case LESS:
-                    if (left->type == NUMBER_T && right->type == NUMBER_T) {
-                        return new bool_o(
-                                dynamic_cast<number_o *>(left)->value < dynamic_cast<number_o *>(right)->value);
-                    }
-                    if (left->type == STRING_T && right->type == STRING_T) {
-                        return new bool_o(
-                                dynamic_cast<string_o *>(left)->value < dynamic_cast<string_o *>(right)->value);
-                    }
-                    throw runtime_exception(b->op, *new string("operands bust be either two numbers or two strings"));
-                case LESS_EQUAL:
-                    if (left->type == NUMBER_T && right->type == NUMBER_T) {
-                        return new bool_o(
-                                dynamic_cast<number_o *>(left)->value <= dynamic_cast<number_o *>(right)->value);
-                    }
-                    if (left->type == STRING_T && right->type == STRING_T) {
-                        return new bool_o(
-                                dynamic_cast<string_o *>(left)->value <= dynamic_cast<string_o *>(right)->value);
-                    }
-                    throw runtime_exception(b->op, *new string("operands bust be either two numbers or two strings"));
-                case MINUS:
-                    check_number_operands(b->op, left, right);
-                    return new number_o(dynamic_cast<number_o *>(left)->value - dynamic_cast<number_o *>(right)->value);
-                case PLUS:
-                    if (left->type == NUMBER_T && right->type == NUMBER_T) {
-                        return new number_o(
-                                dynamic_cast<number_o *>(left)->value + dynamic_cast<number_o *>(right)->value);
-                    }
-                    string s = *new string();
-                    s += left->str() + right->str();
-                    return new string_o(s);
-            }
-            if(type == SLASH){
-                check_number_operands(b->op, left, right);
-                if (dynamic_cast<number_o *>(right)->value == 0) throw runtime_exception(b->op, *new string("dividing by zero"));
-                return new number_o(dynamic_cast<number_o *>(left)->value / dynamic_cast<number_o *>(right)->value);
-            }
-            if(type == STAR){
-                check_number_operands(b->op, left, right);
-                return new number_o(dynamic_cast<number_o *>(left)->value * dynamic_cast<number_o *>(right)->value);
-            }
-            if(type == HAT){
-                check_number_operands(b->op, left, right);
-                if (dynamic_cast<number_o *>(right)->value == 0) return new number_o(1);
-                return new number_o(
-                        pow(dynamic_cast<number_o *>(left)->value, dynamic_cast<number_o *>(right)->value));
+            try {
+                switch (type) {
+                    case AND:
+                        return new bool_o(*left && *right);
+                    case NAND:
+                        return new bool_o(!(*left && *right));
+                    case NOR:
+                        return new bool_o(!(*left || *right));
+                    case OR:
+                        return new bool_o(*left || *right);
+                    case XOR:
+                        return new bool_o((*left && *!(*right)) || (*!(*left) && *right));
+                    case EQUAL_EQUAL:
+                        return new bool_o(((*left) == (*right)));
+                    case BANG_EQUAL:
+                        return new bool_o(!((*left) == (*right)));
+                    case GREATER:
+                        return new bool_o(*left > *right);
+                    case GREATER_EQUAL:
+                        return new bool_o(*left >= *right);
+                    case LESS:
+                        return new bool_o(*left < *right);
+                    case LESS_EQUAL:
+                        return new bool_o(*left <= *right);
+                    case MINUS:
+                        return (*left - *right);
+                    case PLUS:
+                        return (*left + *right);
+                }
+                if (type == SLASH) {
+                    return (*left / *right);
+                }
+                if (type == STAR) {
+                    return (*left * *right);
+                }
+                if (type == HAT) {
+                    return (*left ^ *right);
+                }
+            }catch(const char* p){
+                throw runtime_exception(b->op,*new string(p));
             }
             // unreachable
             return nullptr;
@@ -296,12 +319,16 @@ namespace lns {
 
         object *visit_unary_expr(unary_expr *u) override {//
             object *right = evaluate(const_cast<expr *>(u->right));
+            try{
             switch (u->op.type) {
                 case BANG:
-                    return new bool_o(!is_bool_true_eq(right));
+                    return new bool_o(!is_bool_true_eq(!*right));
                 case MINUS:
                     check_number_operand(u->op, right);
-                    return new number_o(-(dynamic_cast<number_o *>(right)->value));
+                    return (-*right);
+            }
+            }catch(const char* p){
+                throw runtime_exception(u->op,*new string(p));
             }
             //unreachable
             return nullptr;
@@ -324,7 +351,7 @@ namespace lns {
             if (k == nullptr) {
                 k = new string_o(key->str());
             }
-            return environment->assign_map_field(a->name, k, value);
+            return environment->assign_map_field(a->name,a->op, k, value);
         }//
 
         object *visit_null_expr(null_expr *n) override {
@@ -354,6 +381,8 @@ namespace lns {
                 case ASSIGN_MAP_FIELD_EXPR_T:
                 case INCREMENT_EXPR_T:
                 case DECREMENT_EXPR_T:
+                case CONTEXT_ASSIGN_EXPR_T:
+
                     return;
             }
             cout << o->str() << endl;
@@ -479,7 +508,7 @@ namespace lns {
         }
 
     };
-    const int function::arity(){
+    const int function::arity() const{
         return static_cast<int>(declaration->parameters.size());
     }
     object* function::call(interpreter* i, vector<object*> args){
@@ -496,19 +525,23 @@ namespace lns {
         }
         return lns::GET_DEFAULT_NULL();
     }
-    const string& function::name(){
+    const string & function::name()const {
         return declaration->name.lexeme;
+    }
+
+    string function::str() const {
+        return name();
     }
 }
 namespace natives{
     static auto load_time = high_resolution_clock::now();
     class exit_c : public callable{
     public:
-        const int arity() override {
+        const int arity() const override {
             return 1;
         }
 
-        const string &name() override {
+        const string &name() const override {
             return *new string("exit");
         }
 
@@ -520,11 +553,11 @@ namespace natives{
     };//
     class print_c : public callable{
     public:
-        const int arity() override {
+        const int arity() const override {
             return 1;
         }
 
-        const string &name() override {
+        const string &name() const override {
             return *new string("print");
         }
 
@@ -536,11 +569,11 @@ namespace natives{
     };//
     class println_c : public callable{
     public:
-        const int arity() override {
+        const int arity() const override {
             return 1;
         }
 
-        const string &name() override {
+        const string &name() const override {
             return *new string("println");
         }
 
@@ -551,11 +584,11 @@ namespace natives{
     };//
     class millis_c : public callable{
     public:
-        const int arity() override {
+        const int arity() const override {
             return 0;
         }
 
-        const string &name() override {
+        const string &name() const override {
             return *new string("millis");
         }
 
@@ -565,11 +598,11 @@ namespace natives{
         }
     };//
     class type_c : public callable{
-        const int arity() override {
+        const int arity() const override {
             return 1;
         }
 
-        const string &name() override {
+        const string &name() const override {
             return *new string("type");
         }
 
@@ -600,11 +633,11 @@ namespace natives{
         }
     };//
     class call_c : public callable{
-        const int arity() override {
+        const int arity() const override {
             return 1;
         }
 
-        const string &name() override {
+        const string &name() const override {
             return *new string("call");
         }
 
@@ -614,11 +647,11 @@ namespace natives{
         }
     };//
     class sleep_c : public callable{
-        const int arity() override {
+        const int arity() const override {
             return 1;
         }
 
-        const string &name() override {
+        const string &name() const override {
             return *new string("sleep");
         }
 
@@ -631,11 +664,11 @@ namespace natives{
         }
     };//
     class str_c : public callable{
-        const int arity() override {
+        const int arity() const override {
             return 1;
         }
 
-        const string &name() override {
+        const string &name() const override {
             return *new string("str");
         }
 
@@ -644,11 +677,11 @@ namespace natives{
         }
     };//
     class num_c : public callable{
-        const int arity() override {
+        const int arity() const override {
             return 1;
         }
 
-        const string &name() override {
+        const string &name() const override {
             return *new string("num");
         }
 
@@ -673,11 +706,11 @@ namespace natives{
         }
     };//
     class int_c : public callable{
-        const int arity() override {
+        const int arity() const override {
             return 1;
         }
 
-        const string &name() override {
+        const string &name() const override {
             return *new string("int");
         }
 
@@ -687,11 +720,11 @@ namespace natives{
         }
     };//
     class read_c : public callable{
-        const int arity() override {
+        const int arity() const override {
             return 0;
         }
 
-        const string &name() override {
+        const string &name() const override {
             return *new string("read");
         }
 
@@ -702,11 +735,11 @@ namespace natives{
         }
     };
     class readln_c : public callable{
-        const int arity() override {
+        const int arity() const override {
             return 0;
         }
 
-        const string &name() override {
+        const string &name() const override {
             return *new string("readln");
         }
 
@@ -718,11 +751,11 @@ namespace natives{
         }
     };
     class readnr_c : public callable{
-        const int arity() override {
+        const int arity() const override {
             return 0;
         }
 
-        const string &name() override {
+        const string &name() const override {
             return *new string("readnr");
         }
 
@@ -738,11 +771,11 @@ namespace natives{
         }
     };
     class readbool_c : public callable{
-        const int arity() override {
+        const int arity() const override {
             return 0;
         }
 
-        const string &name() override {
+        const string &name() const override {
             return *new string("readbool");
         }
 
@@ -753,11 +786,11 @@ namespace natives{
         }
     };
     class map_c : public callable{
-        const int arity() override {
+        const int arity() const override {
             return 0;
         }
 
-        const string &name() override {
+        const string &name() const override {
             return *new string("map");
         }
 
@@ -766,11 +799,11 @@ namespace natives{
         }
     };
     class elems_c : public callable{
-        const int arity() override {
+        const int arity() const override {
             return 1;
         }
 
-        const string &name() override {
+        const string &name() const override {
             return *new string("elems");
         }
 
