@@ -60,8 +60,8 @@ namespace lns{
         vector<token*> tokens = scn.scan_tokens(true);
         vector<stmt*> stmts;
         if(had_parse_error) throw parse_exception();
-        //for(token& t : tokens){
-        //    cout << t.format() << endl;
+        //for(token* t : tokens){
+        //    cout << t->format() << endl;
         //}
         start_time = high_resolution_clock::now();
         parser parser(tokens);

@@ -245,7 +245,7 @@ namespace lns {
         context(runtime_environment *previous) : runtime_environment(previous), object(CONTEXT_T) {}
 
         string str() const override {
-            return "<context>";
+            return *new string("<context>");
         }
         
         bool operator==(const object &o) const override {

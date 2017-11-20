@@ -33,7 +33,7 @@ namespace lns {
         callable() : object(objtype::CALLABLE_T) {}
         virtual const int arity() const = 0;
         virtual const string& name() const = 0;
-        virtual object* call(lns::interpreter* env, vector<object*> args) = 0;
+        virtual object* call(lns::interpreter *env, vector<object *> &args) = 0;
         bool operator==(const object &o) const override {
             return false;
         }
@@ -125,7 +125,7 @@ namespace lns {
     public:
         const string & name()const;
         const int arity() const;
-        object* call(interpreter* i, vector<object*> args);
+        object* call(interpreter *i, vector<object *> &args);
         explicit function(function_stmt *f) : declaration(f), callable(){}
 
         string str() const override;
@@ -287,7 +287,7 @@ namespace lns {
 
         object *visit_call_expr(call_expr *c) override {
             object * callee = evaluate(const_cast<expr *>(c->callee));
-            vector<object*> args;
+            vector<object*>& args = *new vector<object*>();
             callable * function = dynamic_cast<callable*>(callee);
             if(function == nullptr) throw runtime_exception(c->paren,*new string("target not a callable"));
             int i = 0;
@@ -296,16 +296,16 @@ namespace lns {
             }
             if(args.size() != function->arity()){
                 string s = *new string();
-                s+="expected " + to_string(function->arity()) + " but got " + to_string(args.size());
+                s+="expected " + to_string(function->arity()) + " argument" + (function->arity() == 1 ? "" : "s") + " but got " + to_string(args.size());
                 throw runtime_exception(c->paren,*new string(s.c_str()));
             }
-            if(!globals->is_native(function->name())){
-                stack_call* call = new stack_call(c->paren.filename, c->paren.line, function->name());
-                stack_trace.push_back(call);
+            if(globals->is_native(function->name())){
+                return function->call(this,args);
+            }else{
+                stack_trace.push_back(new stack_call(c->paren.filename, c->paren.line, function->name()));
                 object* p = function->call(this,args);
                 stack_trace.pop_back();
-            }else{
-                return function->call(this,args);
+                return p;
             }
         } //
 
@@ -511,7 +511,7 @@ namespace lns {
     const int function::arity() const{
         return static_cast<int>(declaration->parameters.size());
     }
-    object* function::call(interpreter* i, vector<object*> args){
+    object* function::call(interpreter *i, vector<object *> &args){
         runtime_environment *env = new runtime_environment(retr_globals(i));
         int j;
         for(j = 0; j < declaration->parameters.size(); j++){
@@ -545,7 +545,7 @@ namespace natives{
             return *new string("exit");
         }
 
-        object *call(lns::interpreter *env, vector<object *> args) override {
+        object *call(lns::interpreter *env, vector<object *> &args) override {
             double i = 0;
             if(args[0]->type == NUMBER_T) i = dynamic_cast<number_o*>(args[0])->value;
             exit(static_cast<int>(i));
@@ -561,7 +561,7 @@ namespace natives{
             return *new string("print");
         }
 
-        object *call(lns::interpreter *env, vector<object *> args) override {
+        object *call(lns::interpreter *env, vector<object *> &args) override {
             cout << args[0]->str();
             flush(cout);
             return lns::GET_DEFAULT_NULL();
@@ -577,7 +577,7 @@ namespace natives{
             return *new string("println");
         }
 
-        object *call(lns::interpreter *env, vector<object *> args) override {
+        object *call(lns::interpreter *env, vector<object *> &args) override {
             cout << args[0]->str() << endl;
             return lns::GET_DEFAULT_NULL();
         }
@@ -592,7 +592,7 @@ namespace natives{
             return *new string("millis");
         }
 
-        object *call(lns::interpreter *env, vector<object *> args) override {
+        object *call(lns::interpreter *env, vector<object *> &args) override {
             number_o *o = new number_o((double)duration_cast<microseconds>(high_resolution_clock::now() - load_time).count() / 1000);
             return o;
         }
@@ -606,7 +606,7 @@ namespace natives{
             return *new string("type");
         }
 
-        object *call(lns::interpreter *env, vector<object *> args) override {
+        object *call(lns::interpreter *env, vector<object *> &args) override {
             object* o = args[0];
             string_o* type = new string_o("");
             switch(o->type){
@@ -641,7 +641,7 @@ namespace natives{
             return *new string("call");
         }
 
-        object *call(lns::interpreter *env, vector<object *> args) override {
+        object *call(lns::interpreter *env, vector<object *> &args) override {
             string cmd = args[0]->str();
             return new number_o(system(cmd.c_str()));
         }
@@ -655,7 +655,7 @@ namespace natives{
             return *new string("sleep");
         }
 
-        object *call(lns::interpreter *env, vector<object *> args) override {
+        object *call(lns::interpreter *env, vector<object *> &args) override {
             if(args[0]->type == NUMBER_T){
                 int millis = static_cast<int>(dynamic_cast<number_o*>(args[0])->value);
                 std::this_thread::sleep_for(std::chrono::milliseconds(millis));
@@ -672,7 +672,7 @@ namespace natives{
             return *new string("str");
         }
 
-        object *call(lns::interpreter *env, vector<object *> args) override {
+        object *call(lns::interpreter *env, vector<object *> &args) override {
             return new string_o(args[0]->str());
         }
     };//
@@ -685,7 +685,7 @@ namespace natives{
             return *new string("num");
         }
 
-        object *call(lns::interpreter *env, vector<object *> args) override {
+        object *call(lns::interpreter *env, vector<object *> &args) override {
             double num = 0;
             object* o = args[0];
             switch(o->type){
@@ -714,7 +714,7 @@ namespace natives{
             return *new string("int");
         }
 
-        object *call(lns::interpreter *env, vector<object *> args) override {
+        object *call(lns::interpreter *env, vector<object *> &args) override {
             if(!(args[0]->type == NUMBER_T)) return lns::GET_DEFAULT_NULL();
             return new number_o((int)dynamic_cast<number_o*>(args[0])->value);
         }
@@ -728,7 +728,7 @@ namespace natives{
             return *new string("read");
         }
 
-        object *call(lns::interpreter *env, vector<object *> args) override {
+        object *call(lns::interpreter *env, vector<object *> &args) override {
             string d;
             cin >> d;
             return new string_o(d);
@@ -743,7 +743,7 @@ namespace natives{
             return *new string("readln");
         }
 
-        object *call(lns::interpreter *env, vector<object *> args) override {
+        object *call(lns::interpreter *env, vector<object *> &args) override {
             string_o* o = new string_o("");
             getline(cin,o->value);
             cin.clear();
@@ -759,7 +759,7 @@ namespace natives{
             return *new string("readnr");
         }
 
-        object *call(lns::interpreter *env, vector<object *> args) override {
+        object *call(lns::interpreter *env, vector<object *> &args) override {
             double d = 0;
             cin >> d;
             if(cin.fail()){
@@ -779,7 +779,7 @@ namespace natives{
             return *new string("readbool");
         }
 
-        object *call(lns::interpreter *env, vector<object *> args) override {
+        object *call(lns::interpreter *env, vector<object *> &args) override {
             string d;
             getline(cin,d);
             return new bool_o(d == "true" || d == "1");
@@ -794,7 +794,7 @@ namespace natives{
             return *new string("map");
         }
 
-        object *call(lns::interpreter *env, vector<object *> args) override {
+        object *call(lns::interpreter *env, vector<object *> &args) override {
             return new map_o();
         }
     };
@@ -807,7 +807,7 @@ namespace natives{
             return *new string("elems");
         }
 
-        object *call(lns::interpreter *env, vector<object *> args) override {
+        object *call(lns::interpreter *env, vector<object *> &args) override {
             if(args[0]->type != MAP_T) return lns::GET_DEFAULT_NULL();
             map_o* o = dynamic_cast<map_o*>(args[0]);
             return new number_o(o->values.size());
