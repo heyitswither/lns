@@ -21,8 +21,6 @@ enum token_type {
     // Single-character tokens.
             LEFT_PAREN,
     RIGHT_PAREN,
-    LEFT_BRACE,
-    RIGHT_BRACE,
     LEFT_SQR,
     RIGHT_SQR,
     COMMA,
@@ -80,6 +78,10 @@ enum token_type {
     BREAK,
     CONTINUE,
     CONTEXT,
+    BEGIN,
+    THEN,
+    DO,
+    END,
     UNRECOGNIZED,
     EOF_
 };
@@ -89,23 +91,72 @@ enum objtype {
 typedef objtype object_type;
 namespace lns {
     const string KEYWORDS_S_VALUES[] = {// Single-character tokens.
-            "LEFT_PAREN", "RIGHT_PAREN", "LEFT_BRACE", "RIGHT_BRACE", "LEFT_SQR", "RIGHT_SQR",
-            "COMMA", "DOT", "MINUS", "PLUS", "PLUS_PLUS", "MINUS_MINUS", "SEMICOLON", "SLASH", "STAR", "HAT",
+            // Single-character tokens.
+            "LEFT_PAREN",
+            "RIGHT_PAREN",
+            "LEFT_SQR",
+            "RIGHT_SQR",
+            "COMMA",
+            "DOT",
+            "MINUS",
+            "MINUS_EQUALS",
+            "PLUS",
+            "PLUS_EQUALS",
+            "PLUS_PLUS",
+            "MINUS_MINUS",
+            "SEMICOLON",
+            "SLASH",
+            "SLASH_EQUALS",
+            "STAR",
+            "STAR_EQUALS",
+            "HAT",
             // One or two character tokens.
-            "BANG", "BANG_EQUAL",
-            "EQUAL", "EQUAL_EQUAL",
-            "GREATER", "GREATER_EQUAL",
-            "LESS", "LESS_EQUAL",
+            "BANG",
+            "BANG_EQUAL",
+            "EQUAL",
+            "EQUAL_EQUAL",
+            "GREATER",
+            "GREATER_EQUAL",
+            "LESS",
+            "LESS_EQUAL",
 
             // Literals.
-            "IDENTIFIER", "STRING", "NUMBER",
+            "IDENTIFIER",
+            "STRING",
+            "NUMBER",
 
             // Keywords.
-            "NATIVES", "AND", "CLASS", "ELSE", "FALSE", "FUNCTION", "FOR", "IF", "NUL", "OR", "XOR", "NOR", "XNOR",
-            "NAND", "RETURN", "SUPER", "THIS", "TRUE", "VAR", "WHILE", "GLOBAL", "FINAL", "USE",
-            "BREAK", "CONTINUE", "CONTEXT",
+            "NATIVES",
+            "AND",
+            "CLASS",
+            "ELSE",
+            "FALSE",
+            "FUNCTION",
+            "FOR",
+            "IF",
+            "NUL",
+            "OR",
+            "XOR",
+            "NOR",
+            "NAND",
+            "RETURN",
+            "SUPER",
+            "THIS",
+            "TRUE",
+            "VAR",
+            "WHILE",
+            "GLOBAL",
+            "FINAL",
+            "USE",
+            "BREAK",
+            "CONTINUE",
+            "CONTEXT",
+            "BEGIN",
+            "THEN",
+            "DO",
+            "END",
             "UNRECOGNIZED",
-            "EOF"};
+            "EOF_"};
 
     class object {
     private:
@@ -170,7 +221,7 @@ namespace lns {
         string_o(string value) : object(objtype::STRING_T), value(value) {}
 
         virtual string str() const {
-            return value;
+             return value;
         }
 
         bool operator==(const object &o) const override {
