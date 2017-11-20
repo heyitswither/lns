@@ -36,6 +36,10 @@ namespace lns{
         if(key == "break") return BREAK;
         if(key == "continue") return CONTINUE;
         if(key == "context") return CONTEXT;
+        if(key == "end") return END;
+        if(key == "begin") return BEGIN;
+        if(key == "then") return THEN;
+        if(key == "do") return DO;
         return UNRECOGNIZED;
     }
     class scanner{
@@ -124,8 +128,8 @@ namespace lns{
             switch(c){
                 case '(': add_token(LEFT_PAREN); break;
                 case ')': add_token(RIGHT_PAREN); break;
-                case '{': add_token(LEFT_BRACE); break;
-                case '}': add_token(RIGHT_BRACE); break;
+                //case '{': add_token(LEFT_BRACE); break;
+                //case '}': add_token(RIGHT_BRACE); break;
                 case '[': add_token(LEFT_SQR); break;
                 case ']': add_token(RIGHT_SQR); break;
                 case ',': add_token(COMMA); break;

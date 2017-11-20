@@ -16,6 +16,8 @@
 #include <fstream>
 
 #define PARSE_ERROR (-1)
+
+#define EXPTOCLOSE(what,line) (string("expected 'end' to close " #what "(opened at line ") + std::to_string(line) + string(")"))
 using namespace std;
 using namespace lns;
 namespace lns {
@@ -58,7 +60,6 @@ namespace lns {
         void synchronize() {
             advance();
             while (!is_at_end()) {
-                if (previous().type == SEMICOLON) return;
                 switch (peek().type) {
                     case CLASS:
                     case FUNCTION:
@@ -92,7 +93,7 @@ namespace lns {
             if (match({NATIVES})) isnatives = true;
             token &t = consume(STRING, "expected string inside use statement");
             string &s = dynamic_cast<string_o *>(&t.literal)->value;
-            consume(SEMICOLON, "expected semicolon after use statement");
+            //consume(SEMICOLON, "expected semicolon after use statement");
             if (isnatives) return new uses_native_stmt(t.filename,t.line,t, s);
             ifstream file(s);
             string source;
@@ -118,7 +119,7 @@ namespace lns {
             int line = previous().line;
             stmt* s;
             vector<stmt *> &stmts = *new vector<stmt *>();
-            while(!check(RIGHT_BRACE) && !is_at_end()){
+            while(!check(END) && !is_at_end()){
                 s = declaration();
                 if(s->type == CONTEXT_STMT_T || s->type == VAR_STMT_T || s->type == FUNCTION_STMT_T){
                     stmts.push_back(s);
@@ -126,29 +127,32 @@ namespace lns {
                 }
                 throw error(previous(),"contexts can only contain declarations");
             }
-            string str = *new string("expected '}' to close block (opening brace at line ");
-            str += to_string(line);
-            str += ")";
-            consume(RIGHT_BRACE, str.c_str());
+            consume(END, EXPTOCLOSE(context block,line).c_str());
             return stmts;
         }
-
+        vector<stmt*>& stmts_until(initializer_list<token_type> list){
+            vector<stmt*>& stmts = *new vector<stmt*>();
+            bool should_break = false;
+            while(!is_at_end()){
+                for(token_type t : list) if(check(t)){should_break = true; break;}
+                if(should_break) break;
+                stmts.push_back(declaration());
+            }
+            if(!match(list)) throw -1;
+            return stmts;
+        }
         vector<stmt *> &block() {
             int line = previous().line;
             vector<stmt *> &stmts = *new vector<stmt *>();
-            while (!check(RIGHT_BRACE) && !is_at_end()) {
+            while (!check(END) && !is_at_end()) {
                 stmts.push_back(declaration());
             }
-            string str = *new string("expected '}' to close block (opening brace at line ");
-            str += to_string(line);
-            str += ")";
-            consume(RIGHT_BRACE, str.c_str());
+            consume(END, EXPTOCLOSE(block,line).c_str());
             return stmts;
         }
 
         stmt *context_declaration(bool global, bool final) {
             token& name = consume(IDENTIFIER,"expected context name");
-            token& open = consume(LEFT_BRACE,"expected opening brace");
             vector<stmt*>& stmts = context_block();
             return new context_stmt(name.filename,name.line,name,stmts,global,final);
         }
@@ -193,7 +197,7 @@ namespace lns {
                 delete initializer;
                 initializer = expression();
             }
-            consume(SEMICOLON, "expected ';' after variable declaration");
+            //consume(SEMICOLON, "expected ';' after variable declaration");
             return new var_stmt(name.filename,name.line,name, *initializer, is_global, is_final);
         }
 
@@ -205,78 +209,93 @@ namespace lns {
             if (match({WHILE})) return while_statement();
             if (match({FOR}))
                 return for_statement();
-            if (match({LEFT_BRACE})) return new block_stmt(previous().filename,previous().line,block());
+            if (match({BEGIN})) return new block_stmt(previous().filename,previous().line,block());
             return expression_statement();
         }
 
         stmt *return_statement() {
             token &keyword = previous();
             expr *value = new null_expr(keyword.filename,keyword.line,previous());
-            if (!check(SEMICOLON)) {
-                value = expression();
-            }
-            consume(SEMICOLON, "expected ';' after return value.");
+            if (!is_at_end())
+                if(peek().line == keyword.line)
+                    value = expression();
+            //consume(SEMICOLON, "expected ';' after return value.");
             return new return_stmt(keyword.filename,keyword.line,keyword, *value);
         }
 
         stmt *break_statement() {
             token &t = previous();
-            consume(SEMICOLON, "expected ';' after break statement.");
+            //consume(SEMICOLON, "expected ';' after break statement.");
             return new break_stmt(t.filename,t.line,t);
         }
 
         stmt *continue_statement() {
             token &t = previous();
-            consume(SEMICOLON, "expected ';' after continue statement.");
+            //consume(SEMICOLON, "expected ';' after continue statement.");
             return new continue_stmt(t.filename,t.line,t);
         }
 
         stmt *if_statement() {
-            token lparen = consume(LEFT_PAREN, "expected '(' after 'if'.");
+            token keyword = previous();
             expr *condition = expression();
-            token rparen = consume(RIGHT_PAREN, "expected ')' after condition.");
-            stmt *then_branch = statement();
-            stmt *else_branch = new null_stmt(lparen.filename,lparen.line,rparen);
-            if (match({ELSE}))
-                else_branch = statement();
-            return new if_stmt(lparen.filename,lparen.line,*condition, then_branch, else_branch);
+            consume(THEN,"expected 'then' after if condition");
+            stmt* then_branch;
+            try{
+                then_branch = new block_stmt(condition->file,condition->line,stmts_until({ELSE,END}));
+            }catch(int){
+                throw error(previous(),EXPTOCLOSE(if statement,keyword.line).c_str());
+            }
+            stmt *else_branch = new null_stmt(keyword.filename,keyword.line,keyword);
+            token& closing = previous();
+            if (closing.type == ELSE)
+                if(match({IF})) else_branch = if_statement();
+                else try{else_branch = new block_stmt(previous().filename,previous().line,stmts_until({END}));}catch(int){throw error(previous(),EXPTOCLOSE(else statement,closing.line).c_str());}
+            return new if_stmt(keyword.filename,keyword.line,*condition, then_branch, else_branch);
         }
 
         stmt *while_statement() {
-            token p = consume(LEFT_PAREN, "expected '(' after 'while'");
             expr *condition = expression();
-            consume(RIGHT_PAREN, "expected ')' after condition.");
-            stmt *body = statement();
+            token& d = consume(DO, "expected 'do' after loop condition.");
+            stmt *body;
+            try{
+                body = new block_stmt(d.filename, d.line, stmts_until({END}));
+            }catch(int){
+                throw error(previous(),EXPTOCLOSE(if statement,d.line).c_str());
+            }
             return new s_while_stmt(condition->file,condition->line,*condition, body);
         }
 
         stmt *for_statement() {
-            consume(LEFT_PAREN, "expected '(' after 'for'");
             stmt *initializer = nullptr;
-            if (!match({SEMICOLON}))
+            if (!match({COMMA}))
                 if (match({VAR}))
                     initializer = var_declaration(false, false);
                 else
                     initializer = expression_statement();
-
+            consume(COMMA,"expected ',' after for loop initializer");
             expr *condition = nullptr;
-            if (!check({SEMICOLON})) {
+            if (!check({COMMA})) {
                 condition = expression();
             }
-            token p = consume(SEMICOLON, "expected ';' after loop condition");
+            consume(COMMA, "expected ',' after loop condition");
             expr *increment = nullptr;
-            if (!check(RIGHT_PAREN)) {
+            if (!check(DO)) {
                 increment = expression();
             }
-            consume(RIGHT_PAREN, "expected ')' after for increment");
-            stmt *body = statement();
+            token p = consume(DO,"expected 'do' after for loop increment");
+            stmt *body;
+            try{
+                body = new block_stmt(p.filename, p.line, stmts_until({END}));
+            }catch(int){
+                throw error(previous(),EXPTOCLOSE(for statement, p.line).c_str());
+            }
             s_for_stmt *s = new s_for_stmt(condition == nullptr ? p.filename : condition->file,condition == nullptr ? p.line : condition->line,initializer,condition,increment,body);
             return s;
         }
 
         stmt *expression_statement() {
             expr *expr = expression();
-            consume(SEMICOLON, "expected ';' after expression");
+            //consume(SEMICOLON, "expected ';' after expression");
             return new expression_stmt(expr->file,expr->line,*expr);
         }
 
@@ -291,9 +310,14 @@ namespace lns {
                 } while (match({COMMA}));
             }
             consume(RIGHT_PAREN, "expected ')' after parameter list");
-            consume(LEFT_BRACE, "expected '{' for function body");
-            vector<stmt *> &body = block();
-            return new function_stmt(name.filename,name.line,name, parameters, body, isglobal);
+            //consume(LEFT_BRACE, "expected '{' for function body");
+            try{
+                vector<stmt *> &body = stmts_until({END});
+                return new function_stmt(name.filename,name.line,name, parameters, body, isglobal);
+            }catch(int){
+                int l = name.line;
+                throw error(previous(),EXPTOCLOSE(function,l).c_str());
+            }
         }
 
         expr *assignment() {
