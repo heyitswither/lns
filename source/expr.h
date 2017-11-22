@@ -163,11 +163,12 @@ const token& name;
 
 class map_field_expr : public expr {
 public:
-map_field_expr(const char* file,int line, token& name, expr* key) : name(name), key(key), expr(line, file, MAP_FIELD_EXPR_T) {}
+map_field_expr(const char* file,int line, token& where, expr* name, expr* key) : where(where), name(name), key(key), expr(line, file, MAP_FIELD_EXPR_T) {}
 object* accept(expr_visitor *v) override{
 return v->visit_map_field_expr(this);
 }
-const token& name;
+const token& where;
+const expr* name;
 const expr* key;
 };
 
@@ -175,11 +176,12 @@ const expr* key;
 
 class assign_map_field_expr : public expr {
 public:
-assign_map_field_expr(const char* file,int line, token& name, token_type op, expr* key, expr* value) : name(name), op(op), key(key), value(value), expr(line, file, ASSIGN_MAP_FIELD_EXPR_T) {}
+assign_map_field_expr(const char* file,int line, token& where, expr* name, token_type op, expr* key, expr* value) : where(where), name(name), op(op), key(key), value(value), expr(line, file, ASSIGN_MAP_FIELD_EXPR_T) {}
 object* accept(expr_visitor *v) override{
 return v->visit_assign_map_field_expr(this);
 }
-const token& name;
+const token& where;
+const expr* name;
 const token_type op;
 const expr* key;
 const expr* value;
@@ -189,11 +191,11 @@ const expr* value;
 
 class context_expr : public expr {
 public:
-context_expr(const char* file,int line, token& context_name, token& context_identifier) : context_name(context_name), context_identifier(context_identifier), expr(line, file, CONTEXT_EXPR_T) {}
+context_expr(const char* file,int line, expr* context_name, token& context_identifier) : context_name(context_name), context_identifier(context_identifier), expr(line, file, CONTEXT_EXPR_T) {}
 object* accept(expr_visitor *v) override{
 return v->visit_context_expr(this);
 }
-const token& context_name;
+const expr* context_name;
 const token& context_identifier;
 };
 
@@ -201,11 +203,11 @@ const token& context_identifier;
 
 class context_assign_expr : public expr {
 public:
-context_assign_expr(const char* file,int line, token& context_name, token_type op, token& context_identifier, expr* value) : context_name(context_name), op(op), context_identifier(context_identifier), value(value), expr(line, file, CONTEXT_ASSIGN_EXPR_T) {}
+context_assign_expr(const char* file,int line, expr* context_name, token_type op, token& context_identifier, expr* value) : context_name(context_name), op(op), context_identifier(context_identifier), value(value), expr(line, file, CONTEXT_ASSIGN_EXPR_T) {}
 object* accept(expr_visitor *v) override{
 return v->visit_context_assign_expr(this);
 }
-const token& context_name;
+const expr* context_name;
 const token_type op;
 const token& context_identifier;
 const expr* value;

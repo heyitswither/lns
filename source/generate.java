@@ -22,10 +22,10 @@ public class generate {
                 "literal   : object* value",
                 "unary     : token& op, expr* right",
                 "variable  : token& name",
-                "map_field : token& name, expr* key",
-                "assign_map_field : token& name, token_type op, expr* key, expr* value",
-                "context : token& context_name, token& context_identifier",
-                "context_assign : token& context_name, token_type op, token& context_identifier, expr* value",
+                "map_field : token& where, expr* name, expr* key",
+                "assign_map_field : token& where, expr* name, token_type op, expr* key, expr* value",
+                "context : expr* context_name, token& context_identifier",
+                "context_assign : expr* context_name, token_type op, token& context_identifier, expr* value",
                 "null      : token& where"
         ), Arrays.asList(), "object*");
         defineAst(outputDir, "stmt", Arrays.asList(
