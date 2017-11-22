@@ -79,7 +79,8 @@ namespace lns {
                     variable v = values[name.lexeme];
                     switch (op) {
                         case EQUAL:
-                            *v.value = *obj;
+                            values[name.lexeme].value = obj;
+                            break;
                         case PLUS_EQUALS:
                             *v.value += *obj;
                             break;

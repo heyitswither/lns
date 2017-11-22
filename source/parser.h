@@ -333,12 +333,13 @@ namespace lns {
                     return new assign_expr(var->file,var->line,name,op.type,value);
                 }
                 if (!((map = dynamic_cast<map_field_expr *>(expr)) == nullptr)) {
-                    token &name = const_cast<token &>(map->name);
-                    return new assign_map_field_expr(map->file,map->line,name,op.type,map->key, value);
+                    return new assign_map_field_expr(map->file, map->line, const_cast<token &>(map->where), map->name, op.type,
+                                                     map->key, value);
                 }
                 if (!((context = dynamic_cast<context_expr *>(expr)) == nullptr)) {
-                    token &name = const_cast<token &>(context->context_name);
-                    return new context_assign_expr(context->file,context->line,name,op.type, const_cast<token &>(context->context_identifier), value);
+                    return new context_assign_expr(context->file, context->line,
+                                                   context->context_name, op.type,
+                                                   const_cast<token &>(context->context_identifier), value);
                 }
                 throw error(op, "invalid assignment target");
             }
@@ -403,6 +404,7 @@ namespace lns {
             return expr;
         }
 
+
         expr *unary() {
             if (match({BANG, MINUS})) {
                 token &op = previous();
@@ -412,11 +414,12 @@ namespace lns {
             return call();
         }
 
+
         expr *call() {
             vector<expr *> &args = *new vector<expr *>();
-            expr *expr = primary(), *keyexpr;
+            expr *expr = special_assignment(), *keyexpr;
             token &identifier = previous();
-            if(match({DOT})){
+            /*if(match({DOT})){
                 token &context_identifier = consume(IDENTIFIER,"expected identifier for context call");
                 return new context_expr(identifier.filename,identifier.line,identifier,context_identifier);
             }
@@ -424,7 +427,7 @@ namespace lns {
                 keyexpr = expression();
                 consume(RIGHT_SQR, "expected ']' after key expression");
                 return new map_field_expr(identifier.filename,identifier.line,identifier, keyexpr);
-            }
+            }*/
             while (true)
                 if (match({LEFT_PAREN})) {
                     if (!check(RIGHT_PAREN)) {
@@ -449,7 +452,21 @@ namespace lns {
             call_expr *expr = new call_expr(paren.filename,paren.line,callee, paren, args);
             return expr;
         }
-
+        expr *special_assignment() {
+            expr * expr = primary(),*key;
+            while(match({DOT,LEFT_SQR})){
+                token& op = previous();
+                if(op.type == DOT){
+                    token& fname = consume(IDENTIFIER,"expected field name.");
+                    expr = new context_expr(expr->file,expr->line,expr,fname);
+                }else{
+                    key = expression();
+                    consume(RIGHT_SQR,"expected closing ']' after map key expression.");
+                    expr = new map_field_expr(expr->file,expr->line,op,expr,key);
+                }
+            }
+            return expr;
+        }
         expr *primary() {
             if (match({FALSE})) return new literal_expr(previous().filename,previous().line,new bool_o(false));
             if (match({TRUE})) return new literal_expr(previous().filename,previous().line,new bool_o(true));

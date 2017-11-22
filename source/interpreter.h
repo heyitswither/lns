@@ -38,11 +38,9 @@ namespace lns {
             return false;
         }
         string str() const override{
-            string s = *new string();
-            s+="<function@";
-            s+=(long)this;
-            s+=  "'" + name() + "'>";
-            return s;
+            stringstream s;
+            s<< "<function@" << static_cast<const void*>(this) << ", name: \"" << name() << "\">";
+            return s.str();
         }
         bool operator&&(const object &o) const override {
             WRONG_OP(&&)
@@ -195,21 +193,17 @@ namespace lns {
         }
 
         object *visit_context_expr(context_expr *c) override {
-            object* o = environment->get(c->context_name);
+            object* o = evaluate(const_cast<expr *>(c->context_name));
             if(o->type != CONTEXT_T) {
-                string s = *new string();
-                s+="object '" + c->context_name.lexeme + "' is not a context.";
-                throw runtime_exception(c->context_name,s);
+                throw runtime_exception(c->context_identifier,*new string("object is not a context"));
             }
             return dynamic_cast<context*>(o)->get(c->context_identifier);
         }
 
         object *visit_context_assign_expr(context_assign_expr *c) override {
-            object* o = environment->get(c->context_name);
+            object* o = evaluate(const_cast<expr *>(c->context_name));
             if(o->type != CONTEXT_T) {
-                string s = *new string();
-                s+="object '" + c->context_name.lexeme + "' is not a context.";
-                throw runtime_exception(c->context_name,s);
+                throw runtime_exception(c->context_identifier,*new string("object is not a context"));
             }
             object* value = evaluate(const_cast<expr *>(c->value));
             dynamic_cast<context*>(o)->assign(c->context_identifier,c->op,value);
@@ -338,11 +332,50 @@ namespace lns {
             return environment->get(v->name);
         } //
 
+        object *get_map_field(token& where,object *obj, object* key) {
+            map_o *map = dynamic_cast<map_o*>(obj);
+            if (map == nullptr) {
+                throw runtime_exception(where, *new string("object is not a map"));
+            } else {
+                if (!map->contains_key(key->str())) return new null_o();
+                return map->values[key->str()];
+            }
+        }
+
         object *visit_map_field_expr(map_field_expr *m) override {
             object *o = evaluate(const_cast<expr *>(m->key));
             string str = o->str();
-            return environment->get_map_field(m->name, str);
+            return get_map_field(const_cast<token &>(m->where), evaluate(const_cast<expr *>(m->name)), o);
         } //
+
+        object *assign_map_field(const token& where,object *obj, const token_type op, string_o *key, object *value) {
+                map_o *map;
+                if ((map = dynamic_cast<map_o *>(obj)) == nullptr) {
+                    throw runtime_exception(where, *new string("object is not a map"));
+                }
+                try {
+                    switch (op) {
+                        case EQUAL:
+                            map->values[key->value] = value;
+                            break;
+                        case PLUS_EQUALS:
+                            *(map->values[key->value]) += *value;
+                            break;
+                        case MINUS_EQUALS:
+                            *(map->values[key->value]) -= *value;
+                            break;
+                        case STAR_EQUALS:
+                            *(map->values[key->value]) *= *value;
+                            break;
+                        case SLASH_EQUALS:
+                            *(map->values[key->value]) /= *value;
+                            break;
+                    }
+                    return map->values[key->value];
+                } catch (string &s) {
+                    throw runtime_exception(where,s);
+                }
+        }
 
         object *visit_assign_map_field_expr(assign_map_field_expr *a) override {
             object *key = evaluate(const_cast<expr *>(a->key));
@@ -351,7 +384,7 @@ namespace lns {
             if (k == nullptr) {
                 k = new string_o(key->str());
             }
-            return environment->assign_map_field(a->name,a->op, k, value);
+            return assign_map_field(a->where,evaluate(const_cast<expr *>(a->name)), a->op, k, value);
         }//
 
         object *visit_null_expr(null_expr *n) override {
@@ -530,7 +563,7 @@ namespace lns {
     }
 
     string function::str() const {
-        return name();
+        return callable::str();
     }
 }
 namespace natives{
