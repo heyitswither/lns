@@ -618,10 +618,21 @@ namespace lns {
         bool operator==(const object &o) const override;
 
         string str() const override {
-            return "<map>"; //TODO: implement JSON map conversion
+            stringstream ss;
+            ss << "{";
+            int i = 0;
+            for(auto p : values){
+                if(++i != 1) ss << ", ";
+                ss << "\"" << p.first << "\" : ";
+                if(p.second->type == STRING_T) ss << "\"";
+                ss << p.second->str();
+                if(p.second->type == STRING_T) ss << "\"";
+            }
+            ss << "}";
+            return ss.str(); //TODO: implement JSON map conversion
         }
 
-        const bool contains_key(string &s) {
+        const bool contains_key(string s) {
             return values.find(s) != values.end();
         }
 
