@@ -4,10 +4,12 @@
 The repository root is a CLion project folder.  
 
 Visit the Wiki section for information about the language, the command and the interpreter.
+
+Anyone can contribute to *lns*. You are welcome to clone the repository and commit changes to improve the interpreter. You can even implement new features: you can find some ideas on what to implement in the Issues section.  
+
 ## Credits ##
 The *lns* interpreter started off as a personal project inspired to [Bob Nystrom's "Crafting Interpreters"](http://www.craftinginterpreters.com/ "Crafting Interpreters website") online book, which shows a very basic way to implement an interpreter in Java.  
 At this time the two projects differ in most of their parts (including the syntax definitions, the features of the language and the implementation language itself), but you can see some common aspects in their structure.  
-The two projects don't have any file in common.    
 You can visit Bob Nystrom's GitHub repository [here](https://github.com/munificent/craftinginterpreters "Bob Nystrom's repository").  
 
 ## Contact ##
