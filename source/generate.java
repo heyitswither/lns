@@ -22,7 +22,7 @@ public class generate {
                 "literal   : object* value",
                 "unary     : token& op, expr* right",
                 "variable  : token& name",
-                "map_field : token& where, expr* name, expr* key",
+                "sub_script : token& where, expr* name, expr* key",
                 "assign_map_field : token& where, expr* name, token_type op, expr* key, expr* value",
                 "context : expr* context_name, token& context_identifier",
                 "context_assign : expr* context_name, token_type op, token& context_identifier, expr* value",

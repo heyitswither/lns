@@ -10,7 +10,7 @@ using namespace lns;
 
 namespace lns{
 enum expr_type{
-INCREMENT_EXPR_T, DECREMENT_EXPR_T, ASSIGN_EXPR_T, BINARY_EXPR_T, CALL_EXPR_T, GROUPING_EXPR_T, LITERAL_EXPR_T, UNARY_EXPR_T, VARIABLE_EXPR_T, MAP_FIELD_EXPR_T, ASSIGN_MAP_FIELD_EXPR_T, CONTEXT_EXPR_T, CONTEXT_ASSIGN_EXPR_T, NULL_EXPR_T, 
+INCREMENT_EXPR_T, DECREMENT_EXPR_T, ASSIGN_EXPR_T, BINARY_EXPR_T, CALL_EXPR_T, GROUPING_EXPR_T, LITERAL_EXPR_T, UNARY_EXPR_T, VARIABLE_EXPR_T, SUB_SCRIPT_EXPR_T, ASSIGN_MAP_FIELD_EXPR_T, CONTEXT_EXPR_T, CONTEXT_ASSIGN_EXPR_T, NULL_EXPR_T, 
 };
 class expr_visitor;
 class expr{
@@ -30,7 +30,7 @@ class grouping_expr;
 class literal_expr;
 class unary_expr;
 class variable_expr;
-class map_field_expr;
+class sub_script_expr;
 class assign_map_field_expr;
 class context_expr;
 class context_assign_expr;
@@ -46,7 +46,7 @@ virtual object* visit_grouping_expr(grouping_expr *g) = 0;
 virtual object* visit_literal_expr(literal_expr *l) = 0;
 virtual object* visit_unary_expr(unary_expr *u) = 0;
 virtual object* visit_variable_expr(variable_expr *v) = 0;
-virtual object* visit_map_field_expr(map_field_expr *m) = 0;
+virtual object* visit_sub_script_expr(sub_script_expr *s) = 0;
 virtual object* visit_assign_map_field_expr(assign_map_field_expr *a) = 0;
 virtual object* visit_context_expr(context_expr *c) = 0;
 virtual object* visit_context_assign_expr(context_assign_expr *c) = 0;
@@ -161,11 +161,11 @@ const token& name;
 
 
 
-class map_field_expr : public expr {
+class sub_script_expr : public expr {
 public:
-map_field_expr(const char* file,int line, token& where, expr* name, expr* key) : where(where), name(name), key(key), expr(line, file, MAP_FIELD_EXPR_T) {}
+sub_script_expr(const char* file,int line, token& where, expr* name, expr* key) : where(where), name(name), key(key), expr(line, file, SUB_SCRIPT_EXPR_T) {}
 object* accept(expr_visitor *v) override{
-return v->visit_map_field_expr(this);
+return v->visit_sub_script_expr(this);
 }
 const token& where;
 const expr* name;
@@ -254,8 +254,8 @@ std::cout << "unary_expr" << std::endl;
 virtual object* visit_variable_expr(variable_expr *v) override {
 std::cout << "variable_expr" << std::endl;
 }
-virtual object* visit_map_field_expr(map_field_expr *m) override {
-std::cout << "map_field_expr" << std::endl;
+virtual object* visit_sub_script_expr(sub_script_expr *s) override {
+std::cout << "sub_script_expr" << std::endl;
 }
 virtual object* visit_assign_map_field_expr(assign_map_field_expr *a) override {
 std::cout << "assign_map_field_expr" << std::endl;
