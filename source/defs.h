@@ -66,6 +66,7 @@ enum token_type {
     XOR,
     NOR,
     NAND,
+    NOT,
     RETURN,
     SUPER,
     THIS,
@@ -82,6 +83,7 @@ enum token_type {
     THEN,
     DO,
     END,
+    DPCHECK,
     UNRECOGNIZED,
     EOF_
 };
@@ -139,6 +141,7 @@ namespace lns {
             "XOR",
             "NOR",
             "NAND",
+            "NOT",
             "RETURN",
             "SUPER",
             "THIS",
@@ -154,6 +157,7 @@ namespace lns {
             "BEGIN",
             "THEN",
             "DO",
+            "DPCHECK",
             "END",
             "UNRECOGNIZED",
             "EOF_"};
