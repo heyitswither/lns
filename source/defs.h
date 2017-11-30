@@ -234,15 +234,15 @@ namespace lns {
         }
 
         bool operator||(const object &o) const override {
-            WRONG_OP(||)
+            WRONG_OP('or')
         }
 
         object *operator!() const override {
-            WRONG_OP(!)
+            WRONG_OP('not')
         }
 
         bool operator&&(const object &o) const override {
-            WRONG_OP(&&);
+            WRONG_OP('and');
         }
 
         object *operator+=(const object &o) override {
@@ -334,15 +334,15 @@ namespace lns {
         }
 
         bool operator&&(const object &o) const override {
-            WRONG_OP(&&)
+            WRONG_OP('and')
         }
 
         bool operator||(const object &o) const override {
-            WRONG_OP(||)
+            WRONG_OP('or')
         }
 
         object *operator!() const override {
-            WRONG_OP(!)
+            WRONG_OP('not')
         }
 
         bool operator>(const object &o2) const override {
@@ -445,12 +445,12 @@ namespace lns {
         }
 
         bool operator&&(const object &o) const override {
-            if(!check_type(BOOL_T,*this,o)) WRONG_OP(&&)
+            if(!check_type(BOOL_T,*this,o)) WRONG_OP('and')
             return this->value && dynamic_cast<const bool_o&>(o).value;
         }
 
         bool operator||(const object &o) const override {
-            if(!check_type(BOOL_T,*this,o)) WRONG_OP(&&)
+            if(!check_type(BOOL_T,*this,o)) WRONG_OP('or')
             return this->value || dynamic_cast<const bool_o&>(o).value;
         }
 
@@ -685,15 +685,15 @@ namespace lns {
     }
 
     bool map_o::operator&&(const object &o) const {
-        WRONG_OP(&&)
+        WRONG_OP('and')
     }
 
     bool map_o::operator||(const object &o) const {
-        WRONG_OP(||)
+        WRONG_OP('or')
     }
 
     object *map_o::operator!() const {
-        WRONG_OP(!)
+        WRONG_OP('not')
     }
 
     bool map_o::operator>(const object &o2) const {
