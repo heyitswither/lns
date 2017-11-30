@@ -18,9 +18,11 @@
 #define PARSE_ERROR (-1)
 
 #define EXPTOCLOSE(what,line) (string("expected 'end' to close " #what "(opened at line ") + std::to_string(line) + string(")"))
+#define SIG_EXIT_PARSER -4096
 using namespace std;
 using namespace lns;
 namespace lns {
+    vector<const char*> parsed_files = *new vector<const char*>();
     class parser {
     private:
         int start;
@@ -157,10 +159,22 @@ namespace lns {
             return new context_stmt(name.filename,name.line,name,stmts,global,final);
         }
 
+        bool check_file(const char *str) {
+            for(const char* file : parsed_files)
+                if(strcmp(str,file) == 0) return true;
+            return false;
+        }
+
+        bool dpcheck() {
+            token& s = consume(STRING, "expected string after 'dkcheck' keyword");
+            return check_file(s.literal.str().c_str());
+        }
+
         stmt *declaration() {
             try {
-                if (match({USE})) {
-                    return use();
+                if (match({USE})) return use();
+                if (match({DPCHECK})){
+                    if(dpcheck()) throw SIG_EXIT_PARSER;
                 }
                 use_allowed = false;
                 bool is_global = false, is_final = false;
@@ -406,7 +420,7 @@ namespace lns {
 
 
         expr *unary() {
-            if (match({BANG, MINUS})) {
+            if (match({NOT, MINUS})) {
                 token &op = previous();
                 expr *right = unary();
                 return new unary_expr(op.filename,op.line,op, right);
@@ -497,10 +511,12 @@ namespace lns {
                     s = declaration();
                     if (s == nullptr) continue;
                     statements.push_back(s);
-                } catch (int) {
+                } catch (int i) {
+                    if(i == SIG_EXIT_PARSER) return statements;
                     continue;
                 }
             }
+            parsed_files.push_back(tokens.back()->filename);
             return statements;
         }
         expr *expression() { return assignment(); }

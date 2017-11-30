@@ -315,7 +315,7 @@ namespace lns {
             object *right = evaluate(const_cast<expr *>(u->right));
             try{
             switch (u->op.type) {
-                case BANG:
+                case NOT:
                     return new bool_o(!is_bool_true_eq(!*right));
                 case MINUS:
                     check_number_operand(u->op, right);

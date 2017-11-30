@@ -23,6 +23,7 @@ namespace lns{
         if(key == "nor") return NOR;
         if(key == "xor") return XOR;
         if(key == "nand") return NAND;
+        if(key == "not") return NOT;
         if(key == "return") return RETURN;
         if(key == "super") return SUPER;
         if(key == "this") return THIS;
@@ -40,6 +41,7 @@ namespace lns{
         if(key == "begin") return BEGIN;
         if(key == "then") return THEN;
         if(key == "do") return DO;
+        if(key == "dpcheck") return DPCHECK;
         return UNRECOGNIZED;
     }
     class scanner{
