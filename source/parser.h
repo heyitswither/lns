@@ -318,8 +318,8 @@ namespace lns {
             consume(LEFT_PAREN, "expected '(' after function name.");
             vector<token> &parameters = *new vector<token>();
             if (!check(RIGHT_PAREN)) {
-                token &t = consume(IDENTIFIER, "expected parameter name");
                 do {
+                    token &t = consume(IDENTIFIER, "expected parameter name");
                     parameters.push_back(t);
                 } while (match({COMMA}));
             }
