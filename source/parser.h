@@ -336,7 +336,7 @@ namespace lns {
 
         expr *assignment() {
             variable_expr *var;
-            map_field_expr *map;
+            sub_script_expr *map;
             context_expr* context;
             expr *expr = logical(), *value, *key;
             if (match({EQUAL,PLUS_EQUALS,MINUS_EQUALS,STAR_EQUALS,SLASH_EQUALS})) {
@@ -346,7 +346,7 @@ namespace lns {
                     token &name = const_cast<token &>(var->name);
                     return new assign_expr(var->file,var->line,name,op.type,value);
                 }
-                if (!((map = dynamic_cast<map_field_expr *>(expr)) == nullptr)) {
+                if (!((map = dynamic_cast<sub_script_expr *>(expr)) == nullptr)) {
                     return new assign_map_field_expr(map->file, map->line, const_cast<token &>(map->where), map->name, op.type,
                                                      map->key, value);
                 }
@@ -475,8 +475,8 @@ namespace lns {
                     expr = new context_expr(expr->file,expr->line,expr,fname);
                 }else{
                     key = expression();
-                    consume(RIGHT_SQR,"expected closing ']' after map key expression.");
-                    expr = new map_field_expr(expr->file,expr->line,op,expr,key);
+                    consume(RIGHT_SQR,"expected closing ']' after key expression.");
+                    expr = new sub_script_expr(expr->file,expr->line,op,expr,key);
                 }
             }
             return expr;

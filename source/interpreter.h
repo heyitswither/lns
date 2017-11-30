@@ -316,7 +316,7 @@ namespace lns {
             try{
             switch (u->op.type) {
                 case NOT:
-                    return new bool_o(!is_bool_true_eq(!*right));
+                    return new bool_o(is_bool_true_eq(!*right));
                 case MINUS:
                     check_number_operand(u->op, right);
                     return (-*right);
@@ -334,18 +334,24 @@ namespace lns {
 
         object *get_map_field(token& where,object *obj, object* key) {
             map_o *map = dynamic_cast<map_o*>(obj);
-            if (map == nullptr) {
-                throw runtime_exception(where, *new string("object is not a map"));
-            } else {
-                if (!map->contains_key(key->str())) return new null_o();
-                return map->values[key->str()];
-            }
+            if (!map->contains_key(key->str())) return new null_o();
+            return map->values[key->str()];
         }
 
-        object *visit_map_field_expr(map_field_expr *m) override {
-            object *o = evaluate(const_cast<expr *>(m->key));
-            string str = o->str();
-            return get_map_field(const_cast<token &>(m->where), evaluate(const_cast<expr *>(m->name)), o);
+        object *visit_sub_script_expr(sub_script_expr *m) override {
+            object *key = evaluate(const_cast<expr *>(m->key));
+            object *eval = evaluate(const_cast<expr *>(m->name));
+            if(eval->type == MAP_T){
+                return get_map_field(const_cast<token &>(m->where), eval, key);
+            }else if(eval->type == STRING_T){
+                string evstring = eval->str();
+                if(key->type != NUMBER_T) throw runtime_exception(m->where, *new string("key for operator [] (string) must be an number"));
+                int i = static_cast<int>(dynamic_cast<number_o*>(key)->value);
+                if(evstring.size() > i) return new string_o(*new string() + evstring.at(i));
+                else return new null_o();
+            }else{
+                throw runtime_exception(m->where, *new string("invalid operand for operator []: operand must be either string or map"));
+            }
         } //
 
         object *assign_map_field(const token& where,object *obj, const token_type op, string_o *key, object *value) {
