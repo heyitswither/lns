@@ -37,7 +37,7 @@ namespace lns{
             throw unknown_option_exception(o);
         }
     }
-    void inspectArguments(int fc,const char* args[]){
+    void inspect_args(int fc, const char **args){
         int i;
         string s;
         for(i = 1;i <= fc; i++){
@@ -125,7 +125,7 @@ namespace lns{
 int main(const int argc, const char* argv[]) {
     cout << endl;
     try{
-        lns::inspectArguments(argc - 1,argv);
+        lns::inspect_args(argc - 1, argv);
         if(debugger_option){
             debug* d = new debug(file);
             d->start();
