@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-cd ..
-javac generate.java
-java generate ./
-if [ -f "generate.class" ]; then
-  rm generate.class
+cd source
+javac gen/generate.java
+java gen.generate ./
+if [ -f "gen/generate.class" ]; then
+  rm gen/generate.class
 fi
 echo Done.
