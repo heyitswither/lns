@@ -7,171 +7,116 @@
 
 #include <sstream>
 #include <string>
-#include "errors.h"
+//#include "stmt.h"
+//#include "errors.h"
+//#include "environments.h"
+#include <string>
 #include <map>
 #include <cmath>
+#include <utility>
+#include <vector>
+#include <set>
 
 #define WRONG_OP(OP) throw "invalid operand(s) for operator " #OP;
 #define NULL_OP(OP) throw "null operand(s) given for operator " #OP;
 #define CODE_LEAK_ERROR (-250)
-//#include "interpreter.h"
 
-using namespace std;
-enum token_type {
-    // Single-character tokens.
-            LEFT_PAREN,
-    RIGHT_PAREN,
-    LEFT_SQR,
-    RIGHT_SQR,
-    COMMA,
-    DOT,
-    MINUS,
-    MINUS_EQUALS,
-    PLUS,
-    PLUS_EQUALS,
-    PLUS_PLUS,
-    MINUS_MINUS,
-    SEMICOLON,
-    SLASH,
-    SLASH_EQUALS,
-    STAR,
-    STAR_EQUALS,
-    HAT,
-    // One or two character tokens.
-            BANG,
-    BANG_EQUAL,
-    EQUAL,
-    EQUAL_EQUAL,
-    GREATER,
-    GREATER_EQUAL,
-    LESS,
-    LESS_EQUAL,
-
-    // Literals.
-            IDENTIFIER,
-    STRING,
-    NUMBER,
-
-    // Keywords.
-            NATIVES,
-    AND,
-    CLASS,
-    ELSE,
-    FALSE,
-    FUNCTION,
-    FOR,
-    IF,
-    NUL,
-    OR,
-    XOR,
-    NOR,
-    NAND,
-    NOT,
-    RETURN,
-    SUPER,
-    THIS,
-    TRUE,
-    VAR,
-    WHILE,
-    GLOBAL,
-    FINAL,
-    USE,
-    BREAK,
-    CONTINUE,
-    CONTEXT,
-    BEGIN,
-    THEN,
-    DO,
-    END,
-    DPCHECK,
-    UNRECOGNIZED,
-    EOF_
-};
-enum objtype {
-    NUMBER_T, STRING_T, BOOL_T, NULL_T, MAP_T, CALLABLE_T, CONTEXT_T
-};
-typedef objtype object_type;
 namespace lns {
-    const string KEYWORDS_S_VALUES[] = {// Single-character tokens.
-            // Single-character tokens.
-            "LEFT_PAREN",
-            "RIGHT_PAREN",
-            "LEFT_SQR",
-            "RIGHT_SQR",
-            "COMMA",
-            "DOT",
-            "MINUS",
-            "MINUS_EQUALS",
-            "PLUS",
-            "PLUS_EQUALS",
-            "PLUS_PLUS",
-            "MINUS_MINUS",
-            "SEMICOLON",
-            "SLASH",
-            "SLASH_EQUALS",
-            "STAR",
-            "STAR_EQUALS",
-            "HAT",
-            // One or two character tokens.
-            "BANG",
-            "BANG_EQUAL",
-            "EQUAL",
-            "EQUAL_EQUAL",
-            "GREATER",
-            "GREATER_EQUAL",
-            "LESS",
-            "LESS_EQUAL",
+    enum token_type {
+        // Single-character tokens.
+                LEFT_PAREN,
+        RIGHT_PAREN,
+        LEFT_SQR,
+        RIGHT_SQR,
+        COMMA,
+        DOT,
+        MINUS,
+        MINUS_EQUALS,
+        PLUS,
+        PLUS_EQUALS,
+        PLUS_PLUS,
+        MINUS_MINUS,
+        SEMICOLON,
+        SLASH,
+        SLASH_EQUALS,
+        STAR,
+        STAR_EQUALS,
+        HAT,
+        // One or two character tokens.
+                BANG,
+        BANG_EQUAL,
+        EQUAL,
+        EQUAL_EQUAL,
+        GREATER,
+        GREATER_EQUAL,
+        LESS,
+        LESS_EQUAL,
 
-            // Literals.
-            "IDENTIFIER",
-            "STRING",
-            "NUMBER",
+        // Literals.
+                IDENTIFIER,
+        STRING,
+        NUMBER,
 
-            // Keywords.
-            "NATIVES",
-            "AND",
-            "CLASS",
-            "ELSE",
-            "FALSE",
-            "FUNCTION",
-            "FOR",
-            "IF",
-            "NUL",
-            "OR",
-            "XOR",
-            "NOR",
-            "NAND",
-            "NOT",
-            "RETURN",
-            "SUPER",
-            "THIS",
-            "TRUE",
-            "VAR",
-            "WHILE",
-            "GLOBAL",
-            "FINAL",
-            "USE",
-            "BREAK",
-            "CONTINUE",
-            "CONTEXT",
-            "BEGIN",
-            "THEN",
-            "DO",
-            "DPCHECK",
-            "END",
-            "UNRECOGNIZED",
-            "EOF_"};
+        // Keywords.
+                NATIVES,
+        AND,
+        CLASS,
+        ELSE,
+        FALSE,
+        FUNCTION,
+        FOR,
+        IF,
+        NUL,
+        OR,
+        XOR,
+        NOR,
+        NAND,
+        NOT,
+        RETURN,
+        SUPER,
+        THIS,
+        TRUE,
+        VAR,
+        WHILE,
+        GLOBAL,
+        FINAL,
+        USE,
+        BREAK,
+        CONTINUE,
+        CONTEXT,
+        BEGIN,
+        THEN,
+        DO,
+        END,
+        DPCHECK,
+        UNRECOGNIZED,
+        EOF_
+    };
+    enum objtype {
+        NUMBER_T, STRING_T, BOOL_T, NULL_T, MAP_T, CALLABLE_T, CONTEXT_T
+    };
+    typedef objtype object_type;
+
+    const std::string KEYWORDS_S_VALUES[] = {"LEFT_PAREN", "RIGHT_PAREN", "LEFT_SQR", "RIGHT_SQR", "COMMA", "DOT", "MINUS",
+                                        "MINUS_EQUALS", "PLUS", "PLUS_EQUALS", "PLUS_PLUS", "MINUS_MINUS", "SEMICOLON",
+                                        "SLASH", "SLASH_EQUALS", "STAR", "STAR_EQUALS", "HAT", "BANG", "BANG_EQUAL",
+                                        "EQUAL", "EQUAL_EQUAL", "GREATER", "GREATER_EQUAL", "LESS", "LESS_EQUAL",
+                                        "IDENTIFIER", "STRING", "NUMBER", "NATIVES", "AND", "CLASS", "ELSE", "FALSE",
+                                        "FUNCTION", "FOR", "IF", "NUL", "OR", "XOR", "NOR", "NAND", "NOT", "RETURN",
+                                        "SUPER", "THIS", "TRUE", "VAR", "WHILE", "GLOBAL", "FINAL", "USE", "BREAK",
+                                        "CONTINUE", "CONTEXT", "BEGIN", "THEN", "DO", "DPCHECK", "END", "UNRECOGNIZED",
+                                        "EOF_"};
 
     class object {
     private:
-        object() {}
+        object();
 
     public:
         objtype type;
 
-        object(objtype t) : type(t) {}
+        explicit object(objtype t);
 
-        virtual string str() const = 0;
+        virtual std::string str() const = 0;
 
         //    return *new string("object::plain");
         //};
@@ -181,15 +126,15 @@ namespace lns {
 
         virtual bool operator||(const object &o) const = 0;
 
-        virtual object* operator!() const = 0;
+        virtual object *operator!() const = 0;
 
         virtual bool operator>(const object &o2) const = 0;
 
         virtual bool operator>=(const object &o2) const = 0;
 
-        virtual bool operator<=(const object &o2) const= 0;
+        virtual bool operator<=(const object &o2) const = 0;
 
-        virtual bool operator<(const object &o2) const= 0;
+        virtual bool operator<(const object &o2) const = 0;
 
         virtual object *operator+=(const object &o) = 0;
 
@@ -199,17 +144,17 @@ namespace lns {
 
         virtual object *operator/=(const object &o) = 0;
 
-        virtual object *operator+(const object &o2) const= 0;
+        virtual object *operator+(const object &o2) const = 0;
 
-        virtual object *operator-(const object &o2) const= 0;
+        virtual object *operator-(const object &o2) const = 0;
 
-        virtual object *operator*(const object &o2) const= 0;
+        virtual object *operator*(const object &o2) const = 0;
 
-        virtual object *operator/(const object &o2) const= 0;
+        virtual object *operator/(const object &o2) const = 0;
 
-        virtual object *operator^(const object &o2) const= 0;
+        virtual object *operator^(const object &o2) const = 0;
 
-        virtual object *operator-() const= 0;
+        virtual object *operator-() const = 0;
 
         virtual object *operator++() = 0;
 
@@ -217,102 +162,56 @@ namespace lns {
 
 
     };
-    bool check_type(object_type type, const object& o1, const object& o2);
+
+    bool check_type(object_type type, const object &o1, const object &o2);
+
     class string_o : public object {
     public:
-        string value;
+        std::string value;
 
-        string_o(string value) : object(objtype::STRING_T), value(value) {}
+        explicit string_o(std::string value);
 
-        virtual string str() const {
-             return value;
-        }
+        std::string str() const override;
 
-        bool operator==(const object &o) const override {
-            if (o.type != STRING_T) return false;
-            return (value == dynamic_cast<const string_o *>(&o)->value);
-        }
+        bool operator==(const object &o) const override;
 
-        bool operator||(const object &o) const override {
-            WRONG_OP('or')
-        }
+        bool operator||(const object &o) const override;
 
-        object *operator!() const override {
-            WRONG_OP('not')
-        }
+        object *operator!() const override;
 
-        bool operator&&(const object &o) const override {
-            WRONG_OP('and');
-        }
+        bool operator&&(const object &o) const override;
 
-        object *operator+=(const object &o) override {
-            this->value += o.str();
-            return this;
-        }
+        object *operator+=(const object &o) override;
 
-        object *operator-=(const object &o) override {
-            WRONG_OP(-);
-        }
+        object *operator-=(const object &o) override;
 
-        object *operator*=(const object &o) override {
-            WRONG_OP(*);
-        }
+        object *operator*=(const object &o) override;
 
-        object *operator/=(const object &o) override {
-            WRONG_OP(/);
-        }
+        object *operator/=(const object &o) override;
 
-        bool operator>(const object &o2) const override {
-            if(!check_type(STRING_T,*this,o2)) WRONG_OP(>);
-            return this->value > dynamic_cast<const string_o&>(o2).value;
-        }
+        bool operator>(const object &o2) const override;
 
-        bool operator>=(const object &o2) const override {
-            if(!check_type(STRING_T,*this,o2)) WRONG_OP(>=);
-            return this->value >= dynamic_cast<const string_o&>(o2).value;
-        }
+        bool operator>=(const object &o2) const override;
 
-        bool operator<=(const object &o2) const override {
-            if(!check_type(STRING_T,*this,o2)) WRONG_OP(<=);
-            return this->value <= dynamic_cast<const string_o&>(o2).value;
-        }
+        bool operator<=(const object &o2) const override;
 
-        bool operator<(const object &o2) const override {
-            if(!check_type(STRING_T,*this,o2)) WRONG_OP(<);
-            return this->value < dynamic_cast<const string_o&>(o2).value;
-        }
+        bool operator<(const object &o2) const override;
 
-        object *operator+(const object &o2) const override {
-            return new string_o(this->value + o2.str());
-        }
+        object *operator+(const object &o2) const override;
 
-        object *operator-(const object &o2) const override {
-            WRONG_OP(-);
-        }
+        object *operator-(const object &o2) const override;
 
-        object *operator*(const object &o2) const override {
-            WRONG_OP(*);
-        }
+        object *operator*(const object &o2) const override;
 
-        object *operator/(const object &o2) const override {
-            WRONG_OP(/);
-        }
+        object *operator/(const object &o2) const override;
 
-        object *operator^(const object &o2) const override {
-            WRONG_OP(^);
-        }
+        object *operator^(const object &o2) const override;
 
-        object *operator++() override {
-            WRONG_OP(++);
-        }
+        object *operator++() override;
 
-        object *operator--() override {
-            WRONG_OP(--);
-        }
+        object *operator--() override;
 
-        object *operator-() const override {
-            WRONG_OP(- (unary));
-        }
+        object *operator-() const override;
 
     };
 
@@ -320,325 +219,11 @@ namespace lns {
     public:
         double value;
 
-        number_o(double value) : object(objtype::NUMBER_T), value(value) {}
+        explicit number_o(double value);
 
-        virtual string str() const {
-            stringstream ss;
-            ss << value;
-            return *new string(ss.str());
-        }
-
-        bool operator==(const object &o) const override {
-            if (o.type != NUMBER_T) return false;
-            return value == dynamic_cast<number_o *>(const_cast<object *>(&o))->value;
-        }
-
-        bool operator&&(const object &o) const override {
-            WRONG_OP('and')
-        }
-
-        bool operator||(const object &o) const override {
-            WRONG_OP('or')
-        }
-
-        object *operator!() const override {
-            WRONG_OP('not')
-        }
-
-        bool operator>(const object &o2) const override {
-            if(!check_type(NUMBER_T,*this,o2)) WRONG_OP(>);
-            return this->value > dynamic_cast<const number_o&>(o2).value;
-        }
-
-        bool operator>=(const object &o2) const override {
-            if(!check_type(NUMBER_T,*this,o2)) WRONG_OP(>=);
-            return this->value >= dynamic_cast<const number_o&>(o2).value;
-        }
-
-        bool operator<=(const object &o2) const override {
-            if(!check_type(NUMBER_T,*this,o2)) WRONG_OP(<=);
-            return this->value >= dynamic_cast<const number_o&>(o2).value;
-        }
-
-        bool operator<(const object &o2) const override {
-            if(!check_type(NUMBER_T,*this,o2)) WRONG_OP(<);
-            return this->value < dynamic_cast<const number_o&>(o2).value;
-        }
-
-        object *operator+=(const object &o) override {
-            if(!check_type(NUMBER_T,*this,o)) WRONG_OP(+=);
-            this->value += dynamic_cast<const number_o&>(o).value;
-            return this;
-        }
-
-        object *operator-=(const object &o) override {
-            if(!check_type(NUMBER_T,*this,o)) WRONG_OP(-=);
-            this->value -= dynamic_cast<const number_o&>(o).value;
-            return this;
-        }
-
-        object *operator*=(const object &o) override {
-            if(!check_type(NUMBER_T,*this,o)) WRONG_OP(*=);
-            this->value *= dynamic_cast<const number_o&>(o).value;
-            return this;
-        }
-
-        object *operator/=(const object &o) override {
-            if(!check_type(NUMBER_T,*this,o)) WRONG_OP(/=);
-            this->value /= dynamic_cast<const number_o&>(o).value;
-            return this;
-        }
-
-        object *operator+(const object &o2) const override {
-            if(!check_type(NUMBER_T,*this,o2)) WRONG_OP(+);
-            return new number_o(this->value + dynamic_cast<const number_o&>(o2).value);
-        }
-
-        object *operator-(const object &o2) const override {
-            if(!check_type(NUMBER_T,*this,o2)) WRONG_OP(-);
-            return new number_o(this->value - dynamic_cast<const number_o&>(o2).value);
-        }
-
-        object *operator*(const object &o2) const override {
-            if(!check_type(NUMBER_T,*this,o2)) WRONG_OP(+);
-            return new number_o(this->value * dynamic_cast<const number_o&>(o2).value);
-        }
-
-        object *operator/(const object &o2) const override {
-            if(!check_type(NUMBER_T,*this,o2)) WRONG_OP(+);
-            return new number_o(this->value / dynamic_cast<const number_o&>(o2).value);
-        }
-
-        object *operator^(const object &o2) const override {
-            if(!check_type(NUMBER_T,*this,o2)) WRONG_OP(+);
-            return new number_o(pow(this->value,dynamic_cast<const number_o&>(o2).value));
-        }
-
-        object *operator-() const override {
-            return new number_o(this->value);
-        }
-
-        object *operator++() override {
-            ++this->value;
-            return new number_o(value - 1);
-        }
-
-        object *operator--() override {
-            --this->value;
-            return new number_o(value + 1);
-        }
-    };
-
-    class bool_o : public object {
-    public:
-        bool value;
-
-        bool_o(bool value) : object(objtype::BOOL_T), value(value) {}
-
-        virtual string str() const {
-            return value ? "true" : "false";
-        }
-
-        bool operator==(const object &o) const override {
-            if (o.type != BOOL_T) return false;
-            return value == dynamic_cast<const bool_o&>(o).value;
-        }
-
-        bool operator&&(const object &o) const override {
-            if(!check_type(BOOL_T,*this,o)) WRONG_OP('and')
-            return this->value && dynamic_cast<const bool_o&>(o).value;
-        }
-
-        bool operator||(const object &o) const override {
-            if(!check_type(BOOL_T,*this,o)) WRONG_OP('or')
-            return this->value || dynamic_cast<const bool_o&>(o).value;
-        }
-
-        object *operator!() const override {
-            return new bool_o(!this->value);
-        }
-
-        bool operator>(const object &o2) const override {
-            WRONG_OP(>)
-        }
-
-        bool operator>=(const object &o2) const override {
-            WRONG_OP(>=)
-        }
-
-        bool operator<=(const object &o2) const override {
-            WRONG_OP(<=)
-        }
-
-        bool operator<(const object &o2) const override {
-            WRONG_OP(<)
-        }
-
-        object *operator+=(const object &o) override {
-            WRONG_OP(+=)
-        }
-
-        object *operator-=(const object &o) override {
-            WRONG_OP(-=)
-        }
-
-        object *operator*=(const object &o) override {
-            WRONG_OP(*=)
-        }
-
-        object *operator/=(const object &o) override {
-            WRONG_OP(/=)
-        }
-
-        object *operator+(const object &o2) const override {
-            WRONG_OP(+)
-        }
-
-        object *operator-(const object &o2) const override {
-            WRONG_OP(-)
-        }
-
-        object *operator*(const object &o2) const override {
-            WRONG_OP(*)
-        }
-
-        object *operator/(const object &o2) const override {
-            WRONG_OP(/)
-        }
-
-        object *operator^(const object &o2) const override {
-            WRONG_OP(^)
-        }
-
-        object *operator-() const override {
-            WRONG_OP(-)
-        }
-
-        object *operator++() override {
-            WRONG_OP(++)
-        }
-
-        object *operator--() override {
-            WRONG_OP(--)
-        }
-    };
-
-    class null_o : public object {
-    public:
-        null_o() : object(NULL_T) {}
-
-        virtual string str() const {
-            return "null";
-        }
-
-        bool operator==(const object &o) const override {
-            return o.type == NULL_T;
-        }
-
-        bool operator&&(const object &o) const override {
-            NULL_OP(&&)
-        }
-
-        bool operator||(const object &o) const override {
-            NULL_OP(||)
-        }
-
-        object *operator!() const override {
-            NULL_OP(!)
-        }
-
-        bool operator>(const object &o2) const override {
-            NULL_OP(>)
-        }
-
-        bool operator>=(const object &o2) const override {
-            NULL_OP(>=)
-        }
-
-        bool operator<=(const object &o2) const override {
-            NULL_OP(<=)
-        }
-
-        bool operator<(const object &o2) const override {
-            NULL_OP(<)
-        }
-
-        object *operator+=(const object &o) override {
-            NULL_OP(+=)
-        }
-
-        object *operator-=(const object &o) override {
-            NULL_OP(-=)
-        }
-
-        object *operator*=(const object &o) override {
-            NULL_OP(*=)
-        }
-
-        object *operator/=(const object &o) override {
-            NULL_OP(/=)
-        }
-
-        object *operator+(const object &o2) const override {
-            NULL_OP(+)
-        }
-
-        object *operator-(const object &o2) const override {
-            NULL_OP(-)
-        }
-
-        object *operator*(const object &o2) const override {
-            NULL_OP(*)
-        }
-
-        object *operator/(const object &o2) const override {
-            NULL_OP(/)
-        }
-
-        object *operator^(const object &o2) const override {
-            NULL_OP(^)
-        }
-
-        object *operator-() const override {
-            NULL_OP(-)
-        }
-
-        object *operator++() override {
-            NULL_OP(++)
-        }
-
-        object *operator--() override {
-            NULL_OP(--)
-        }
-    };
-
-    class map_o : public object {
-    private:
-    public:
-        map_o() : object(MAP_T) {}
-
-        map<string, object *> values;
+        std::string str() const override;
 
         bool operator==(const object &o) const override;
-
-        string str() const override {
-            stringstream ss;
-            ss << "{";
-            int i = 0;
-            for(auto p : values){
-                if(++i != 1) ss << ", ";
-                ss << "\"" << p.first << "\" : ";
-                if(p.second->type == STRING_T) ss << "\"";
-                ss << p.second->str();
-                if(p.second->type == STRING_T) ss << "\"";
-            }
-            ss << "}";
-            return ss.str(); //TODO: implement JSON map conversion
-        }
-
-        const bool contains_key(string s) {
-            return values.find(s) != values.end();
-        }
 
         bool operator&&(const object &o) const override;
 
@@ -679,120 +264,154 @@ namespace lns {
         object *operator--() override;
     };
 
-    bool map_o::operator==(const object &o) const {
-        if (o.type != MAP_T) return false;
-        return values == dynamic_cast<map_o *>(const_cast<object *>(&o))->values;
-    }
-
-    bool map_o::operator&&(const object &o) const {
-        WRONG_OP('and')
-    }
-
-    bool map_o::operator||(const object &o) const {
-        WRONG_OP('or')
-    }
-
-    object *map_o::operator!() const {
-        WRONG_OP('not')
-    }
-
-    bool map_o::operator>(const object &o2) const {
-        WRONG_OP(>)
-    }
-
-    bool map_o::operator>=(const object &o2) const {
-        WRONG_OP(>=)
-    }
-
-    bool map_o::operator<=(const object &o2) const {
-        WRONG_OP(<=)
-    }
-
-    bool map_o::operator<(const object &o2) const {
-        WRONG_OP(<)
-    }
-
-    object *map_o::operator+=(const object &o) {
-        WRONG_OP(+=)
-    }
-
-    object *map_o::operator-=(const object &o) {
-        WRONG_OP(-=)
-    }
-
-    object *map_o::operator*=(const object &o) {
-        WRONG_OP(*=)
-    }
-
-    object *map_o::operator/=(const object &o) {
-        WRONG_OP(/=)
-    }
-
-    object *map_o::operator+(const object &o2) const {
-        WRONG_OP(+)
-    }
-
-    object *map_o::operator-(const object &o2) const {
-        WRONG_OP(-)
-    }
-
-    object *map_o::operator*(const object &o2) const {
-        WRONG_OP(*)
-    }
-
-    object *map_o::operator/(const object &o2) const {
-        WRONG_OP(/)
-    }
-
-    object *map_o::operator^(const object &o2) const {
-        WRONG_OP(^)
-    }
-
-    object *map_o::operator-() const {
-        WRONG_OP(-)
-    }
-
-    object *map_o::operator++() {
-        WRONG_OP(++)
-    }
-
-    object *map_o::operator--() {
-        WRONG_OP(--)
-    }
-
-    class token {
+    class bool_o : public object {
     public:
-        token(token_type type, string lexeme, object &literal, const char *filename, int line) : type(type),
-                                                                                                 lexeme(lexeme),
-                                                                                                 literal(literal),
-                                                                                                 filename(filename),
-                                                                                                 line(line) {}
+        bool value;
 
-        token_type type;
-        string lexeme;
-        object &literal;
-        const char *filename;
-        int line;
+        explicit bool_o(bool value);
 
-        string format() const {
-            stringstream ss;
-            ss << "type: " << KEYWORDS_S_VALUES[type] << ", lexeme: " << lexeme << ", literal: |";
-            string str = literal.str();
-            ss << str;
-            ss << "|, file: \"" << filename << "\", line:" << line;
-            return *new string(ss.str());
+        std::string str() const override {
+            return value ? "true" : "false";
         }
-        //void operator delete(void*){}
+
+        bool operator==(const object &o) const override;
+
+        bool operator&&(const object &o) const override;
+
+        bool operator||(const object &o) const override;
+
+        object *operator!() const override;
+
+        bool operator>(const object &o2) const override;
+
+        bool operator>=(const object &o2) const override;
+
+        bool operator<=(const object &o2) const override;
+
+        bool operator<(const object &o2) const override;
+
+        object *operator+=(const object &o) override;
+
+        object *operator-=(const object &o) override;
+
+        object *operator*=(const object &o) override;
+
+        object *operator/=(const object &o) override;
+
+        object *operator+(const object &o2) const override;
+
+        object *operator-(const object &o2) const override;
+
+        object *operator*(const object &o2) const override;
+
+        object *operator/(const object &o2) const override;
+
+        object *operator^(const object &o2) const override;
+
+        object *operator-() const override;
+
+        object *operator++() override;
+
+        object *operator--() override;
     };
 
-    class stack_call {
+    class null_o : public object {
     public:
-        const char *filename;
-        const int line;
-        const string &method;
+        null_o();
 
-        stack_call(const char *filename, const int line, const string &method) : filename(filename), line(line),
-                                                                                 method(method) {}
+        virtual std::string str() const;
+
+        bool operator==(const object &o) const override;
+
+        bool operator&&(const object &o) const override;
+
+        bool operator||(const object &o) const override;
+
+        object *operator!() const override;
+
+        bool operator>(const object &o2) const override;
+
+        bool operator>=(const object &o2) const override;
+
+        bool operator<=(const object &o2) const override;
+
+        bool operator<(const object &o2) const override;
+
+        object *operator+=(const object &o) override;
+
+        object *operator-=(const object &o) override;
+
+        object *operator*=(const object &o) override;
+
+        object *operator/=(const object &o) override;
+
+        object *operator+(const object &o2) const override;
+
+        object *operator-(const object &o2) const override;
+
+        object *operator*(const object &o2) const override;
+
+        object *operator/(const object &o2) const override;
+
+        object *operator^(const object &o2) const override;
+
+        object *operator-() const override;
+
+        object *operator++() override;
+
+        object *operator--() override;
+    };
+
+    class map_o : public object {
+    private:
+    public:
+        map_o();
+
+        std::map<std::string, object *> values;
+
+        bool operator==(const object &o) const override;
+
+        std::string str() const override;
+
+        const bool contains_key(std::string s);
+
+        bool operator&&(const object &o) const override;
+
+        bool operator||(const object &o) const override;
+
+        object *operator!() const override;
+
+        bool operator>(const object &o2) const override;
+
+        bool operator>=(const object &o2) const override;
+
+        bool operator<=(const object &o2) const override;
+
+        bool operator<(const object &o2) const override;
+
+        object *operator+=(const object &o) override;
+
+        object *operator-=(const object &o) override;
+
+        object *operator*=(const object &o) override;
+
+        object *operator/=(const object &o) override;
+
+        object *operator+(const object &o2) const override;
+
+        object *operator-(const object &o2) const override;
+
+        object *operator*(const object &o2) const override;
+
+        object *operator/(const object &o2) const override;
+
+        object *operator^(const object &o2) const override;
+
+        object *operator-() const override;
+
+        object *operator++() override;
+
+        object *operator--() override;
     };
 
     class variable {
@@ -800,56 +419,169 @@ namespace lns {
         const bool isfinal;
         object *value;
 
-        explicit variable() : value(new null_o()), isfinal(false) {}
+        explicit variable();
 
-        variable(const bool isfinal, object *value) : isfinal(isfinal), value(value) {}
+        variable(const bool isfinal, object *value);
 
-        const operator=(variable &v) {
-            this->value = v.value;
-        }
+        const operator=(variable &v);
     };
 
-    class return_signal : public exception {
+    class token {
+    public:
+        token(token_type type, std::string lexeme, object &literal, const char *filename, int line);
+
+        token_type type;
+        std::string lexeme;
+        object &literal;
+        const char *filename;
+        int line;
+
+        std::string format() const;
+        //void operator delete(void*){}
+    };
+
+    class runtime_environment {
+    private:
+        std::set <std::string> natives;
+        runtime_environment *enclosing;
+        std::map<std::string, lns::variable> values;
+
+        bool contains_key(const std::string name);
+
+    public:
+        explicit runtime_environment();
+
+        explicit runtime_environment(runtime_environment *enc);
+
+        object *get(const token &name);
+
+        void define(const token &name, object *o, bool is_final, bool is_global);
+
+        void assign(const token &name,token_type op, object *obj);
+
+        bool is_valid_object_type(objtype objtype);
+
+        object *get_map_field(const token &map_name, std::string key);
+
+        object *assign_map_field(const token &name,const token_type op,string_o *key, object *value);
+
+        void add_native(const std::string &s);
+
+        bool is_native(const std::string &basic_string);
+
+        object *increment(const token &name);
+
+        object *decrement(const token &name);
+
+        void reset();
+    };
+
+    class context : public lns::runtime_environment, public object {
+    public:
+        explicit context(runtime_environment *previous) : runtime_environment(previous), object(CONTEXT_T) {}
+
+        std::string str() const override;
+
+        bool operator==(const object &o) const override;
+
+        bool operator&&(const object &o) const override;
+
+        bool operator||(const object &o) const override;
+
+        object *operator!() const override;
+
+        bool operator>(const object &o2) const override;
+
+        bool operator>=(const object &o2) const override;
+
+        bool operator<=(const object &o2) const override;
+
+        bool operator<(const object &o2) const override;
+
+        object *operator+=(const object &o) override;
+
+        object *operator-=(const object &o) override;
+
+        object *operator*=(const object &o) override;
+
+        object *operator/=(const object &o) override;
+
+        object *operator+(const object &o2) const override;
+
+        object *operator-(const object &o2) const override;
+
+        object *operator*(const object &o2) const override;
+
+        object *operator/(const object &o2) const override;
+
+        object *operator^(const object &o2) const override;
+
+        object *operator-() const override;
+
+        object *operator++() override;
+
+        object *operator--() override;
+    };
+
+
+
+    class stack_call {
+    public:
+        const char *filename;
+        const int line;
+        const std::string &method;
+
+        stack_call(const char *filename, const int line, const std::string &method);
+    };
+
+
+    class return_signal : public std::exception {
     public:
         object *value;
         const token &keyword;
 
-        return_signal(object *value, const token &keyword) : value(value), keyword(keyword) {}
+        return_signal(object *value, const token &keyword);
 
-        const char *what() const throw() {
-            return exception::what();
-        }
+        const char *what() const throw() override;
     };
 
-    class break_signal : public exception {
+    class break_signal : public std::exception {
     public:
         const token &keyword;
 
-        break_signal(const token &keyword) : keyword(keyword) {}
+        explicit break_signal(const token &keyword);
 
-        const char *what() const throw() {
-            return exception::what();
-        }
+        const char *what() const throw() override;
     };
 
-    class continue_signal : public exception {
+    class continue_signal : public std::exception {
     public:
         const token &keyword;
 
-        const char *what() const throw() {
-            return exception::what();
-        }
+        const char *what() const throw() override;
 
-        explicit continue_signal(const token &keyword) : keyword(keyword) {}
+        explicit continue_signal(const token &keyword);
     };
 
-    static object *GET_DEFAULT_NULL() {
+    static object *GET_DEFAULT_NULL();
+
+    inline bool check_type(object_type type, const object &o1, const object &o2) {
+        return (o1.type == type && o2.type == type);
+    }
+
+    object *GET_DEFAULT_NULL() {
         return new null_o();
     }
 
-    inline bool check_type(object_type type, const object& o1, const object& o2){
-        return (o1.type == type && o2.type == type);
-    }
+    class runtime_exception : public std::exception {
+    public:
+        std::string &message;
+        const lns::token &token;
+
+        runtime_exception(const lns::token &token, std::string &m);
+
+        const char *what() const throw() override;
+    };
 }
 
 #endif //CPPLNS_DEFS_H
