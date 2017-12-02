@@ -504,8 +504,8 @@ string token::format() const {
     return *new string(ss.str());
 }
 
-stack_call::stack_call(const char *filename, const int line, const string &method) : filename(filename), line(line),
-                                                                                     method(method) {}
+stack_call::stack_call(const char *filename, const int line, const string &method, const bool native) : filename(filename), line(line),
+                                                                                     method(method) , native(native){}
 
 return_signal::return_signal(object *value, const token &keyword) : value(value), keyword(keyword) {}
 

@@ -19,6 +19,9 @@
 
 #define WRONG_OP(OP) throw "invalid operand(s) for operator " #OP;
 #define NULL_OP(OP) throw "null operand(s) given for operator " #OP;
+
+#define LNS_LIBRARY_LOCATION "/lns/lib/"
+
 #define CODE_LEAK_ERROR (-250)
 
 namespace lns {
@@ -530,8 +533,8 @@ namespace lns {
         const char *filename;
         const int line;
         const std::string &method;
-
-        stack_call(const char *filename, const int line, const std::string &method);
+        const bool native;
+        stack_call(const char *filename, const int line, const std::string &method, const bool native);
     };
 
 
