@@ -31,7 +31,7 @@ namespace lns {
     public:
         virtual void execute(stmt *s);
 
-        vector<stack_call *> stack_trace = *new vector<stack_call *>();
+        vector<stack_call *>& stack_trace;
     protected:
         object *evaluate(expr *e);
 
@@ -470,7 +470,6 @@ namespace natives {
         }
     };
 
-    vector<callable *> *builtin_natives();
 
 }
 #endif //CPPLNS_INTERPRETER_H
