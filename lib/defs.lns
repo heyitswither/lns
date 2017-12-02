@@ -1,0 +1,7 @@
+dpcheck "defs"
+
+global final var Number = "number"
+global final var String = "string"
+global final var Boolean = "boolean"
+global final var Map = "map"
+global final var Null = "null"

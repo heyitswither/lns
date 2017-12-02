@@ -1,0 +1,37 @@
+use "defs"
+
+dpcheck "string"
+
+context string
+    function length(s)
+        if not (type(s) == String) then
+            return null
+        end
+        var i = 0
+        var char = ""
+        while (char = s[i]) != null do
+            i++
+        end
+        return i
+    end
+
+    function sub(s,index)
+        var todo = string.length(s) - index
+        if todo < 0 then return null end
+        var s_ = ""
+        for var i = 0, i < todo, i++ do
+            s_ += s[i + index]
+        end
+        return s_
+    end
+
+    function sub2(s,start,end_)
+        var todo = string.length(s) - index
+        if todo < 0 then return null end
+        var s_ = ""
+        for var i = start, i < todo, i++ do
+            s_ += s[i + index]
+        end
+        return s_
+    end
+end
