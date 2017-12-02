@@ -5,6 +5,7 @@
 #include <iostream>
 #include "errors.h"
 #include "options.h"
+#include <vector>
 using namespace errors;
 using namespace std;
 using namespace lns;
@@ -16,7 +17,7 @@ void errors::runtime_error(lns::runtime_exception &error, std::vector<lns::stack
     had_runtime_error = true;
     if (lns::silent_execution || lns::silent_full) return;
     lns::token t = std::move(error.token);
-    lns::stack_call *first = new lns::stack_call(t.filename, t.line, t.lexeme);
+    lns::stack_call *first = new lns::stack_call(t.filename, t.line, t.lexeme,false);
     string &stringstack = gen_stack_trace_desc(first, stack);
     cerr << RUNTIME_ERROR << " in file ";
     cerr << t.filename;
@@ -28,7 +29,7 @@ void errors::runtime_error(lns::runtime_exception &error, std::vector<lns::stack
     //printf("%s in file %s%s: %s.\n%s",RUNTIME_ERROR,error.token.filename,stringstack.empty() ? (":" + error.token.line) : "",error.what(),stringstack.c_str());
 }
 
-string &errors::gen_stack_trace_desc(lns::stack_call *first_call, vector<lns::stack_call *> &stack) {
+string &errors::gen_stack_trace_desc(lns::stack_call *first_call, std::vector<lns::stack_call *> &stack) {
     string &s = *new std::string(""), s2 = *new std::string("");
     if (lns::prompt || stack.empty()) return s;
     string method;
@@ -37,11 +38,13 @@ string &errors::gen_stack_trace_desc(lns::stack_call *first_call, vector<lns::st
     lns::stack_call *current = nullptr;
     //cout << stack[2]->method << endl;
     while (!stack.empty()) {
-        current = move(stack.back());
+        current = stack.back();
         method = current->method;
         filename = current->filename;
         line = current->line;
-        s2 += "       function ";
+        s2 += "       ";
+        if(current->native) s2+="native ";
+        s2 += "function ";
         s2 += method;
         s2 += "(), called at ";
         s2 += filename;
@@ -65,7 +68,7 @@ void errors::fatal_error(exception &e) {
 }
 
 void errors::report(const char *type, const char *filename, int line, const char *where, const char *message) {
-    had_parse_error = true;
+    errors::had_parse_error = true;
     if (lns::silent_full) return;
     cerr << type << " in file " << filename << ":" << line << (where == "" ? "" : ",") << where << ": " << message
          << "." << endl;

@@ -4,18 +4,19 @@
 #include "scanner.h"
 #include "expr.h"
 #include "parser.h"
-#include "options.h"
 #include "interpreter.h"
 #include "debug.h"
-#include <chrono>
 #include <iomanip>
-#define COMPILER_VERSION "0.2"
-#define PROGRAM_START_SIGN "LNS v" COMPILER_VERSION ". All rights reserved.\n"
+
+
+#define INTERPRETER_VERSION "0.2"
+#define PROGRAM_START_SIGN "LNS v" INTERPRETER_VERSION ". All rights reserved.\n"
 using namespace std;
 using namespace errors;
 using namespace lns;
 using namespace std::chrono;
 namespace lns{
+
     static char * file = nullptr;
     static auto start_time = high_resolution_clock::now(),parsing_time = high_resolution_clock::now(),execution_time = high_resolution_clock::now();
     void option(string& o){
@@ -72,7 +73,7 @@ namespace lns{
             return;
         }
         //cout << "Total statements: " << to_string(stmts.size()) << endl;
-        if(had_parse_error) throw parse_exception();
+        if(errors::had_parse_error) throw parse_exception();
         if(i == nullptr) i = new interpreter();
         i->interpret(stmts);
         execution_time = high_resolution_clock::now();
@@ -82,7 +83,6 @@ namespace lns{
             cout << "Execution time: " << std::setprecision(5) << (double)duration_cast<microseconds>(execution_time - parsing_time).count()/1000 << "ms.\n";
             cout << "Total time:     " << std::setprecision(5) << (double)duration_cast<microseconds>(execution_time - start_time).count()/1000 << "ms.\n";
         }
-        cout << endl;
     }
 
     void reinit_errors() {
@@ -123,7 +123,6 @@ namespace lns{
     }
 }
 int main(const int argc, const char* argv[]) {
-    cout << endl;
     try{
         lns::inspect_args(argc - 1, argv);
         if(debugger_option){
@@ -137,6 +136,6 @@ int main(const int argc, const char* argv[]) {
     }catch(exception& e){
         fatal_error(e);
     }
-    cout << endl;
     return EXIT_UNKNOWN;
 }
+
