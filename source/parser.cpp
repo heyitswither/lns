@@ -72,13 +72,12 @@ stmt *parser::use() {
     if (match({NATIVES})) isnatives = true;
     token &t = consume(STRING, "expected string inside use statement");
     string &s = dynamic_cast<string_o *>(&t.literal)->value;
-    //consume(SEMICOLON, "expected semicolon after use statement");
     if (isnatives) return new uses_native_stmt(t.filename, t.line, t, s);
-    ifstream file(s);
+    ifstream file(best_file_path(s.c_str()));
     string source;
     stringstream ss;
     if (!file.is_open()) {
-        error(previous(), "use: file was not found or is unaccessible");
+        throw error(previous(), "use: file was not found or is unaccessible");
         return nullptr;
     }
     ss << file.rdbuf();
@@ -526,4 +525,17 @@ void parser::reset(vector<token *> tokens) {
     }
     this->current = 0;
     this->start = 0;
+}
+
+const char *lns::best_file_path(const char *filename) {
+    ifstream rel_file(filename);
+    auto buf = (char*) malloc(1024 * sizeof(char));
+    if(rel_file.is_open()) return filename;
+    *buf = '\0';
+    strcat(buf,LNS_LIBRARY_LOCATION);
+    strcat(buf,filename);
+    strcat(buf,".lns");
+    ifstream path_file(buf);
+    if(path_file.is_open()) return buf;
+    return filename;
 }

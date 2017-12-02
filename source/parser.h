@@ -13,6 +13,7 @@
 #include "scanner.h"
 #include <initializer_list>
 #include <fstream>
+#include <climits>
 
 #define PARSE_ERROR_CODE (-1)
 
@@ -122,5 +123,7 @@ namespace lns {
         void reset(vector<token *> tokens);
     };
 
+
+    const char* best_file_path(const char* filename);
 }
 #endif //CPPLNS_PARSER_H
