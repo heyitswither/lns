@@ -38,6 +38,7 @@ token_type lns::get_token_type(string &key) {
     if (key == "begin") return BEGIN;
     if (key == "then") return THEN;
     if (key == "do") return DO;
+    if (key == "bind") return BIND;
     if (key == "dpcheck") return DPCHECK;
     return UNRECOGNIZED;
 }

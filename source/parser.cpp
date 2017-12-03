@@ -70,9 +70,12 @@ stmt *parser::use() {
     bool isnatives = false;
     if (!use_allowed)use_not_allowed();
     if (match({NATIVES})) isnatives = true;
-    token &t = consume(STRING, "expected string inside use statement");
+    token &t = consume(STRING, "expected filename in use statement");
     string &s = dynamic_cast<string_o *>(&t.literal)->value;
-    if (isnatives) return new uses_native_stmt(t.filename, t.line, t, s);
+    if (isnatives) {
+        consume(BIND,"expected 'bind' after filename");
+        return new uses_native_stmt(t.filename, t.line, t, s, consume(IDENTIFIER,"expected identifier after 'bind'"));
+    }
     ifstream file(best_file_path(s.c_str()));
     string source;
     stringstream ss;
@@ -527,15 +530,3 @@ void parser::reset(vector<token *> tokens) {
     this->start = 0;
 }
 
-const char *lns::best_file_path(const char *filename) {
-    ifstream rel_file(filename);
-    auto buf = (char*) malloc(1024 * sizeof(char));
-    if(rel_file.is_open()) return filename;
-    *buf = '\0';
-    strcat(buf,LNS_LIBRARY_LOCATION);
-    strcat(buf,filename);
-    strcat(buf,".lns");
-    ifstream path_file(buf);
-    if(path_file.is_open()) return buf;
-    return filename;
-}

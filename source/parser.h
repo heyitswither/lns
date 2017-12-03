@@ -124,6 +124,5 @@ namespace lns {
     };
 
 
-    const char* best_file_path(const char* filename);
 }
 #endif //CPPLNS_PARSER_H
