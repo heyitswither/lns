@@ -87,7 +87,22 @@ lns::object *lns::string_o::operator*(const lns::object &o2) const {
 }
 
 lns::object *lns::string_o::operator/(const lns::object &o2) const {
-    WRONG_OP(/);
+    if(o2.type != NULL_T)
+        return GET_DEFAULT_NULL();
+    auto *map = new map_o();
+    unsigned long i = 0;
+    unsigned long current;
+    string partial = this->value;
+    while((current = partial.find(o2.str())) != string::npos){
+        string& s = *new string();
+        s+= std::to_string(i++);
+        map->values[s] = new string_o(partial.substr(0, current));
+        partial = partial.substr(current + 1,partial.size()-1);
+    }
+    string& s = *new string();
+    s+= std::to_string(i++);
+    map->values[s] = new string_o(move(partial));
+    return map;
 }
 
 lns::object *lns::string_o::operator^(const lns::object &o2) const {
