@@ -2,6 +2,7 @@
 // Created by lorenzo on 11/30/17.
 //
 
+#include "parser.h"
 #include "defs.h"
 #include "exceptions.h"
 #include "options.h"
@@ -630,6 +631,7 @@ object *runtime_environment::get(const token &name) {
     throw runtime_exception(name, s);
 }
 
+
 void runtime_environment::define(const token &name, object *o, bool is_final, bool is_global) {
     if (contains_key(name.lexeme)) {
         string &s = *new string();
@@ -644,6 +646,10 @@ void runtime_environment::define(const token &name, object *o, bool is_final, bo
     }
 
     values.insert(std::pair<string, variable>(name.lexeme, *new variable(is_final, o)));
+}
+
+object* lns::GET_DEFAULT_NULL() {
+    return new null_o();
 }
 
 void runtime_environment::assign(const token &name, token_type op, object *obj) {
@@ -821,8 +827,9 @@ void runtime_environment::reset() {
 
 variable::variable() : value(new null_o()), isfinal(false) {}
 
-const variable::operator=(variable &v) {
+const variable& variable::operator=(const variable &v) {
     this->value = v.value;
+    return *this;
 }
 
 variable::variable(const bool isfinal, object *value) : isfinal(isfinal), value(value) {}
@@ -832,4 +839,19 @@ lns::runtime_exception::runtime_exception(const lns::token &token, string &m) : 
 
 const char *lns::runtime_exception::what() const throw(){
     return message.c_str();
+}
+
+const char *lns::best_file_path(const char *filename) {
+    ifstream rel_file(filename);
+    auto buf = (char*) malloc(1024 * sizeof(char));
+    if(rel_file.is_open()) return filename;
+    *buf = '\0';
+    strcat(buf,LNS_LIBRARY_LOCATION);
+    strcat(buf,filename);
+    ifstream path_file(buf);
+    if(path_file.is_open()) return buf;
+    strcat(buf,".lns");
+    ifstream path_file2(buf);
+    if(path_file2.is_open()) return buf;
+    return filename;
 }

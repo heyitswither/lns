@@ -7,9 +7,6 @@
 
 #include <sstream>
 #include <string>
-//#include "stmt.h"
-//#include "errors.h"
-//#include "environments.h"
 #include <string>
 #include <map>
 #include <cmath>
@@ -24,7 +21,9 @@
 
 #define CODE_LEAK_ERROR (-250)
 
+
 namespace lns {
+    const char* best_file_path(const char* filename);
     enum token_type {
         // Single-character tokens.
                 LEFT_PAREN,
@@ -92,6 +91,7 @@ namespace lns {
         DO,
         END,
         DPCHECK,
+        BIND,
         UNRECOGNIZED,
         EOF_
     };
@@ -101,14 +101,14 @@ namespace lns {
     typedef objtype object_type;
 
     const std::string KEYWORDS_S_VALUES[] = {"LEFT_PAREN", "RIGHT_PAREN", "LEFT_SQR", "RIGHT_SQR", "COMMA", "DOT", "MINUS",
-                                        "MINUS_EQUALS", "PLUS", "PLUS_EQUALS", "PLUS_PLUS", "MINUS_MINUS", "SEMICOLON",
-                                        "SLASH", "SLASH_EQUALS", "STAR", "STAR_EQUALS", "HAT", "BANG", "BANG_EQUAL",
-                                        "EQUAL", "EQUAL_EQUAL", "GREATER", "GREATER_EQUAL", "LESS", "LESS_EQUAL",
-                                        "IDENTIFIER", "STRING", "NUMBER", "NATIVES", "AND", "CLASS", "ELSE", "FALSE",
-                                        "FUNCTION", "FOR", "IF", "NUL", "OR", "XOR", "NOR", "NAND", "NOT", "RETURN",
-                                        "SUPER", "THIS", "TRUE", "VAR", "WHILE", "GLOBAL", "FINAL", "USE", "BREAK",
-                                        "CONTINUE", "CONTEXT", "BEGIN", "THEN", "DO", "DPCHECK", "END", "UNRECOGNIZED",
-                                        "EOF_"};
+                                             "MINUS_EQUALS", "PLUS", "PLUS_EQUALS", "PLUS_PLUS", "MINUS_MINUS", "SEMICOLON",
+                                             "SLASH", "SLASH_EQUALS", "STAR", "STAR_EQUALS", "HAT", "BANG", "BANG_EQUAL",
+                                             "EQUAL", "EQUAL_EQUAL", "GREATER", "GREATER_EQUAL", "LESS", "LESS_EQUAL",
+                                             "IDENTIFIER", "STRING", "NUMBER", "NATIVES", "AND", "CLASS", "ELSE", "FALSE",
+                                             "FUNCTION", "FOR", "IF", "NUL", "OR", "XOR", "NOR", "NAND", "NOT", "RETURN",
+                                             "SUPER", "THIS", "TRUE", "VAR", "WHILE", "GLOBAL", "FINAL", "USE", "BREAK",
+                                             "CONTINUE", "CONTEXT", "BEGIN", "THEN", "DO", "DPCHECK", "END", "BIND", "UNRECOGNIZED",
+                                             "EOF_"};
 
     class object {
     private:
@@ -320,9 +320,9 @@ namespace lns {
 
     class null_o : public object {
     public:
-        null_o();
+        explicit null_o();
 
-        virtual std::string str() const;
+        std::string str() const override;
 
         bool operator==(const object &o) const override;
 
@@ -368,7 +368,7 @@ namespace lns {
     class map_o : public object {
     private:
     public:
-        map_o();
+        explicit map_o();
 
         std::map<std::string, object *> values;
 
@@ -424,9 +424,9 @@ namespace lns {
 
         explicit variable();
 
-        variable(const bool isfinal, object *value);
+        variable(bool isfinal, object *value);
 
-        const operator=(variable &v);
+        const variable& operator=(variable const &v);
     };
 
     class token {
@@ -449,7 +449,7 @@ namespace lns {
         runtime_environment *enclosing;
         std::map<std::string, lns::variable> values;
 
-        bool contains_key(const std::string name);
+        bool contains_key(std::string name);
 
     public:
         explicit runtime_environment();
@@ -566,14 +566,10 @@ namespace lns {
         explicit continue_signal(const token &keyword);
     };
 
-    static object *GET_DEFAULT_NULL();
+    object *GET_DEFAULT_NULL();
 
     inline bool check_type(object_type type, const object &o1, const object &o2) {
         return (o1.type == type && o2.type == type);
-    }
-
-    object *GET_DEFAULT_NULL() {
-        return new null_o();
     }
 
     class runtime_exception : public std::exception {
