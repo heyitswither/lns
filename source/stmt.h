@@ -192,12 +192,13 @@ const stmt* body;
 
 class uses_native_stmt : public stmt {
 public:
-uses_native_stmt(const char* file,int line, token& token, string& path) : token(token), path(path), stmt(line, file, USES_NATIVE_STMT_T) {}
+uses_native_stmt(const char* file,int line, token& where, string& lib_name, token& bind) : where(where), lib_name(lib_name), bind(bind), stmt(line, file, USES_NATIVE_STMT_T) {}
 void accept(stmt_visitor *v) override{
 v->visit_uses_native_stmt(this);
 }
-const token& token;
-const string& path;
+const token& where;
+const string& lib_name;
+const token& bind;
 };
 
 
