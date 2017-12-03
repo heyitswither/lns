@@ -42,7 +42,7 @@ public class generate {
                 "var        : token& name, expr& initializer, bool isglobal, bool isfinal",
                 "s_while    : expr& condition, stmt* body",
                 "s_for     : stmt* init, expr* condition, expr* increment, stmt* body",
-                "uses_native : token& token, string& path",
+                "uses_native : token& where, string& lib_name, token& bind",
                 "null       : token& where"
         ), Arrays.asList("\"expr.h\"","<memory>"), "void");
     }
