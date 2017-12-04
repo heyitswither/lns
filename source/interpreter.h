@@ -17,9 +17,6 @@
 #include <chrono>
 #include <thread>
 
-namespace lns {
-    class callable;
-}
 namespace natives {
     vector<lns::callable *> *builtin_natives();
 }
@@ -120,53 +117,6 @@ namespace lns {
 
         void interpret(vector<stmt *> &statements);
 
-    };
-
-    class callable : public object{
-    public:
-        callable();
-        virtual const int arity() const = 0;
-        virtual const std::string& name() const = 0;
-        virtual object *call(std::vector<object *> &args) = 0;
-        bool operator==(const object &o) const override;
-        std::string str() const override;
-        bool operator&&(const object &o) const override;
-
-        bool operator||(const object &o) const override;
-
-        object *operator!() const override;
-
-        bool operator>(const object &o2) const override;
-
-        bool operator>=(const object &o2) const override;
-
-        bool operator<=(const object &o2) const override;
-
-        bool operator<(const object &o2) const override;
-
-        object *operator+=(const object &o) override;
-
-        object *operator-=(const object &o) override;
-
-        object *operator*=(const object &o) override;
-
-        object *operator/=(const object &o) override;
-
-        object *operator+(const object &o2) const override;
-
-        object *operator-(const object &o2) const override;
-
-        object *operator*(const object &o2) const override;
-
-        object *operator/(const object &o2) const override;
-
-        object *operator^(const object &o2) const override;
-
-        object *operator-() const override;
-
-        object *operator++() override;
-
-        object *operator--() override;
     };
 
     class function : public callable{
