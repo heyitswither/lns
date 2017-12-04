@@ -14,9 +14,8 @@
 #include <vector>
 #include <set>
 
-#define WRONG_OP(OP) throw "invalid operand(s) for operator " #OP;
-#define NULL_OP(OP) throw "null operand(s) given for operator " #OP;
-
+#define WRONG_OP(OP) throw INVALID_OP(#OP,this->type,&o.type);
+#define WRONG_OP_UN(OP) throw INVALID_OP(#OP,this->type,nullptr);
 #define LNS_LIBRARY_LOCATION "/lns/lib/"
 
 #define CODE_LEAK_ERROR (-250)
@@ -460,6 +459,8 @@ namespace lns {
 
         void define(const token &name, object *o, bool is_final, bool is_global);
 
+        void define(const std::string &name, object *o, bool is_final);
+
         void assign(const token &name,token_type op, object *obj);
 
         bool is_valid_object_type(objtype objtype);
@@ -527,6 +528,53 @@ namespace lns {
     };
 
 
+    class callable : public object{
+    public:
+        callable();
+        virtual const int arity() const = 0;
+        virtual const std::string& name() const = 0;
+        virtual object *call(std::vector<object *> &args) = 0;
+        bool operator==(const object &o) const override;
+        std::string str() const override;
+        bool operator&&(const object &o) const override;
+
+        bool operator||(const object &o) const override;
+
+        object *operator!() const override;
+
+        bool operator>(const object &o2) const override;
+
+        bool operator>=(const object &o2) const override;
+
+        bool operator<=(const object &o2) const override;
+
+        bool operator<(const object &o2) const override;
+
+        object *operator+=(const object &o) override;
+
+        object *operator-=(const object &o) override;
+
+        object *operator*=(const object &o) override;
+
+        object *operator/=(const object &o) override;
+
+        object *operator+(const object &o2) const override;
+
+        object *operator-(const object &o2) const override;
+
+        object *operator*(const object &o2) const override;
+
+        object *operator/(const object &o2) const override;
+
+        object *operator^(const object &o2) const override;
+
+        object *operator-() const override;
+
+        object *operator++() override;
+
+        object *operator--() override;
+    };
+
 
     class stack_call {
     public:
@@ -581,6 +629,11 @@ namespace lns {
 
         const char *what() const throw() override;
     };
+
+    const char* INVALID_OP(const char* OP, const lns::object_type t1, const lns::object_type* t2);
+
+    const char *type_to_string(object_type t);
+
 }
 
 #endif //CPPLNS_DEFS_H
