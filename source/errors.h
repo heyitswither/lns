@@ -8,8 +8,9 @@
 #include "exceptions.h"
 #define EXIT_UNKNOWN (-1)
 namespace errors {
-    static bool had_parse_error = false;
-    static bool had_runtime_error = false;
+
+    extern bool had_parse_error;
+    extern bool had_runtime_error;
 
     void fatal_error(std::exception &e);
 

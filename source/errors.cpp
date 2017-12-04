@@ -6,9 +6,10 @@
 #include "errors.h"
 #include "options.h"
 #include <vector>
-using namespace errors;
 using namespace std;
 using namespace lns;
+bool errors::had_parse_error = false;
+bool errors::had_runtime_error = false;
 void errors::parse_error(const char *&file, int line, const char *message) {
     report(PARSE_ERROR, file, line, "", message);
 }
@@ -68,7 +69,7 @@ void errors::fatal_error(exception &e) {
 }
 
 void errors::report(const char *type, const char *filename, int line, const char *where, const char *message) {
-    errors::had_parse_error = true;
+    had_parse_error = true;
     if (lns::silent_full) return;
     cerr << type << " in file " << filename << ":" << line << (where == "" ? "" : ",") << where << ": " << message
          << "." << endl;
