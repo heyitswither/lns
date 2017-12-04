@@ -26,15 +26,15 @@ bool lns::string_o::operator==(const lns::object &o) const {
 }
 
 bool lns::string_o::operator||(const lns::object &o) const {
-    WRONG_OP('or')
+    WRONG_OP(or)
 }
 
 lns::object *lns::string_o::operator!() const {
-    WRONG_OP('not')
+    WRONG_OP_UN(not)
 }
 
 bool lns::string_o::operator&&(const lns::object &o) const {
-    WRONG_OP('and');
+    WRONG_OP(and);
 }
 
 lns::object *lns::string_o::operator+=(const lns::object &o) {
@@ -54,46 +54,46 @@ lns::object *lns::string_o::operator/=(const lns::object &o) {
     WRONG_OP(/);
 }
 
-bool lns::string_o::operator>(const lns::object &o2) const {
-    if (!check_type(STRING_T, *this, o2)) WRONG_OP(>);
-    return this->value > dynamic_cast<const string_o &>(o2).value;
+bool lns::string_o::operator>(const lns::object &o) const {
+    if (!check_type(STRING_T, *this, o)) WRONG_OP(>);
+    return this->value > dynamic_cast<const string_o &>(o).value;
 }
 
-bool lns::string_o::operator>=(const lns::object &o2) const {
-    if (!check_type(STRING_T, *this, o2)) WRONG_OP(>=);
-    return this->value >= dynamic_cast<const string_o &>(o2).value;
+bool lns::string_o::operator>=(const lns::object &o) const {
+    if (!check_type(STRING_T, *this, o)) WRONG_OP(>=);
+    return this->value >= dynamic_cast<const string_o &>(o).value;
 }
 
-bool lns::string_o::operator<=(const lns::object &o2) const {
-    if (!check_type(STRING_T, *this, o2)) WRONG_OP(<=);
-    return this->value <= dynamic_cast<const string_o &>(o2).value;
+bool lns::string_o::operator<=(const lns::object &o) const {
+    if (!check_type(STRING_T, *this, o)) WRONG_OP(<=);
+    return this->value <= dynamic_cast<const string_o &>(o).value;
 }
 
-bool lns::string_o::operator<(const lns::object &o2) const {
-    if (!check_type(STRING_T, *this, o2)) WRONG_OP(<);
-    return this->value < dynamic_cast<const string_o &>(o2).value;
+bool lns::string_o::operator<(const lns::object &o) const {
+    if (!check_type(STRING_T, *this, o)) WRONG_OP(<);
+    return this->value < dynamic_cast<const string_o &>(o).value;
 }
 
-lns::object *lns::string_o::operator+(const lns::object &o2) const {
-    return new string_o(this->value + o2.str());
+lns::object *lns::string_o::operator+(const lns::object &o) const {
+    return new string_o(this->value + o.str());
 }
 
-lns::object *lns::string_o::operator-(const lns::object &o2) const {
+lns::object *lns::string_o::operator-(const lns::object &o) const {
     WRONG_OP(-);
 }
 
-lns::object *lns::string_o::operator*(const lns::object &o2) const {
+lns::object *lns::string_o::operator*(const lns::object &o) const {
     WRONG_OP(*);
 }
 
-lns::object *lns::string_o::operator/(const lns::object &o2) const {
-    if(o2.type != NULL_T)
+lns::object *lns::string_o::operator/(const lns::object &o) const {
+    if(o.type != STRING_T)
         return GET_DEFAULT_NULL();
     auto *map = new map_o();
     unsigned long i = 0;
     unsigned long current;
     string partial = this->value;
-    while((current = partial.find(o2.str())) != string::npos){
+    while((current = partial.find(o.str())) != string::npos){
         string& s = *new string();
         s+= std::to_string(i++);
         map->values[s] = new string_o(partial.substr(0, current));
@@ -105,20 +105,20 @@ lns::object *lns::string_o::operator/(const lns::object &o2) const {
     return map;
 }
 
-lns::object *lns::string_o::operator^(const lns::object &o2) const {
+lns::object *lns::string_o::operator^(const lns::object &o) const {
     WRONG_OP(^);
 }
 
 lns::object *lns::string_o::operator++() {
-    WRONG_OP(++);
+    WRONG_OP_UN(++);
 }
 
 lns::object *lns::string_o::operator--() {
-    WRONG_OP(--);
+    WRONG_OP_UN(--);
 }
 
 lns::object *lns::string_o::operator-() const {
-    WRONG_OP(-(unary));
+    WRONG_OP_UN(- (unary));
 }
 
 
@@ -136,35 +136,35 @@ bool lns::number_o::operator==(const lns::object &o) const {
 }
 
 bool lns::number_o::operator&&(const lns::object &o) const {
-    WRONG_OP('and')
+    WRONG_OP(and)
 }
 
 bool lns::number_o::operator||(const lns::object &o) const {
-    WRONG_OP('or')
+    WRONG_OP(or)
 }
 
 lns::object *lns::number_o::operator!() const {
-    WRONG_OP('not')
+    WRONG_OP_UN(not)
 }
 
-bool lns::number_o::operator>(const lns::object &o2) const {
-    if (!check_type(NUMBER_T, *this, o2)) WRONG_OP(>);
-    return this->value > dynamic_cast<const number_o &>(o2).value;
+bool lns::number_o::operator>(const lns::object &o) const {
+    if (!check_type(NUMBER_T, *this, o)) WRONG_OP(>);
+    return this->value > dynamic_cast<const number_o &>(o).value;
 }
 
-bool lns::number_o::operator>=(const lns::object &o2) const {
-    if (!check_type(NUMBER_T, *this, o2)) WRONG_OP(>=);
-    return this->value >= dynamic_cast<const number_o &>(o2).value;
+bool lns::number_o::operator>=(const lns::object &o) const {
+    if (!check_type(NUMBER_T, *this, o)) WRONG_OP(>=);
+    return this->value >= dynamic_cast<const number_o &>(o).value;
 }
 
-bool lns::number_o::operator<=(const lns::object &o2) const {
-    if (!check_type(NUMBER_T, *this, o2)) WRONG_OP(<=);
-    return this->value >= dynamic_cast<const number_o &>(o2).value;
+bool lns::number_o::operator<=(const lns::object &o) const {
+    if (!check_type(NUMBER_T, *this, o)) WRONG_OP(<=);
+    return this->value >= dynamic_cast<const number_o &>(o).value;
 }
 
-bool lns::number_o::operator<(const lns::object &o2) const {
-    if (!check_type(NUMBER_T, *this, o2)) WRONG_OP(<);
-    return this->value < dynamic_cast<const number_o &>(o2).value;
+bool lns::number_o::operator<(const lns::object &o) const {
+    if (!check_type(NUMBER_T, *this, o)) WRONG_OP(<);
+    return this->value < dynamic_cast<const number_o &>(o).value;
 }
 
 lns::object *lns::number_o::operator+=(const lns::object &o) {
@@ -191,29 +191,29 @@ lns::object *lns::number_o::operator/=(const lns::object &o) {
     return this;
 }
 
-lns::object *lns::number_o::operator+(const lns::object &o2) const {
-    if (!check_type(NUMBER_T, *this, o2)) WRONG_OP(+);
-    return new number_o(this->value + dynamic_cast<const number_o &>(o2).value);
+lns::object *lns::number_o::operator+(const lns::object &o) const {
+    if (!check_type(NUMBER_T, *this, o)) WRONG_OP(+);
+    return new number_o(this->value + dynamic_cast<const number_o &>(o).value);
 }
 
-lns::object *lns::number_o::operator-(const lns::object &o2) const {
-    if (!check_type(NUMBER_T, *this, o2)) WRONG_OP(-);
-    return new number_o(this->value - dynamic_cast<const number_o &>(o2).value);
+lns::object *lns::number_o::operator-(const lns::object &o) const {
+    if (!check_type(NUMBER_T, *this, o)) WRONG_OP(-);
+    return new number_o(this->value - dynamic_cast<const number_o &>(o).value);
 }
 
-lns::object *lns::number_o::operator*(const lns::object &o2) const {
-    if (!check_type(NUMBER_T, *this, o2)) WRONG_OP(+);
-    return new number_o(this->value * dynamic_cast<const number_o &>(o2).value);
+lns::object *lns::number_o::operator*(const lns::object &o) const {
+    if (!check_type(NUMBER_T, *this, o)) WRONG_OP(+);
+    return new number_o(this->value * dynamic_cast<const number_o &>(o).value);
 }
 
-lns::object *lns::number_o::operator/(const lns::object &o2) const {
-    if (!check_type(NUMBER_T, *this, o2)) WRONG_OP(+);
-    return new number_o(this->value / dynamic_cast<const number_o &>(o2).value);
+lns::object *lns::number_o::operator/(const lns::object &o) const {
+    if (!check_type(NUMBER_T, *this, o)) WRONG_OP(+);
+    return new number_o(this->value / dynamic_cast<const number_o &>(o).value);
 }
 
-lns::object *lns::number_o::operator^(const lns::object &o2) const {
-    if (!check_type(NUMBER_T, *this, o2)) WRONG_OP(+);
-    return new number_o(pow(this->value, dynamic_cast<const number_o &>(o2).value));
+lns::object *lns::number_o::operator^(const lns::object &o) const {
+    if (!check_type(NUMBER_T, *this, o)) WRONG_OP(+);
+    return new number_o(pow(this->value, dynamic_cast<const number_o &>(o).value));
 }
 
 lns::object *lns::number_o::operator-() const {
@@ -239,12 +239,12 @@ bool lns::bool_o::operator==(const lns::object &o) const {
 }
 
 bool lns::bool_o::operator&&(const lns::object &o) const {
-    if (!check_type(BOOL_T, *this, o)) WRONG_OP('and')
+    if (!check_type(BOOL_T, *this, o)) WRONG_OP(and)
     return this->value && dynamic_cast<const bool_o &>(o).value;
 }
 
 bool lns::bool_o::operator||(const lns::object &o) const {
-    if (!check_type(BOOL_T, *this, o)) WRONG_OP('or')
+    if (!check_type(BOOL_T, *this, o)) WRONG_OP(or)
     return this->value || dynamic_cast<const bool_o &>(o).value;
 }
 
@@ -252,19 +252,19 @@ lns::object *lns::bool_o::operator!() const {
     return new bool_o(!this->value);
 }
 
-bool lns::bool_o::operator>(const lns::object &o2) const {
+bool lns::bool_o::operator>(const lns::object &o) const {
     WRONG_OP(>)
 }
 
-bool lns::bool_o::operator>=(const lns::object &o2) const {
+bool lns::bool_o::operator>=(const lns::object &o) const {
     WRONG_OP(>=)
 }
 
-bool lns::bool_o::operator<=(const lns::object &o2) const {
+bool lns::bool_o::operator<=(const lns::object &o) const {
     WRONG_OP(<=)
 }
 
-bool lns::bool_o::operator<(const lns::object &o2) const {
+bool lns::bool_o::operator<(const lns::object &o) const {
     WRONG_OP(<)
 }
 
@@ -284,36 +284,36 @@ lns::object *lns::bool_o::operator/=(const lns::object &o) {
     WRONG_OP(/=)
 }
 
-lns::object *lns::bool_o::operator+(const lns::object &o2) const {
+lns::object *lns::bool_o::operator+(const lns::object &o) const {
     WRONG_OP(+)
 }
 
-lns::object *lns::bool_o::operator-(const lns::object &o2) const {
+lns::object *lns::bool_o::operator-(const lns::object &o) const {
     WRONG_OP(-)
 }
 
-lns::object *lns::bool_o::operator*(const lns::object &o2) const {
+lns::object *lns::bool_o::operator*(const lns::object &o) const {
     WRONG_OP(*)
 }
 
-lns::object *lns::bool_o::operator/(const lns::object &o2) const {
+lns::object *lns::bool_o::operator/(const lns::object &o) const {
     WRONG_OP(/)
 }
 
-lns::object *lns::bool_o::operator^(const lns::object &o2) const {
+lns::object *lns::bool_o::operator^(const lns::object &o) const {
     WRONG_OP(^)
 }
 
 lns::object *lns::bool_o::operator-() const {
-    WRONG_OP(-)
+    WRONG_OP_UN(-)
 }
 
 lns::object *lns::bool_o::operator++() {
-    WRONG_OP(++)
+    WRONG_OP_UN(++)
 }
 
 lns::object *lns::bool_o::operator--() {
-    WRONG_OP(--)
+    WRONG_OP_UN(--)
 }
 
 lns::null_o::null_o() : object(NULL_T) {}
@@ -327,79 +327,79 @@ bool lns::null_o::operator==(const lns::object &o) const {
 }
 
 bool lns::null_o::operator&&(const lns::object &o) const {
-    NULL_OP(&&)
+    WRONG_OP_UN(and)
 }
 
 bool lns::null_o::operator||(const lns::object &o) const {
-    NULL_OP(||)
+    WRONG_OP_UN(or)
 }
 
 lns::object *lns::null_o::operator!() const {
-    NULL_OP(!)
+    WRONG_OP_UN(not)
 }
 
-bool lns::null_o::operator>(const lns::object &o2) const {
-    NULL_OP(>)
+bool lns::null_o::operator>(const lns::object &o) const {
+    WRONG_OP(>)
 }
 
-bool lns::null_o::operator>=(const lns::object &o2) const {
-    NULL_OP(>=)
+bool lns::null_o::operator>=(const lns::object &o) const {
+    WRONG_OP(>=)
 }
 
-bool lns::null_o::operator<=(const lns::object &o2) const {
-    NULL_OP(<=)
+bool lns::null_o::operator<=(const lns::object &o) const {
+    WRONG_OP(<=)
 }
 
-bool lns::null_o::operator<(const lns::object &o2) const {
-    NULL_OP(<)
+bool lns::null_o::operator<(const lns::object &o) const {
+    WRONG_OP(<)
 }
 
 lns::object *lns::null_o::operator+=(const lns::object &o) {
-    NULL_OP(+=)
+    WRONG_OP(+=)
 }
 
 lns::object *lns::null_o::operator-=(const lns::object &o) {
-    NULL_OP(-=)
+    WRONG_OP(-=)
 }
 
 lns::object *lns::null_o::operator*=(const lns::object &o) {
-    NULL_OP(*=)
+    WRONG_OP(*=)
 }
 
 lns::object *lns::null_o::operator/=(const lns::object &o) {
-    NULL_OP(/=)
+    WRONG_OP(/=)
 }
 
-lns::object *lns::null_o::operator+(const lns::object &o2) const {
-    NULL_OP(+)
+lns::object *lns::null_o::operator+(const lns::object &o) const {
+    WRONG_OP(+)
 }
 
-lns::object *lns::null_o::operator-(const lns::object &o2) const {
-    NULL_OP(-)
+lns::object *lns::null_o::operator-(const lns::object &o) const {
+    WRONG_OP(-)
 }
 
-lns::object *lns::null_o::operator*(const lns::object &o2) const {
-    NULL_OP(*)
+lns::object *lns::null_o::operator*(const lns::object &o) const {
+    WRONG_OP(*)
 }
 
-lns::object *lns::null_o::operator/(const lns::object &o2) const {
-    NULL_OP(/)
+lns::object *lns::null_o::operator/(const lns::object &o) const {
+    WRONG_OP(/)
 }
 
-lns::object *lns::null_o::operator^(const lns::object &o2) const {
-    NULL_OP(^)
+lns::object *lns::null_o::operator^(const lns::object &o) const {
+    WRONG_OP(^)
 }
 
 lns::object *lns::null_o::operator-() const {
-    NULL_OP(-)
+    WRONG_OP_UN(-)
 }
 
 lns::object *lns::null_o::operator++() {
-    NULL_OP(++)
+    WRONG_OP_UN(++)
 }
 
 lns::object *lns::null_o::operator--() {
-    NULL_OP(--)
+    WRONG_OP_UN(--)
 }
 
 bool map_o::operator==(const object &o) const {
@@ -408,30 +408,30 @@ bool map_o::operator==(const object &o) const {
 }
 
 bool map_o::operator&&(const object &o) const {
-    WRONG_OP('and')
+    WRONG_OP(and)
 }
 
 bool map_o::operator||(const object &o) const {
-    WRONG_OP('or')
+    WRONG_OP(or)
 }
 
 object *map_o::operator!() const {
-    WRONG_OP('not')
+    WRONG_OP_UN(not)
 }
 
-bool map_o::operator>(const object &o2) const {
+bool map_o::operator>(const object &o) const {
     WRONG_OP(>)
 }
 
-bool map_o::operator>=(const object &o2) const {
+bool map_o::operator>=(const object &o) const {
     WRONG_OP(>=)
 }
 
-bool map_o::operator<=(const object &o2) const {
+bool map_o::operator<=(const object &o) const {
     WRONG_OP(<=)
 }
 
-bool map_o::operator<(const object &o2) const {
+bool map_o::operator<(const object &o) const {
     WRONG_OP(<)
 }
 
@@ -451,36 +451,36 @@ object *map_o::operator/=(const object &o) {
     WRONG_OP(/=)
 }
 
-object *map_o::operator+(const object &o2) const {
+object *map_o::operator+(const object &o) const {
     WRONG_OP(+)
 }
 
-object *map_o::operator-(const object &o2) const {
+object *map_o::operator-(const object &o) const {
     WRONG_OP(-)
 }
 
-object *map_o::operator*(const object &o2) const {
+object *map_o::operator*(const object &o) const {
     WRONG_OP(*)
 }
 
-object *map_o::operator/(const object &o2) const {
+object *map_o::operator/(const object &o) const {
     WRONG_OP(/)
 }
 
-object *map_o::operator^(const object &o2) const {
+object *map_o::operator^(const object &o) const {
     WRONG_OP(^)
 }
 
 object *map_o::operator-() const {
-    WRONG_OP(-)
+    WRONG_OP_UN(-)
 }
 
 object *map_o::operator++() {
-    WRONG_OP(++)
+    WRONG_OP_UN(++)
 }
 
 object *map_o::operator--() {
-    WRONG_OP(--)
+    WRONG_OP_UN(--)
 }
 
 map_o::map_o() : object(MAP_T) {}
@@ -550,30 +550,30 @@ bool context::operator==(const object &o) const {
 }
 
 bool context::operator&&(const object &o) const {
-    WRONG_OP(&&)
+    WRONG_OP_UN(and)
 }
 
 bool context::operator||(const object &o) const {
-    WRONG_OP(||)
+    WRONG_OP_UN(or)
 }
 
 object *context::operator!() const {
-    WRONG_OP(!)
+    WRONG_OP_UN(not)
 }
 
-bool context::operator>(const object &o2) const {
+bool context::operator>(const object &o) const {
     WRONG_OP(>)
 }
 
-bool context::operator>=(const object &o2) const {
+bool context::operator>=(const object &o) const {
     WRONG_OP(>=)
 }
 
-bool context::operator<=(const object &o2) const {
+bool context::operator<=(const object &o) const {
     WRONG_OP(<=)
 }
 
-bool context::operator<(const object &o2) const {
+bool context::operator<(const object &o) const {
     WRONG_OP(<)
 }
 
@@ -593,36 +593,36 @@ object *context::operator/=(const object &o) {
     WRONG_OP(/=)
 }
 
-object *context::operator+(const object &o2) const {
+object *context::operator+(const object &o) const {
     WRONG_OP(+)
 }
 
-object *context::operator-(const object &o2) const {
+object *context::operator-(const object &o) const {
     WRONG_OP(-)
 }
 
-object *context::operator*(const object &o2) const {
+object *context::operator*(const object &o) const {
     WRONG_OP(*)
 }
 
-object *context::operator/(const object &o2) const {
+object *context::operator/(const object &o) const {
     WRONG_OP(/)
 }
 
-object *context::operator^(const object &o2) const {
+object *context::operator^(const object &o) const {
     WRONG_OP(^)
 }
 
 object *context::operator-() const {
-    WRONG_OP(-)
+    WRONG_OP_UN(-)
 }
 
 object *context::operator++() {
-    WRONG_OP(++)
+    WRONG_OP_UN(++)
 }
 
 object *context::operator--() {
-    WRONG_OP(--)
+    WRONG_OP_UN(--)
 }
 
 bool lns::runtime_environment::contains_key(const std::string name) {
@@ -659,9 +659,9 @@ void runtime_environment::define(const token &name, object *o, bool is_final, bo
             return enclosing->define(name, o, is_final, is_global);
         }
     }
-
-    values.insert(std::pair<string, variable>(name.lexeme, *new variable(is_final, o)));
+    define(name.lexeme,o,is_final);
 }
+
 
 object* lns::GET_DEFAULT_NULL() {
     return new null_o();
@@ -840,6 +840,10 @@ void runtime_environment::reset() {
     if (enclosing != nullptr) enclosing->reset();
 }
 
+void runtime_environment::define(const std::string &name, object *o, bool is_final) {
+    values.insert(std::pair<string, lns::variable>(name, *new variable(is_final, o)));
+}
+
 variable::variable() : value(new null_o()), isfinal(false) {}
 
 const variable& variable::operator=(const variable &v) {
@@ -869,4 +873,117 @@ const char *lns::best_file_path(const char *filename) {
     ifstream path_file2(buf);
     if(path_file2.is_open()) return buf;
     return filename;
+}
+
+callable::callable() : object(objtype::CALLABLE_T) {}
+
+bool callable::operator==(const object &o) const {
+    return false;
+}
+
+string callable::str() const {
+    stringstream s;
+    s << "<function@" << static_cast<const void *>(this) << ", name: \"" << name() << "\">";
+    return s.str();
+}
+
+bool callable::operator&&(const object &o) const {
+    WRONG_OP_UN(and)
+}
+
+bool callable::operator||(const object &o) const {
+    WRONG_OP_UN(or)
+}
+
+object *callable::operator!() const {
+    WRONG_OP_UN(not)
+}
+
+bool callable::operator>(const object &o) const {
+    WRONG_OP(>)
+}
+
+bool callable::operator>=(const object &o) const {
+    WRONG_OP(>=)
+}
+
+bool callable::operator<=(const object &o) const {
+    WRONG_OP(<=)
+}
+
+bool callable::operator<(const object &o) const {
+    WRONG_OP(<)
+}
+
+object *callable::operator+=(const object &o) {
+    WRONG_OP(+=)
+}
+
+object *callable::operator-=(const object &o) {
+    WRONG_OP(-=)
+}
+
+object *callable::operator*=(const object &o) {
+    WRONG_OP(*=)
+}
+
+object *callable::operator/=(const object &o) {
+    WRONG_OP(/=)
+}
+
+object *callable::operator+(const object &o) const {
+    WRONG_OP(+)
+}
+
+object *callable::operator-(const object &o) const {
+    WRONG_OP(-)
+}
+
+object *callable::operator*(const object &o) const {
+    WRONG_OP(*)
+}
+
+object *callable::operator/(const object &o) const {
+    WRONG_OP(/)
+}
+
+object *callable::operator^(const object &o) const {
+    WRONG_OP(^)
+}
+
+object *callable::operator-() const {
+    WRONG_OP_UN(-)
+}
+
+object *callable::operator++() {
+    WRONG_OP_UN(++)
+}
+
+object *callable::operator--() {
+    WRONG_OP_UN(--)
+}
+const char* lns::INVALID_OP(const char* OP, const lns::object_type t1, const lns::object_type* t2){
+    auto * buf = (char*)malloc(sizeof(char) * 64);
+    strcat(buf,"Operator '");
+    strcat(buf,OP);
+    strcat(buf,t2 == nullptr ? "' is not applicable to type '" : "' is invalid for types '");
+    strcat(buf,type_to_string(t1));
+    if(t2 != nullptr){
+        strcat(buf,"' and '");
+        strcat(buf,type_to_string(*t2));
+    }
+    strcat(buf,"'");
+    return buf;
+}
+const char *lns::type_to_string(object_type t) {
+    switch(t){
+        case NUMBER_T:return "number";
+        case STRING_T:return "string";
+        case BOOL_T:return "bool";
+        case NULL_T:return "null";
+        case MAP_T:return "map";
+        case CALLABLE_T:return "callable";
+        case CONTEXT_T:return "context";
+    }
+    return "unknown";
 }
