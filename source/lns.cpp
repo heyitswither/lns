@@ -73,7 +73,7 @@ namespace lns{
             return;
         }
         //cout << "Total statements: " << to_string(stmts.size()) << endl;
-        if(errors::had_parse_error) throw parse_exception();
+        if(had_parse_error) throw parse_exception();
         if(i == nullptr) i = new interpreter();
         i->interpret(stmts);
         execution_time = high_resolution_clock::now();
@@ -86,11 +86,11 @@ namespace lns{
     }
 
     void reinit_errors() {
-        errors::had_parse_error = false;
-        errors::had_runtime_error = false;
+        had_parse_error = false;
+        had_runtime_error = false;
     }
     void run_prompt(){
-        prompt = true;
+        lns::prompt = true;
         string source;
         const char filename[] = "stdin";
         interpreter *i = new interpreter();
