@@ -160,6 +160,7 @@ stmt *parser::declaration() {
         if (match({USE})) return use();
         if (match({DPCHECK})) {
             if (dpcheck()) throw SIG_EXIT_PARSER;
+            return nullptr;
         }
         use_allowed = false;
         bool is_global = false, is_final = false;
