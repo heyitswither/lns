@@ -439,6 +439,9 @@ object *interpreter::clone_or_keep(object *obj, const expr_type type, const toke
         case LITERAL_EXPR_T:
         case UNARY_EXPR_T:
         case NULL_EXPR_T:
+        case ASSIGN_EXPR_T:
+        case ASSIGN_MAP_FIELD_EXPR_T:
+        case CONTEXT_ASSIGN_EXPR_T:
             return obj;
     }
     object* ret = obj->clone();
