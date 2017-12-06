@@ -162,7 +162,7 @@ namespace lns {
 
         virtual object *operator--() = 0;
 
-
+        virtual object *clone() const = 0;
     };
 
     bool check_type(object_type type, const object &o1, const object &o2);
@@ -170,6 +170,8 @@ namespace lns {
     class string_o : public object {
     public:
         std::string value;
+
+        object *clone() const override;
 
         explicit string_o(std::string value);
 
@@ -264,6 +266,8 @@ namespace lns {
         object *operator++() override;
 
         object *operator--() override;
+
+        object *clone() const;
     };
 
     class bool_o : public object {
@@ -315,6 +319,8 @@ namespace lns {
         object *operator++() override;
 
         object *operator--() override;
+
+        object *clone() const override;
     };
 
     class null_o : public object {
@@ -362,6 +368,8 @@ namespace lns {
         object *operator++() override;
 
         object *operator--() override;
+
+        object *clone() const;
     };
 
     class map_o : public object {
@@ -414,6 +422,8 @@ namespace lns {
         object *operator++() override;
 
         object *operator--() override;
+
+        object *clone() const;
     };
 
     class variable {
@@ -525,6 +535,8 @@ namespace lns {
         object *operator++() override;
 
         object *operator--() override;
+
+        object *clone() const override;
     };
 
 
@@ -573,6 +585,8 @@ namespace lns {
         object *operator++() override;
 
         object *operator--() override;
+
+        object *clone() const;
     };
 
 

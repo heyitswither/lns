@@ -121,6 +121,31 @@ lns::object *lns::string_o::operator-() const {
     WRONG_OP_UN(- (unary));
 }
 
+object *string_o::clone() const {
+    return new string_o(*new string(this->value));
+}
+
+object *number_o::clone() const {
+    return new number_o(this->value);
+}
+object *null_o::clone() const {
+    return new null_o();
+}
+object *bool_o::clone() const{
+    return new bool_o(this->value);
+}
+object *map_o::clone() const {
+    map_o* map = new map_o();
+    map->values = this->values;
+    return map;
+}
+
+object *callable::clone() const {
+    return nullptr;
+}
+object *context::clone() const {
+    return nullptr;
+}
 
 lns::number_o::number_o(double value) : object(objtype::NUMBER_T), value(value) {}
 
@@ -966,7 +991,7 @@ const char* lns::INVALID_OP(const char* OP, const lns::object_type t1, const lns
     auto * buf = (char*)malloc(sizeof(char) * 64);
     strcat(buf,"Operator '");
     strcat(buf,OP);
-    strcat(buf,t2 == nullptr ? "' is not applicable to type '" : "' is invalid for types '");
+    strcat(buf,t2 == nullptr ? "' is not applicable to type '" : "' is not applicable to types '");
     strcat(buf,type_to_string(t1));
     if(t2 != nullptr){
         strcat(buf,"' and '");
