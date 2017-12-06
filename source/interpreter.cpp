@@ -74,7 +74,7 @@ object *interpreter::visit_context_assign_expr(context_assign_expr *c) {
         throw runtime_exception(c->context_identifier, *new string("object is not a context"));
     }
     object *value = evaluate(const_cast<expr *>(c->value));
-    dynamic_cast<context *>(o)->assign(c->context_identifier, c->op, value);
+    dynamic_cast<context *>(o)->assign(c->context_identifier, c->op, clone_or_keep(value,c->value->type,c->context_identifier));
     return value;
 }
 
@@ -88,7 +88,7 @@ object *interpreter::visit_decrement_expr(decrement_expr *d) {
 
 object *interpreter::visit_assign_expr(assign_expr *a) {
     object *value = evaluate(const_cast<expr *>(a->value));
-    environment->assign(a->name, a->op, value);
+    environment->assign(a->name, a->op, clone_or_keep(value,a->value->type,a->name));
     return value;
 }
 
@@ -224,12 +224,13 @@ object *lns::interpreter::get_map_field(token &where, object *obj, object *key) 
 }
 
 object *
-interpreter::assign_map_field(const token &where, object *obj, const token_type op, string_o *key, object *value) {
+interpreter::assign_map_field(const token &where, object *obj, const token_type op, string_o *key, object *v) {
     map_o *map;
     if ((map = dynamic_cast<map_o *>(obj)) == nullptr) {
         throw runtime_exception(where, *new string("object is not a map"));
     }
     try {
+        object* value = clone_or_keep(v, static_cast<const expr_type>(op), where);
         switch (op) {
             case EQUAL:
                 map->values[key->value] = value;
@@ -330,12 +331,12 @@ void interpreter::visit_continue_stmt(continue_stmt *c) {
 }
 
 void interpreter::visit_var_stmt(var_stmt *v) {
-    object *val = lns::GET_DEFAULT_NULL();
     if (v->initializer.type != NULL_STMT_T) {
-        delete val;
-        val = evaluate(const_cast<expr *>(&v->initializer));
+        object* val = evaluate(const_cast<expr *>(&v->initializer));
+        environment->define(const_cast<token &>(v->name), clone_or_keep(val,v->initializer.type,v->name), v->isfinal, v->isglobal);
+    }else{
+        environment->define(const_cast<token &>(v->name), new null_o, v->isfinal, v->isglobal);
     }
-    environment->define(const_cast<token &>(v->name), val, v->isfinal, v->isglobal);
 }
 
 void interpreter::visit_s_while_stmt(s_while_stmt *s) {
@@ -427,6 +428,22 @@ void interpreter::interpret(vector<stmt *> &statements) {
         runtime_exception e(s.keyword, *new string("break statements can only be used inside of loops"));
         errors::runtime_error(e, stack_trace);
     }
+}
+
+object *interpreter::clone_or_keep(object *obj, const expr_type type, const token &where) {
+    switch(type){
+        case INCREMENT_EXPR_T:
+        case DECREMENT_EXPR_T:
+        case BINARY_EXPR_T:
+        case CALL_EXPR_T:
+        case LITERAL_EXPR_T:
+        case UNARY_EXPR_T:
+        case NULL_EXPR_T:
+            return obj;
+    }
+    object* ret = obj->clone();
+    if(ret == nullptr) throw runtime_exception(where,*new string(obj->type == CONTEXT_T ? "illegal assignment: context" : "illegal assignment: callable"));
+    return ret;
 }
 
 

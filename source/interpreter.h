@@ -117,6 +117,7 @@ namespace lns {
 
         void interpret(vector<stmt *> &statements);
 
+        object *clone_or_keep(object *obj, const expr_type type, const token &where);
     };
 
     class function : public callable{
