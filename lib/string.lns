@@ -1,14 +1,13 @@
+dpcheck "string"
 use "defs"
 
-dpcheck "string"
-
-context string
+context String
     function length(s)
-        if not (type(s) == String) then
+        if not (type(s) == STRING) then
             return null
         end
         var i = 0
-        var char = ""
+        var char
         while (char = s[i]) != null do
             i++
         end
@@ -24,9 +23,10 @@ context string
         end
         return s_
     end
-
+    if
     function sub2(s,start,end_)
-        var todo = string.length(s) - index
+        if not ((type(s) == STRING) and (type(start) == NUMBER) and (type(end_) == NUMBER)) then return null end
+        var todo = String.length(s) - end_
         if todo < 0 then return null end
         var s_ = ""
         for var i = start, i < todo, i++ do
