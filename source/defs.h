@@ -17,6 +17,7 @@
 #define WRONG_OP(OP) throw INVALID_OP(#OP,this->type,&o.type);
 #define WRONG_OP_UN(OP) throw INVALID_OP(#OP,this->type,nullptr);
 #define LNS_LIBRARY_LOCATION "/lns/lib/"
+#define S(s) *new std::string(#s)
 
 #define CODE_LEAK_ERROR (-250)
 
