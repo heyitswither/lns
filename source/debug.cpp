@@ -287,7 +287,7 @@ void debug::build_and_run() {
     vector<stmt *> stmts;
     if (errors::had_parse_error) throw parse_exception();
     parser parser(tokens);
-    vector<stmt *> parsed = parser.parse();
+    vector<stmt *> parsed = parser.parse(false);
     if (errors::had_parse_error) throw parse_exception();
     this->stmts.clear();
     for (stmt *s : parsed) {
@@ -362,7 +362,7 @@ void debug::loadcode(const char *filename) {
     vector<stmt *> stmts;
     if (errors::had_parse_error) throw parse_exception();
     code_parser.reset(tokens);
-    vector<stmt *> parsed = code_parser.parse();
+    vector<stmt *> parsed = code_parser.parse(false);
     if (errors::had_parse_error) throw parse_exception();
     this->stmts.clear();
     for (stmt *s : parsed) {

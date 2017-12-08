@@ -76,23 +76,7 @@ stmt *parser::use() {
         consume(BIND,"expected 'bind' after filename");
         return new uses_native_stmt(t.filename, t.line, t, s, consume(IDENTIFIER,"expected identifier after 'bind'"));
     }
-    ifstream file(best_file_path(s.c_str()));
-    string source;
-    stringstream ss;
-    if (!file.is_open()) {
-        throw error(previous(), "use: file was not found or is unaccessible");
-        return nullptr;
-    }
-    ss << file.rdbuf();
-    source = ss.str();
-    scanner scanner = *new lns::scanner(s.c_str(), source);
-    vector<token *> &tkns = scanner.scan_tokens(true);
-    parser p(tkns);
-    vector<stmt *> &toadd = p.parse();
-    int i = 0;
-    for (; i < toadd.size(); i++) {
-        statements.push_back(toadd[i]);
-    }
+    ld_stmts(s);
     return nullptr;
 }
 
@@ -490,10 +474,11 @@ expr *parser::primary() {
 parser::parser(vector<token *> &tokens) : tokens(tokens), start(0), current(0), use_allowed(true),
                                           statements(*new vector<stmt *>()) {}
 
-vector<stmt *> &parser::parse() {
+vector<stmt *> &parser::parse(bool ld_std) {
     stmt *s;
     while (!is_at_end()) {
         try {
+            if(ld_std) ld_stmts(*new string("std"));
             s = declaration();
             if (s == nullptr) continue;
             statements.push_back(s);
@@ -529,5 +514,24 @@ void parser::reset(vector<token *> tokens) {
     }
     this->current = 0;
     this->start = 0;
+}
+
+void parser::ld_stmts(string &s) {
+    ifstream file(best_file_path(s.c_str()));
+    string source;
+    stringstream ss;
+    if (!file.is_open()) {
+        throw error(previous(), "use: file was not found or is unaccessible");
+    }
+    ss << file.rdbuf();
+    source = ss.str();
+    scanner scanner = *new lns::scanner(s.c_str(), source);
+    vector<token *> &tkns = scanner.scan_tokens(true);
+    parser p(tkns);
+    vector<stmt *> &toadd = p.parse(false);
+    int i = 0;
+    for (; i < toadd.size(); i++) {
+        statements.push_back(toadd[i]);
+    }
 }
 

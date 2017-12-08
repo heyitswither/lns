@@ -112,7 +112,7 @@ namespace lns {
 
         parser() = delete;
 
-        vector<stmt *> &parse();
+        vector<stmt *> &parse(bool ld_std);
 
         expr *expression();
 
@@ -121,6 +121,8 @@ namespace lns {
         bool is_at_end();
 
         void reset(vector<token *> tokens);
+
+        void ld_stmts(string &s);
     };
 
 
