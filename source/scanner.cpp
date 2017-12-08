@@ -6,7 +6,6 @@
 #include "errors.h"
 
 using namespace lns;
-
 token_type lns::get_token_type(string &key) {
     if (key == "and") return AND;
     if (key == "class") return CLASS;
@@ -229,20 +228,52 @@ char scanner::peek() {
 }
 
 void scanner::string_() {
+    string& s = *new string();
     while (true) {
-        if (peek() == '"') {
-            if (!prmatch('\\')) break;
-        }
         if (is_at_end()) break;
         if (peek() == '\n') line++;
-        advance();
+        char c = advance();
+        if(c == '\\'){
+            if(is_at_end()) errors::parse_error(filename,line,"unexpected escape character ('\\')");
+            switch(peek()) {
+                case 'b':
+                    s+='\b';
+                    break;
+                case 'f':
+                    s+='\f';
+                    break;
+                case 'n':
+                    s+='\n';
+                    break;
+                case 't':
+                    s+='\t';
+                    break;
+                case 'v':
+                    s+='\v';
+                    break;
+                case '\\':
+                    s+='\\';
+                    break;
+                case '\'':
+                    s+='\'';
+                    break;
+                case '"':
+                    s+='"';
+                    break;
+                default:
+                    errors::parse_error(filename,line,"unknown escaping sequence");
+            }
+            advance();
+            continue;
+        }
+        s+=c;
     }
     if (is_at_end()) {
         errors::parse_error(filename, line, "unterminated string");
         return;
     }
     advance();
-    string_o &value = *new string_o(source.substr(start + 1, (current - 1) - (start + 1)));
+    string_o &value = *new string_o(s);
     add_token(STRING, value);
 }
 
