@@ -135,8 +135,13 @@ bool parser::check_file(const char *str) {
 }
 
 bool parser::dpcheck() {
-    token &s = consume(STRING, "expected string after 'dkcheck' keyword");
-    return check_file(s.literal.str().c_str());
+    if(check(STRING)){
+        token& s = advance();
+        return check_file(s.literal.str().c_str());
+    }else if(check(THIS)){
+        token &s = advance();
+        return check_file(s.filename);
+    }else throw error(previous(),"expected string or 'this' after dpcheck");
 }
 
 stmt *parser::declaration() {
@@ -476,9 +481,9 @@ parser::parser(vector<token *> &tokens) : tokens(tokens), start(0), current(0), 
 
 vector<stmt *> &parser::parse(bool ld_std) {
     stmt *s;
+    if(ld_std) ld_stmts(*new string("std"));
     while (!is_at_end()) {
         try {
-            if(ld_std) ld_stmts(*new string("std"));
             s = declaration();
             if (s == nullptr) continue;
             statements.push_back(s);
@@ -517,7 +522,8 @@ void parser::reset(vector<token *> tokens) {
 }
 
 void parser::ld_stmts(string &s) {
-    ifstream file(best_file_path(s.c_str()));
+    const char* filename = best_file_path(s.c_str());
+    ifstream file(filename);
     string source;
     stringstream ss;
     if (!file.is_open()) {
@@ -525,7 +531,7 @@ void parser::ld_stmts(string &s) {
     }
     ss << file.rdbuf();
     source = ss.str();
-    scanner scanner = *new lns::scanner(s.c_str(), source);
+    scanner scanner = *new lns::scanner(filename, source);
     vector<token *> &tkns = scanner.scan_tokens(true);
     parser p(tkns);
     vector<stmt *> &toadd = p.parse(false);
