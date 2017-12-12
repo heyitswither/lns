@@ -56,7 +56,7 @@ namespace lns{
             }
         }
     }
-    void run(const char* filename,string& source, interpreter * i){
+    void run(const char* filename,string& source, interpreter * i, bool load_std){
         scanner scn (filename,source);
         vector<token*> tokens = scn.scan_tokens(true);
         vector<stmt*> stmts;
@@ -66,7 +66,7 @@ namespace lns{
         //}
         start_time = high_resolution_clock::now();
         parser parser(tokens);
-        stmts = parser.parse();
+        stmts = parser.parse(load_std);
         parsing_time = high_resolution_clock::now();
         if(parse_only){
             if(time_count) cout << "\nParsing time: " << std::setprecision(5) << duration_cast<microseconds>(parsing_time - start_time).count()/1000 << "ms.\n";
@@ -91,6 +91,7 @@ namespace lns{
     }
     void run_prompt(){
         lns::prompt = true;
+        bool load_std = true;
         string source;
         const char filename[] = "stdin";
         interpreter *i = new interpreter();
@@ -100,7 +101,8 @@ namespace lns{
             cout << "> ";
             getline(cin,source);
             try {
-                run(filename,source,i);
+                run(filename,source,i,load_std);
+                load_std = false;
             }catch(std::exception e){
 
             }
@@ -116,7 +118,7 @@ namespace lns{
             stringstream ss;
             ss << file.rdbuf();
             source = ss.str();
-            run(filename,source, nullptr);
+            run(filename,source, nullptr,true);
         }else{
             throw file_not_found_exception(filename);
         }
