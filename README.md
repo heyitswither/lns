@@ -1,7 +1,6 @@
 # lns
 
 *lns* is a simple scripting language written in C++.
-The repository root is a CLion project folder.  
 
 Visit the Wiki section for information about the language, the command and the interpreter.
 
