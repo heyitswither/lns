@@ -231,51 +231,59 @@ void scanner::string_() {
     string& s = *new string();
     while (true) {
         if (is_at_end()) break;
+        if (peek() == '\"') break;
         if (peek() == '\n') line++;
-        char c = advance();
-        if(c == '\\'){
-            if(is_at_end()) errors::parse_error(filename,line,"unexpected escape character ('\\')");
-            switch(peek()) {
+        if (peek() == '\\') {
+            advance();
+            char c;
+            switch (c = peek()) {
+                case 'n':
+                    s += '\n';
+                    break;
+                case 'r':
+                    s += '\r';
+                case 't':
+                    s += '\t';
+                    break;
                 case 'b':
-                    s+='\b';
+                    s += '\b';
                     break;
                 case 'f':
-                    s+='\f';
-                    break;
-                case 'n':
-                    s+='\n';
-                    break;
-                case 't':
-                    s+='\t';
+                    s += '\f';
                     break;
                 case 'v':
-                    s+='\v';
+                    s += '\v';
                     break;
                 case '\\':
-                    s+='\\';
+                    s += '\\';
                     break;
                 case '\'':
-                    s+='\'';
+                    s += '\'';
                     break;
-                case '"':
-                    s+='"';
+                case '\"':
+                    s += '\"';
                     break;
                 default:
-                    errors::parse_error(filename,line,"unknown escaping sequence");
+                    string &error = *new string();
+                    error += "Invalid escape character: '";
+                    error += c;
+                    error += "'";
+                    errors::parse_error(filename, line, error.c_str());
+                    break;
             }
             advance();
-            continue;
+        } else {
+            s += advance();
         }
-        s+=c;
     }
     if (is_at_end()) {
         errors::parse_error(filename, line, "unterminated string");
         return;
     }
     advance();
-    string_o &value = *new string_o(s);
-    add_token(STRING, value);
+    add_token(STRING, *new string_o(s));
 }
+
 
 bool scanner::prmatch(char c) {
     if (current == 0) return false;
