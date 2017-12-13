@@ -15,10 +15,9 @@
 #include <fstream>
 #include <climits>
 
-#define PARSE_ERROR_CODE (-1)
-
 #define EXPTOCLOSE(what, line) (string("expected 'end' to close " #what "(opened at line ") + std::to_string(line) + string(")"))
-#define SIG_EXIT_PARSER -4096
+#define SIG_EXIT_PARSER (-4096)
+
 using namespace std;
 using namespace lns;
 namespace lns {

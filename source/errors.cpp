@@ -11,7 +11,7 @@ using namespace lns;
 bool errors::had_parse_error = false;
 bool errors::had_runtime_error = false;
 void errors::parse_error(const char *&file, int line, const char *message) {
-    report(PARSE_ERROR, file, line, "", message);
+    report(PARSE_ERROR_S, file, line, "", message);
 }
 
 void errors::runtime_error(lns::runtime_exception &error, std::vector<lns::stack_call *> &stack) {
@@ -20,14 +20,14 @@ void errors::runtime_error(lns::runtime_exception &error, std::vector<lns::stack
     lns::token t = std::move(error.token);
     lns::stack_call *first = new lns::stack_call(t.filename, t.line, t.lexeme,false);
     string &stringstack = gen_stack_trace_desc(first, stack);
-    cerr << RUNTIME_ERROR << " in file ";
+    cerr << RUNTIME_ERROR_S << " in file ";
     cerr << t.filename;
     cerr << (stringstack.empty() ? (string(":") + to_string(t.line)).c_str() : "");
     cerr << ": ";
     cerr << error.what();
     cerr << ".\n";
     cerr << stringstack;
-    //printf("%s in file %s%s: %s.\n%s",RUNTIME_ERROR,error.token.filename,stringstack.empty() ? (":" + error.token.line) : "",error.what(),stringstack.c_str());
+    //printf("%s in file %s%s: %s.\n%s",RUNTIME_ERROR_S,error.token.filename,stringstack.empty() ? (":" + error.token.line) : "",error.what(),stringstack.c_str());
 }
 
 string &errors::gen_stack_trace_desc(lns::stack_call *first_call, std::vector<lns::stack_call *> &stack) {
@@ -62,10 +62,10 @@ string &errors::gen_stack_trace_desc(lns::stack_call *first_call, std::vector<ln
     return s;
 }
 
-void errors::fatal_error(exception &e) {
+void errors::fatal_error(exception &e, int code) {
     cerr << e.what() << endl;
     cout << endl;
-    exit(-1);
+    exit(code);
 }
 
 void errors::report(const char *type, const char *filename, int line, const char *where, const char *message) {

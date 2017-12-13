@@ -176,7 +176,7 @@ stmt *parser::declaration() {
 
 int parser::error(token &token, const char *message) {
     errors::parse_error(token.filename, token.line, message);
-    return PARSE_ERROR_CODE;
+    return PARSE_ERROR;
 }
 
 var_stmt *parser::var_declaration(bool is_global, bool is_final) {

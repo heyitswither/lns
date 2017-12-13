@@ -135,9 +135,11 @@ int main(const int argc, const char* argv[]) {
         }else{
             lns::run_file(lns::file);
         }
-    }catch(exception& e){
-        fatal_error(e);
+    }catch(lns::parse_exception& e){
+        fatal_error(e, PARSE_ERROR);
+    }catch(std::exception& e){
+        fatal_error(e, FATAL_ERROR);
     }
-    return EXIT_UNKNOWN;
+    return EXIT_SUCCESS;
 }
 

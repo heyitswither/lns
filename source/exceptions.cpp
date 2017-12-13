@@ -2,6 +2,7 @@
 // Created by lorenzo on 11/30/17.
 //
 #include "exceptions.h"
+#include "errors.h"
 using namespace std;
 const char *lns::createDescription(string s) {
     s.append("\n");
@@ -11,7 +12,7 @@ const char *lns::createDescription(string s) {
 }
 
 const char *lns::unknown_option_exception::what() const throw(){
-    string s = FATAL_ERROR ": unknown option '";
+    string s = FATAL_ERROR_S ": unknown option '";
     s += option;
     s += "'.";
     return createDescription(s);
@@ -20,12 +21,12 @@ const char *lns::unknown_option_exception::what() const throw(){
 lns::unknown_option_exception::unknown_option_exception(string o) : option(o) {}
 
 const char *lns::memory_leak_exception::what() const throw(){
-    return createDescription(FATAL_ERROR ": a memory leak occurred during execution.");
+    return createDescription(FATAL_ERROR_S ": a memory leak occurred during execution.");
 }
 
 const char *lns::wrong_usage_exception::what() const throw(){
     return createDescription(
-            FATAL_ERROR ": wrong usage. Usage:\n        - lns [script] [-p|q-s|-S|--permissive|-t|-o]");
+            FATAL_ERROR_S ": wrong usage. Usage:\n        - lns [script] [-p|q-s|-S|--permissive|-t|-o]");
 }
 
 lns::file_not_found_exception::file_not_found_exception(string f) : filename(f) {}

@@ -428,6 +428,7 @@ void interpreter::interpret(vector<stmt *> &statements) {
         runtime_exception e(s.keyword, *new string("break statements can only be used inside of loops"));
         errors::runtime_error(e, stack_trace);
     }
+    if(errors::had_runtime_error) std::exit(RUNTIME_ERROR);
 }
 
 object *interpreter::clone_or_keep(object *obj, const expr_type type, const token &where) {
@@ -480,13 +481,6 @@ lns::function::function(interpreter *i, const lns::function_stmt *f) : i(i), dec
 
 vector<callable *> *::natives::builtin_natives() {
     vector<callable *> *natives = new vector<callable *>();
-    natives->push_back(new exit_c());
-    natives->push_back(new print_c());
-    natives->push_back(new println_c());
-    natives->push_back(new millis_c());
-    natives->push_back(new type_c());
-    natives->push_back(new sleep_c());
-    natives->push_back(new str_c());
     natives->push_back(new num_c());
     natives->push_back(new int_c());
     natives->push_back(new read_c());
@@ -494,7 +488,6 @@ vector<callable *> *::natives::builtin_natives() {
     natives->push_back(new readnr_c());
     natives->push_back(new readbool_c());
     natives->push_back(new map_c());
-    natives->push_back(new call_c());
     natives->push_back(new elems_c());
     return natives;
 }
