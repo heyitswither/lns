@@ -650,6 +650,21 @@ object *context::operator--() {
     WRONG_OP_UN(--)
 }
 
+set<callable *> & context::declare_natives() const{
+    std::set<callable*>& natives = *new std::set<callable*>();
+    function_container* f;
+    callable* clb;
+    for(const auto &elem : this->values){
+        if(DCAST_ASNCHK(f,function_container*,elem.second.value)){
+            std::set<callable*>& temp = f->declare_natives();
+            natives.insert(temp.begin(),temp.end());
+        }
+        if(elem.second.value->type == NATIVE_CALLABLE_T)
+            natives.insert(DCAST(callable*,elem.second.value));
+    }
+    return natives;
+}
+
 bool lns::runtime_environment::contains_key(const std::string name) {
     return values.find(name) != values.end();
 }
@@ -804,12 +819,8 @@ object *runtime_environment::assign_map_field(const token &name, const token_typ
     throw runtime_exception(name, s);
 }
 
-void runtime_environment::add_native(const string &s) {
-    natives.insert(s);
-}
-
-bool runtime_environment::is_native(const string &basic_string) {
-    return natives.find(basic_string) != natives.end();
+bool runtime_environment::is_native(callable *ptr) {
+    return natives.find(ptr) != natives.end();
 }
 
 object *runtime_environment::increment(const token &name) {
@@ -869,6 +880,14 @@ void runtime_environment::define(const std::string &name, object *o, bool is_fin
     values.insert(std::pair<string, lns::variable>(name, *new variable(is_final, o)));
 }
 
+void runtime_environment::add_natives(const std::set<callable *> &natives) {
+    this->natives.insert(natives.begin(),natives.end());
+}
+
+void runtime_environment::add_native(callable *ptr) {
+    this->natives.insert(ptr);
+}
+
 variable::variable() : value(new null_o()), isfinal(false) {}
 
 const variable& variable::operator=(const variable &v) {
@@ -879,12 +898,13 @@ const variable& variable::operator=(const variable &v) {
 variable::variable(const bool isfinal, object *value) : isfinal(isfinal), value(value) {}
 
 
-lns::runtime_exception::runtime_exception(const lns::token &token, string &m) : message(m), token(token) {}
+lns::runtime_exception::runtime_exception(const lns::token &token, string &m) : native_throw(false),message(m), token(token) {}
 
 const char *lns::runtime_exception::what() const throw(){
     return message.c_str();
 }
 
+runtime_exception::runtime_exception(const char* filename, int line, string& message) : native_throw(true), message(message), token(*new lns::token(UNRECOGNIZED,STR(""),*new null_o(),filename,line)){}
 const char *lns::best_file_path(const char *filename) {
     ifstream rel_file(filename);
     auto buf = (char*) malloc(1024 * sizeof(char));
@@ -900,7 +920,7 @@ const char *lns::best_file_path(const char *filename) {
     return filename;
 }
 
-callable::callable() : object(objtype::CALLABLE_T) {}
+callable::callable(bool native) : object(native ? objtype::NATIVE_CALLABLE_T : objtype ::CALLABLE_T) {}
 
 bool callable::operator==(const object &o) const {
     return false;
@@ -987,8 +1007,12 @@ object *callable::operator++() {
 object *callable::operator--() {
     WRONG_OP_UN(--)
 }
+
+callable::callable() : object(NATIVE_CALLABLE_T) {}
+
 const char* lns::INVALID_OP(const char* OP, const lns::object_type t1, const lns::object_type* t2){
     auto * buf = (char*)malloc(sizeof(char) * 64);
+    *buf = '\0';
     strcat(buf,"Operator '");
     strcat(buf,OP);
     strcat(buf,t2 == nullptr ? "' is not applicable to type '" : "' is not applicable to types '");
@@ -1000,6 +1024,7 @@ const char* lns::INVALID_OP(const char* OP, const lns::object_type t1, const lns
     strcat(buf,"'");
     return buf;
 }
+
 const char *lns::type_to_string(object_type t) {
     switch(t){
         case NUMBER_T:return "number";
@@ -1012,3 +1037,5 @@ const char *lns::type_to_string(object_type t) {
     }
     return "unknown";
 }
+
+function_container::function_container(objtype type) : object(type) {}

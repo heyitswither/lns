@@ -14,8 +14,16 @@
 #include <vector>
 #include <set>
 
+
+#define NATIVE_RUNTIME_EXC(msg) throw runtime_exception(__FILE__,__LINE__,*new std::string(msg))
+#define STR(S) *new string(S)
 #define WRONG_OP(OP) throw INVALID_OP(#OP,this->type,&o.type);
 #define WRONG_OP_UN(OP) throw INVALID_OP(#OP,this->type,nullptr);
+
+#define DCAST(a,b) (dynamic_cast<a>(b))
+#define DCAST_ASN(a,b,c) (a = DCAST(b,c))
+#define DCAST_ASNCHK(a,b,c) (DCAST_ASN(a,b,c) != nullptr)
+
 #define LNS_LIBRARY_LOCATION "/lns/lib/"
 #define S(s) *new std::string(#s)
 
@@ -96,7 +104,7 @@ namespace lns {
         EOF_
     };
     enum objtype {
-        NUMBER_T, STRING_T, BOOL_T, NULL_T, MAP_T, CALLABLE_T, CONTEXT_T
+        NUMBER_T, STRING_T, BOOL_T, NULL_T, MAP_T, CALLABLE_T, NATIVE_CALLABLE_T, CONTEXT_T
     };
     typedef objtype object_type;
 
@@ -370,7 +378,7 @@ namespace lns {
 
         object *operator--() override;
 
-        object *clone() const;
+        object *clone() const override;
     };
 
     class map_o : public object {
@@ -453,9 +461,76 @@ namespace lns {
         //void operator delete(void*){}
     };
 
+
+    class callable : public object{
+    public:
+        callable();
+        explicit callable(bool native);
+        virtual const int arity() const = 0;
+        virtual const std::string& name() const = 0;
+        virtual object *call(std::vector<object *> &args) = 0;
+        bool operator==(const object &o) const override;
+        std::string str() const override;
+        bool operator&&(const object &o) const override;
+
+        bool operator||(const object &o) const override;
+
+        object *operator!() const override;
+
+        bool operator>(const object &o2) const override;
+
+        bool operator>=(const object &o2) const override;
+
+        bool operator<=(const object &o2) const override;
+
+        bool operator<(const object &o2) const override;
+
+        object *operator+=(const object &o) override;
+
+        object *operator-=(const object &o) override;
+
+        object *operator*=(const object &o) override;
+
+        object *operator/=(const object &o) override;
+
+        object *operator+(const object &o2) const override;
+
+        object *operator-(const object &o2) const override;
+
+        object *operator*(const object &o2) const override;
+
+        object *operator/(const object &o2) const override;
+
+        object *operator^(const object &o2) const override;
+
+        object *operator-() const override;
+
+        object *operator++() override;
+
+        object *operator--() override;
+
+        object *clone() const override;
+
+    };
+
+    class function_container : public object{
+    public:
+        explicit function_container(objtype type);
+        virtual std::set<callable*>& declare_natives() const = 0;
+    };
+
+    class stack_call {
+    public:
+        const char *filename;
+        const int line;
+        const std::string &method;
+        const bool native;
+        stack_call(const char *filename, const int line, const std::string &method, const bool native);
+    };
+
     class runtime_environment {
-    private:
-        std::set <std::string> natives;
+    protected:
+        std::set <callable*> natives;
         runtime_environment *enclosing;
         std::map<std::string, lns::variable> values;
 
@@ -480,20 +555,22 @@ namespace lns {
 
         object *assign_map_field(const token &name,const token_type op,string_o *key, object *value);
 
-        void add_native(const std::string &s);
-
-        bool is_native(const std::string &basic_string);
+        bool is_native(callable *ptr);
 
         object *increment(const token &name);
 
         object *decrement(const token &name);
 
         void reset();
+
+        void add_natives(const std::set<callable*>& natives);
+
+        void add_native(callable *ptr);
     };
 
-    class context : public lns::runtime_environment, public object {
+    class context : public lns::runtime_environment, public function_container {
     public:
-        explicit context(runtime_environment *previous) : runtime_environment(previous), object(CONTEXT_T) {}
+        explicit context(runtime_environment *previous) : runtime_environment(previous), function_container(CONTEXT_T) {}
 
         std::string str() const override;
 
@@ -538,67 +615,10 @@ namespace lns {
         object *operator--() override;
 
         object *clone() const override;
+
+        std::set<callable *> &declare_natives() const override;
     };
 
-
-    class callable : public object{
-    public:
-        callable();
-        virtual const int arity() const = 0;
-        virtual const std::string& name() const = 0;
-        virtual object *call(std::vector<object *> &args) = 0;
-        bool operator==(const object &o) const override;
-        std::string str() const override;
-        bool operator&&(const object &o) const override;
-
-        bool operator||(const object &o) const override;
-
-        object *operator!() const override;
-
-        bool operator>(const object &o2) const override;
-
-        bool operator>=(const object &o2) const override;
-
-        bool operator<=(const object &o2) const override;
-
-        bool operator<(const object &o2) const override;
-
-        object *operator+=(const object &o) override;
-
-        object *operator-=(const object &o) override;
-
-        object *operator*=(const object &o) override;
-
-        object *operator/=(const object &o) override;
-
-        object *operator+(const object &o2) const override;
-
-        object *operator-(const object &o2) const override;
-
-        object *operator*(const object &o2) const override;
-
-        object *operator/(const object &o2) const override;
-
-        object *operator^(const object &o2) const override;
-
-        object *operator-() const override;
-
-        object *operator++() override;
-
-        object *operator--() override;
-
-        object *clone() const;
-    };
-
-
-    class stack_call {
-    public:
-        const char *filename;
-        const int line;
-        const std::string &method;
-        const bool native;
-        stack_call(const char *filename, const int line, const std::string &method, const bool native);
-    };
 
 
     class return_signal : public std::exception {
@@ -638,8 +658,9 @@ namespace lns {
     class runtime_exception : public std::exception {
     public:
         std::string &message;
+        bool native_throw;
         const lns::token &token;
-
+        runtime_exception(const char *filename, int line, std::string& message);
         runtime_exception(const lns::token &token, std::string &m);
 
         const char *what() const throw() override;
@@ -649,6 +670,9 @@ namespace lns {
 
     const char *type_to_string(object_type t);
 
+    const inline bool ISFUNCTR(const object * o){
+        return dynamic_cast<const function_container*>(o) == nullptr;
+    }
 }
 
 #endif //CPPLNS_DEFS_H
