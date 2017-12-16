@@ -13,7 +13,7 @@ echo "Creating install directory..."
 sudo mkdir --parents /lns/lib
 
 echo "Compiling executable..."
-sudo g++ -w -Wall -fpermissive -rdynamic -Wl,--no-as-needed -ldl source/lns.cpp source/errors.h source/exceptions.h source/scanner.h source/defs.h source/parser.h source/options.h source/interpreter.h source/environments.h source/debug.h source/commands.h source/commands.cpp source/debug.cpp source/defs.cpp source/errors.cpp source/exceptions.cpp source/interpreter.cpp source/parser.cpp source/scanner.cpp source/options.cpp -o ./lns
+sudo g++ -w -Wall -fpermissive -rdynamic -Wl,--no-as-needed -ldl source/lns.cpp source/errors.h source/exceptions.h source/scanner.h source/defs.h source/parser.h source/options.h source/interpreter.h source/debug.h source/commands.h source/commands.cpp source/debug.cpp source/defs.cpp source/errors.cpp source/exceptions.cpp source/interpreter.cpp source/parser.cpp source/scanner.cpp source/options.cpp -o ./lns
 
 echo "Moving executable..."
 sudo mv lns /lns/
