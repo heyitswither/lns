@@ -384,21 +384,6 @@ void interpreter::visit_context_stmt(context_stmt *c) {
     environment->define(c->name, ctx, c->is_global, c->isfinal);
 }
 
-void interpreter::register_natives() {
-    vector<callable *> *natives = natives::builtin_natives();
-    callable *current;
-    token *t;
-    string name;
-    int i;
-    for (i = 0; i < natives->size(); i++) {
-        current = natives->operator[](i);
-        name = const_cast<string &>(current->name());
-        t = new token(token_type::IDENTIFIER, name, *new string_o(name), "builtin_natives", -1);
-        globals->define(*t, current, true, true);
-        globals->add_native(current->name());
-    }
-}
-
 interpreter::interpreter() : stack_trace(*new vector<stack_call *>()) {
     stmt_visitor *sv = new default_stmt_visitor();
     expr_visitor *ev = new default_expr_visitor();
@@ -478,19 +463,6 @@ string lns::function::str() const {
 }
 
 lns::function::function(interpreter *i, const lns::function_stmt *f) : i(i), declaration(f), callable() {}
-
-vector<callable *> *::natives::builtin_natives() {
-    vector<callable *> *natives = new vector<callable *>();
-    natives->push_back(new num_c());
-    natives->push_back(new int_c());
-    natives->push_back(new read_c());
-    natives->push_back(new readln_c());
-    natives->push_back(new readnr_c());
-    natives->push_back(new readbool_c());
-    natives->push_back(new map_c());
-    natives->push_back(new elems_c());
-    return natives;
-}
 
 runtime_environment *lns::retr_globals(interpreter *i) {
     return i->globals;

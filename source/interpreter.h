@@ -17,9 +17,6 @@
 #include <chrono>
 #include <thread>
 
-namespace natives {
-    vector<lns::callable *> *builtin_natives();
-}
 namespace lns {
     class interpreter;
     runtime_environment *retr_globals(interpreter *i);
@@ -105,11 +102,11 @@ namespace lns {
 
         void visit_s_while_stmt(s_while_stmt *s) override; //
 
-        void visit_uses_native_stmt(uses_native_stmt *u) override; //TODO: implement natives
+        void visit_uses_native_stmt(uses_native_stmt *u) override;
 
         void visit_null_stmt(null_stmt *n) override; //
+
         void visit_context_stmt(context_stmt *c) override;//
-        void register_natives();
 
     public:
 
@@ -131,152 +128,6 @@ namespace lns {
 
         string str() const override;
     };
-
-}
-namespace natives {
-    class num_c : public callable {
-        const int arity() const override {
-            return 1;
-        }
-
-        const string &name() const override {
-            return *new string("num");
-        }
-
-        object *call( vector<object *> &args) override {
-            double num = 0;
-            object *o = args[0];
-            switch (o->type) {
-                case NUMBER_T:
-                    return o;
-                case STRING_T:
-                    stringstream ss(o->str());
-                    ss >> num;
-                    if (ss.fail()) return lns::GET_DEFAULT_NULL();
-                    break;
-                case BOOL_T:
-                    num = dynamic_cast<bool_o *>(o)->value ? 1 : 0;
-                    break;
-                default:
-                    return lns::GET_DEFAULT_NULL();
-            }
-            return new number_o(num);
-        }
-    };//
-    class int_c : public callable {
-        const int arity() const override {
-            return 1;
-        }
-
-        const string &name() const override {
-            return *new string("int");
-        }
-
-        object *call( vector<object *> &args) override {
-            if (!(args[0]->type == NUMBER_T)) return lns::GET_DEFAULT_NULL();
-            return new number_o((int) dynamic_cast<number_o *>(args[0])->value);
-        }
-    };//
-    class read_c : public callable {
-        const int arity() const override {
-            return 0;
-        }
-
-        const string &name() const override {
-            return *new string("read");
-        }
-
-        object *call( vector<object *> &args) override {
-            string d;
-            cin >> d;
-            return new string_o(d);
-        }
-    };
-
-    class readln_c : public callable {
-        const int arity() const override {
-            return 0;
-        }
-
-        const string &name() const override {
-            return *new string("readln");
-        }
-
-        object *call( vector<object *> &args) override {
-            string_o *o = new string_o("");
-            getline(cin, o->value);
-            cin.clear();
-            return o;
-        }
-    };
-
-    class readnr_c : public callable {
-        const int arity() const override {
-            return 0;
-        }
-
-        const string &name() const override {
-            return *new string("readnr");
-        }
-
-        object *call( vector<object *> &args) override {
-            double d = 0;
-            cin >> d;
-            if (cin.fail()) {
-                cin.clear();
-                cin.ignore(10000, '\n');
-                return lns::GET_DEFAULT_NULL();
-            }
-            return new number_o(d);
-        }
-    };
-
-    class readbool_c : public callable {
-        const int arity() const override {
-            return 0;
-        }
-
-        const string &name() const override {
-            return *new string("readbool");
-        }
-
-        object *call( vector<object *> &args) override {
-            string d;
-            getline(cin, d);
-            return new bool_o(d == "true" || d == "1");
-        }
-    };
-
-    class map_c : public callable {
-        const int arity() const override {
-            return 0;
-        }
-
-        const string &name() const override {
-            return *new string("map");
-        }
-
-        object *call( vector<object *> &args) override {
-            return new map_o();
-        }
-    };
-
-    class elems_c : public callable {
-        const int arity() const override {
-            return 1;
-        }
-
-        const string &name() const override {
-            return *new string("elems");
-        }
-
-        object *call( vector<object *> &args) override {
-            if (args[0]->type != MAP_T) return lns::GET_DEFAULT_NULL();
-            map_o *o = dynamic_cast<map_o *>(args[0]);
-            return new number_o(o->values.size());
-        }
-    };
-
 
 }
 #endif //CPPLNS_INTERPRETER_H
