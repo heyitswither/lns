@@ -2,7 +2,6 @@
 // Created by lorenzo on 11/30/17.
 //
 #include "exceptions.h"
-#include "errors.h"
 using namespace std;
 const char *lns::createDescription(string s) {
     s.append("\n");

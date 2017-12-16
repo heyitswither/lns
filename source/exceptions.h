@@ -8,6 +8,7 @@
 #include <string>
 #include "defs.h"
 #include "cstring"
+
 #define FATAL_ERROR_S   "\n\033[1;31mFatal error\033[0m"
 #define PARSE_ERROR_S   "\n\033[1;31mParse error\033[0m"
 #define RUNTIME_ERROR_S "\n\033[1;31mRuntime error\033[0m"
