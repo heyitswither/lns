@@ -305,7 +305,6 @@ void debug::run() {
         cout << "Running script...\n\n";
         interpreter->interpret(stmts);
         interpreter->reset();
-        interpreter->register_natives();
         cout << "\nExecution terminated successfully.\n" << endl;
         broken = true;
         started = false;

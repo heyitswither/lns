@@ -15,7 +15,7 @@
 #include "interpreter.h"
 #include "scanner.h"
 #include "parser.h"
-#include "debug.h"
+
 namespace lns {
 
     class watch {
