@@ -9,9 +9,8 @@
 #include "expr.h"
 #include "stmt.h"
 #include <vector>
-#include "math.h"
+#include <cmath>
 #include <ctime>
-#include "environments.h"
 #include "exceptions.h"
 #include <string>
 #include <chrono>
@@ -115,6 +114,7 @@ namespace lns {
         void interpret(vector<stmt *> &statements);
 
         object *clone_or_keep(object *obj, const expr_type type, const token &where);
+
     };
 
     class function : public callable{

@@ -5,6 +5,7 @@
 #include "errors.h"
 #include "options.h"
 #include <dlfcn.h>
+
 using namespace lns;
 
 void lns::interpreter::execute(stmt *s) {
@@ -139,8 +140,8 @@ object *interpreter::visit_binary_expr(binary_expr *b) {
         if (type == HAT) {
             return (*left ^ *right);
         }
-    } catch (const char *p) {
-        throw runtime_exception(b->op, *new string(p));
+    } catch (const char* p) {
+        throw runtime_exception(b->op, STR(p));
     }
     // unreachable
     return nullptr;
@@ -163,7 +164,7 @@ object *interpreter::visit_call_expr(call_expr *c) {
         throw runtime_exception(c->paren, *new string(s.c_str()));
     }
     stack_trace.push_back(
-            new stack_call(c->paren.filename, c->paren.line, function->name(), globals->is_native(function->name())));
+            new stack_call(c->paren.filename, c->paren.line, function->name(), globals->is_native(function)));
     object *p = function->call(args);
     stack_trace.pop_back();
     return p;
@@ -188,7 +189,7 @@ object *interpreter::visit_unary_expr(unary_expr *u) {//
                 return (-*right);
         }
     } catch (const char *p) {
-        throw runtime_exception(u->op, *new string(p));
+        throw runtime_exception(u->op, STR(p));
     }
     //unreachable
     return nullptr;
@@ -362,6 +363,12 @@ void interpreter::visit_uses_native_stmt(uses_native_stmt *u) {
         if(!suppl) throw dlerror();
         object *obj = suppl();
         globals->define(u->bind,obj,true,true);
+        function_container* ptr;
+        if(obj->type == NATIVE_CALLABLE_T)
+            globals->add_native(DCAST(callable*,obj));
+        else if(DCAST_ASNCHK(ptr,function_container*,obj))
+            globals->add_natives(ptr->declare_natives());
+
     } catch (char *what) {
         string &s = *new string();
         s += "Couldn't load the dynamic library: ";
@@ -385,11 +392,8 @@ void interpreter::visit_context_stmt(context_stmt *c) {
 }
 
 interpreter::interpreter() : stack_trace(*new vector<stack_call *>()) {
-    stmt_visitor *sv = new default_stmt_visitor();
-    expr_visitor *ev = new default_expr_visitor();
-    dsv = static_cast<stmt_visitor *>(sv);
-    dev = static_cast<expr_visitor *>(ev);
-    register_natives();
+    dsv = new default_stmt_visitor();
+    dev = new default_expr_visitor();
 }
 
 void interpreter::interpret(vector<stmt *> &statements) {
@@ -413,7 +417,7 @@ void interpreter::interpret(vector<stmt *> &statements) {
         runtime_exception e(s.keyword, *new string("break statements can only be used inside of loops"));
         errors::runtime_error(e, stack_trace);
     }
-    if(errors::had_runtime_error) std::exit(RUNTIME_ERROR);
+    if(errors::had_runtime_error && !lns::prompt) std::exit(RUNTIME_ERROR);
 }
 
 object *interpreter::clone_or_keep(object *obj, const expr_type type, const token &where) {
@@ -462,7 +466,7 @@ string lns::function::str() const {
     return callable::str();
 }
 
-lns::function::function(interpreter *i, const lns::function_stmt *f) : i(i), declaration(f), callable() {}
+lns::function::function(interpreter *i, const lns::function_stmt *f) : i(i), declaration(f), callable(false) {}
 
 runtime_environment *lns::retr_globals(interpreter *i) {
     return i->globals;
