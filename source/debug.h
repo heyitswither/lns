@@ -4,9 +4,11 @@
 
 #ifndef CPPLNS_DEBUG_H
 #define CPPLNS_DEBUG_H
+
 #define BP_DELIMITER string(":")
 #define MAX_BREAKPOINTS 128
 #define MAX_WATCHES 32
+#define CHK_EXEC(s) if(s != nullptr) s->accept(this);
 
 #include <string>
 #include <sstream>
@@ -90,15 +92,20 @@ namespace lns {
     };
 
 
-    class debugger : public interpreter {
+    class debugger : public interpreter{
     private:
         breakpoint *breakpoints[MAX_BREAKPOINTS];
         lns::watch *watches[MAX_WATCHES];
         scanner expr_scanner;
         parser expr_parser;
         lns::debug *debug_env;
-        int target_depth;
+        int bp_id;
     public:
+
+        lns::action current_action;
+
+        int depth;
+
         explicit debugger(lns::debug *debug);
 
         bool set_break_point(breakpoint *p, bool silent);
@@ -119,13 +126,15 @@ namespace lns {
 
         void execute(stmt *s) override;
 
-        int current_depth();
-
         void reset();
 
-        expr *interpret_expression(string &str);
+        expr *parse_expression(string &str);
 
         void watch_all();
+
+        breakpoint* check_bp(stmt *s);
+
+        inline int current_depth();
     };
 
 }

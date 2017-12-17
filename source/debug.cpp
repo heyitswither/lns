@@ -4,6 +4,7 @@
 #include "debug.h"
 #include "errors.h"
 
+#define ARROW "---> "
 using namespace std;
 using namespace lns;
 
@@ -14,7 +15,7 @@ lns::watch::watch(string &text, expr *expr) : text(text), e(expr) {}
 lns::debugger::debugger(lns::debug *debug) : debug_env(debug),
                                              expr_scanner(*new scanner("", *new string())),
                                              expr_parser(*new parser(*new vector<token *>())),
-                                             target_depth(-1) {}
+                                             current_action(CONTINUE_A) {}
 
 bool lns::debugger::set_break_point(breakpoint *p, bool silent) {
     int i;
@@ -35,7 +36,7 @@ bool lns::debugger::set_break_point(breakpoint *p, bool silent) {
 void lns::debugger::watch(string &str) {
     expr *e;
     try {
-        e = interpret_expression(str);
+        e = parse_expression(str);
         object *eval = this->evaluate(e);
         cout << str << " --> " << (eval->type == STRING_T ? ("\"" + eval->str() + "\"") : eval->str()) << endl;
     } catch (int) {
@@ -109,7 +110,7 @@ void lns::debugger::add_watch(string &expression) {
         for (i = 0; i < MAX_WATCHES; ++i) {
             if (watches[i] == nullptr) break;
         }
-        watches[i] = new lns::watch(expression, interpret_expression(expression));
+        watches[i] = new lns::watch(expression, parse_expression(expression));
         if (i == MAX_WATCHES)
             cout << "Reached the maximum number of watches." << endl;
         else
@@ -153,61 +154,49 @@ void debugger::remove_break_point(int id) {
 }
 
 void debugger::execute(stmt *s) {
-    if (target_depth == -1) {
-        breakpoint *bp = nullptr;
-        int i;
-        for (i = 0; i < MAX_BREAKPOINTS; ++i) {
-            if (breakpoints[i] == nullptr) continue;
-            if (strcmp(breakpoints[i]->filename, s->file) == 0 && breakpoints[i]->line == s->line) {
-                bp = breakpoints[i];
+    breakpoint *bp;
+    if ((bp = check_bp(s)) != nullptr) {
+        debug_env->break_(false, bp, bp_id);
+        execute(s);
+    } else if (current_action == BREAK_A) {
+        debug_env->break_(true,new breakpoint(s->file,s->line),0);
+        execute(s);
+    } else {
+        switch (current_action) {
+            case CONTINUE_A:
+                CHK_EXEC(s);
                 break;
-            }
+            case STEP_IN:
+                current_action = BREAK_A;
+                CHK_EXEC(s);
+                break;
+            case STEP_OUT:
+                break;
+            case STEP_OVER:
+                break;
         }
-        if (bp == nullptr)
-            interpreter::execute(s);
-        else
-            debug_env->break_(false, bp, i);
-    } else if (target_depth > current_depth()) { //STEP IN
-        debugger::execute(s);
-        debug_env->break_(true, new breakpoint(s->file, s->line), -1);
-    } else if (target_depth < current_depth()) { //STEP OUT
-        while (target_depth < current_depth()) {
-            interpreter::execute(s);
-        }
-    } else if (target_depth == current_depth()) { //STEP OVER
-        interpreter::execute(s);
-        debug_env->break_(true, new breakpoint(s->file, s->line), -1);
     }
 }
 
 void debugger::action(lns::action action) {
-    switch (action) {
-        case action::STEP_IN:
-            target_depth = current_depth() + 1;
-            break;
-        case action::STEP_OUT:
-            target_depth = current_depth() <= 0 ? 0 : current_depth() - 1;
-            break;
-        case action::STEP_OVER:
-            target_depth = current_depth();
-            break;
-        case action::CONTINUE_A:
-            target_depth = -1;
-            break;
+    this->current_action = action;
+    if (action == action::STEP_OUT)
+        depth = current_depth() - 1;
+    else if (action == action::STEP_OVER)
+        depth = current_depth();
+    else if (action == action::STEP_IN) {
+        depth = current_depth() + 1;
     }
     debug_env->broken = false;
 }
 
-int debugger::current_depth() {
-    return static_cast<int>(stack_trace.size());
-}
 
 void debugger::reset() {
     if (environment != nullptr)
         environment->reset();
 }
 
-expr *debugger::interpret_expression(string &expression) {
+expr *debugger::parse_expression(string &expression) {
     expr *e;
     lns::silent_full = true;
     errors::had_parse_error = false;
@@ -218,7 +207,7 @@ expr *debugger::interpret_expression(string &expression) {
         throw 1;
     }
     expr_parser.reset(expr_scanner.scan_tokens(true));
-    e = expr_parser.logical();
+    e = expr_parser.logical(true);
     if (errors::had_parse_error) {
         errors::had_parse_error = false;
         lns::silent_full = false;
@@ -246,6 +235,24 @@ void debugger::watch_all() {
         }
     }
     if (!found) cout << "No watches registered. Use 'watch add <expression>' to add a watch." << endl;
+}
+
+breakpoint *debugger::check_bp(stmt *s) {
+    breakpoint *bp = nullptr;
+    int i;
+    for (i = 0; i < MAX_BREAKPOINTS; ++i) {
+        if (breakpoints[i] == nullptr) break;
+        if (strcmp(breakpoints[i]->filename, s->file) == 0 && breakpoints[i]->line == s->line) {
+            bp = breakpoints[i];
+            break;
+        }
+    }
+    bp_id = i;
+    return bp;
+}
+
+inline int debugger::current_depth() {
+    return static_cast<int>(stack_trace.size());
 }
 
 
@@ -361,7 +368,7 @@ void debug::loadcode(const char *filename) {
     vector<stmt *> stmts;
     if (errors::had_parse_error) throw parse_exception();
     code_parser.reset(tokens);
-    vector<stmt *> parsed = code_parser.parse(false);
+    vector<stmt *> parsed = code_parser.parse(true);
     if (errors::had_parse_error) throw parse_exception();
     this->stmts.clear();
     for (stmt *s : parsed) {
@@ -373,14 +380,14 @@ void debug::loadcode(const char *filename) {
 }
 
 lns::debug::debug(char *source) : command(this),
-                             visitor(new default_expr_visitor()),
-                             started(false),
-                             ready(false),
-                             file(source),
-                             stmts(*new vector<stmt *>()),
-                             code_scanner(*new scanner("", *new string())),
-                             code_parser(*new parser(*new vector<token *>())),
-                             source(*new string()) {
+                                  visitor(new default_expr_visitor()),
+                                  started(false),
+                                  ready(false),
+                                  file(source),
+                                  stmts(*new vector<stmt *>()),
+                                  code_scanner(*new scanner("", *new string())),
+                                  code_parser(*new parser(*new vector<token *>())),
+                                  source(*new string()) {
     lns::silent_full = false;
     lns::silent_execution = false;
     lns::parse_only = false;
@@ -388,6 +395,7 @@ lns::debug::debug(char *source) : command(this),
 }
 
 void debug::break_(bool stepping, breakpoint *bp, int id) {
+    interpreter->current_action = action::BREAK_A;
     broken = true;
     ifstream file(bp->filename);
     stringstream ss;
@@ -411,12 +419,12 @@ void debug::break_(bool stepping, breakpoint *bp, int id) {
         }
         if (eline.empty())
             cout
-                    << "Binding error: the sources and the loaded code don't match (have the files been modified?). The debugger will enter break mode anyway."
+                    << "Binding error: the sources and the loaded code don't match (has the file been modified?). The debugger will enter break mode anyway."
                     << endl;
         else {
             cout << "In file " << bp->filename << ":\n";
             if (!pline.empty()) cout << "     line " << bp->line - 1 << ":   " << pline << endl;
-            cout << "---> line " << bp->line << ":   " << eline << endl;
+            cout << ARROW << "line " << bp->line << ":   " << eline << endl;
             if (!lline.empty()) cout << "     line " << bp->line + 1 << ":   " << lline << "\n" << endl;
         }
         file.close();

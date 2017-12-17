@@ -10,13 +10,12 @@
 #include <sstream>
 #include <iostream>
 #include "exceptions.h"
-//#include "debug.h"
 
 namespace lns {
     class command_interpreter;
 
     enum action {
-        CONTINUE_A, STEP_IN, STEP_OUT, STEP_OVER
+        CONTINUE_A, STEP_IN, STEP_OUT, STEP_OVER, BREAK_A
     };
 
     class breakpoint {
