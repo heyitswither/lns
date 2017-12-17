@@ -63,7 +63,7 @@ token &parser::consume(token_type type, const char *message) {
 
 void parser::use_not_allowed() {
     token &name = previous();
-    throw error(name, "'use' statements are not allowed at this location.");
+    throw error(name, "'use' statements are not allowed at this location");
 }
 
 stmt *parser::use() {
@@ -163,7 +163,7 @@ stmt *parser::declaration() {
             if (is_final) {
                 if (!permissive)
                     throw error(peek(),
-                                "functions are unchangeable by definition: keyword 'final' is redundant (--permissive).");
+                                "functions are unchangeable by definition: keyword 'final' is redundant (--permissive)");
             }
             return function(is_global);
         }
@@ -180,11 +180,11 @@ int parser::error(token &token, const char *message) {
 }
 
 var_stmt *parser::var_declaration(bool is_global, bool is_final) {
-    token &name = consume(IDENTIFIER, "expected identifier in variable declaration.");
+    token &name = consume(IDENTIFIER, "expected identifier in variable declaration");
     expr *initializer = new null_expr(name.filename, name.line, name);
     if (match({EQUAL})) {
         delete initializer;
-        initializer = expression();
+        initializer = expression(true);
     }
     //consume(SEMICOLON, "expected ';' after variable declaration");
     return new var_stmt(name.filename, name.line, name, *initializer, is_global, is_final);
@@ -207,7 +207,7 @@ stmt *parser::return_statement() {
     expr *value = new null_expr(keyword.filename, keyword.line, previous());
     if (!is_at_end())
         if (peek().line == keyword.line)
-            value = expression();
+            value = expression(true);
     //consume(SEMICOLON, "expected ';' after return value.");
     return new return_stmt(keyword.filename, keyword.line, keyword, *value);
 }
@@ -226,7 +226,7 @@ stmt *parser::continue_statement() {
 
 stmt *parser::if_statement() {
     token keyword = previous();
-    expr *condition = expression();
+    expr *condition = expression(true);
     consume(THEN, "expected 'then' after if condition");
     stmt *then_branch;
     try {
@@ -245,8 +245,8 @@ stmt *parser::if_statement() {
 }
 
 stmt *parser::while_statement() {
-    expr *condition = expression();
-    token &d = consume(DO, "expected 'do' after loop condition.");
+    expr *condition = expression(true);
+    token &d = consume(DO, "expected 'do' after loop condition");
     stmt *body;
     try {
         body = new block_stmt(d.filename, d.line, stmts_until({END}));
@@ -266,12 +266,12 @@ stmt *parser::for_statement() {
     consume(COMMA, "expected ',' after for loop initializer");
     expr *condition = nullptr;
     if (!check({COMMA})) {
-        condition = expression();
+        condition = expression(true);
     }
     consume(COMMA, "expected ',' after loop condition");
     expr *increment = nullptr;
     if (!check(DO)) {
-        increment = expression();
+        increment = expression(true);
     }
     token p = consume(DO, "expected 'do' after for loop increment");
     stmt *body;
@@ -288,14 +288,14 @@ stmt *parser::for_statement() {
 }
 
 stmt *parser::expression_statement() {
-    expr *expr = expression();
+    expr *expr = expression(false);
     //consume(SEMICOLON, "expected ';' after expression");
     return new expression_stmt(expr->file, expr->line, *expr);
 }
 
 stmt *parser::function(bool isglobal) {
     token &name = consume(IDENTIFIER, "expected function name");
-    consume(LEFT_PAREN, "expected '(' after function name.");
+    consume(LEFT_PAREN, "expected '(' after function name");
     vector<token> &parameters = *new vector<token>();
     if (!check(RIGHT_PAREN)) {
         do {
@@ -314,14 +314,14 @@ stmt *parser::function(bool isglobal) {
     }
 }
 
-expr *parser::assignment() {
+expr *parser::assignment(bool nested) {
     variable_expr *var;
     sub_script_expr *map;
     context_expr *context;
-    expr *expr = logical(), *value, *key;
+    expr *expr = logical(nested), *value, *key;
     if (match({EQUAL, PLUS_EQUALS, MINUS_EQUALS, STAR_EQUALS, SLASH_EQUALS})) {
         token &op = previous();
-        value = assignment();
+        value = assignment(true);
         if ((var = dynamic_cast<variable_expr *>(expr)) != nullptr) {
             token &name = const_cast<token &>(var->name);
             return new assign_expr(var->file, var->line, name, op.type, value);
@@ -351,78 +351,69 @@ expr *parser::assignment() {
             const token &name = var->name;
             return new decrement_expr(name.filename, name.line, const_cast<token &>(name), expr);
         }
-        error(mm, "Invalid decrement target.");
+        error(mm, "Invalid decrement target");
     }
     return expr;
 }
 
-expr *parser::comparison() {
-    expr *expr = addition(), *right;
+expr *parser::comparison(bool nested) {
+    expr *expr = addition(nested), *right;
     while (match({GREATER, GREATER_EQUAL, LESS, LESS_EQUAL})) {
         token &op = previous();
-        right = addition();
+        right = addition(true);
         expr = new binary_expr(op.filename, op.line, expr, op, right);
     }
     return expr;
 }
 
-expr *parser::addition() {
-    expr *expr = multiplication(), *right;
+expr *parser::addition(bool nested) {
+    expr *expr = multiplication(nested), *right;
     while (match({MINUS, PLUS})) {
         token &op = previous();
-        right = multiplication();
+        right = multiplication(true);
         expr = new binary_expr(op.filename, op.line, expr, op, right);
     }
     return expr;
 }
 
-expr *parser::multiplication() {
-    expr *expr = power(), *right;
+expr *parser::multiplication(bool nested) {
+    expr *expr = power(nested), *right;
     while (match({SLASH, STAR})) {
         token &op = previous();
-        right = power();
+        right = power(true);
         expr = new binary_expr(op.filename, op.line, expr, op, right);
     }
     return expr;
 }
 
-expr *parser::power() {
-    expr *expr = unary(), *right;
+expr *parser::power(bool nested) {
+    expr *expr = unary(nested), *right;
     while (match({HAT})) {
         token &op = previous();
-        right = unary();
+        right = unary(true);
         expr = new binary_expr(op.filename, op.line, expr, op, right);
     }
     return expr;
 }
 
-expr *parser::unary() {
+expr *parser::unary(bool nested) {
     if (match({NOT, MINUS})) {
         token &op = previous();
-        expr *right = unary();
+        expr *right = unary(true);
         return new unary_expr(op.filename, op.line, op, right);
     }
-    return call();
+    return call(nested);
 }
 
-expr *parser::call() {
+expr *parser::call(bool nested) {
     vector<expr *> &args = *new vector<expr *>();
-    expr *expr = special_assignment(), *keyexpr;
+    expr *expr = special_assignment(nested), *keyexpr;
     token &identifier = previous();
-    /*if(match({DOT})){
-        token &context_identifier = consume(IDENTIFIER,"expected identifier for context call");
-        return new context_expr(identifier.filename,identifier.line,identifier,context_identifier);
-    }
-    if (match({LEFT_SQR})) {
-        keyexpr = expression();
-        consume(RIGHT_SQR, "expected ']' after key expression");
-        return new map_field_expr(identifier.filename,identifier.line,identifier, keyexpr);
-    }*/
     while (true)
         if (match({LEFT_PAREN})) {
             if (!check(RIGHT_PAREN)) {
                 do {
-                    args.push_back(expression());
+                    args.push_back(expression(true));
                 } while (match({COMMA}));
             }
             token &paren = consume(RIGHT_PAREN, "expected ')' after arguments");
@@ -435,7 +426,7 @@ expr *parser::finish_call(expr *callee) {
     vector<expr *> args;
     if (!check(RIGHT_PAREN)) {
         do {
-            args.push_back(expression());
+            args.push_back(expression(true));
         } while (match({COMMA}));
     }
     token paren = consume(RIGHT_PAREN, "expected ')' after arguments");
@@ -443,23 +434,23 @@ expr *parser::finish_call(expr *callee) {
     return expr;
 }
 
-expr *parser::special_assignment() {
-    expr *expr = primary(), *key;
+expr *parser::special_assignment(bool nested) {
+    expr *expr = primary(nested), *key;
     while (match({DOT, LEFT_SQR})) {
         token &op = previous();
         if (op.type == DOT) {
-            token &fname = consume(IDENTIFIER, "expected field name.");
+            token &fname = consume(IDENTIFIER, "expected field name");
             expr = new context_expr(expr->file, expr->line, expr, fname);
         } else {
-            key = expression();
-            consume(RIGHT_SQR, "expected closing ']' after key expression.");
+            key = expression(true);
+            consume(RIGHT_SQR, "expected closing ']' after key expression");
             expr = new sub_script_expr(expr->file, expr->line, op, expr, key);
         }
     }
     return expr;
 }
 
-expr *parser::primary() {
+expr *parser::primary(bool nested) {
     if (match({FALSE})) return new literal_expr(previous().filename, previous().line, new bool_o(false));
     if (match({TRUE})) return new literal_expr(previous().filename, previous().line, new bool_o(true));
     if (match({NUL})) return new literal_expr(previous().filename, previous().line, new null_o());
@@ -469,11 +460,11 @@ expr *parser::primary() {
         return new variable_expr(identifier.filename, identifier.line, identifier);
     }
     if (match({LEFT_PAREN})) {
-        expr *expr = expression();
+        expr *expr = expression(true);
         consume(RIGHT_PAREN, "missing closing ')'");
         return new grouping_expr(expr->file, expr->line, expr);
     }
-    throw error(peek(), "expected expression");
+    throw error(peek(), nested ? "expected expression" : "invalid statement");
 }
 
 parser::parser(vector<token *> &tokens) : tokens(tokens), start(0), current(0), use_allowed(true),
@@ -496,13 +487,13 @@ vector<stmt *> &parser::parse(bool ld_std) {
     return statements;
 }
 
-expr *parser::expression() { return assignment(); }
+expr *parser::expression(bool nested) { return assignment(nested); }
 
-expr *parser::logical() {
-    expr *expr = comparison(), *right;
+expr *parser::logical(bool nested) {
+    expr *expr = comparison(nested), *right;
     while (match({BANG_EQUAL, EQUAL_EQUAL, AND, OR, NOR, XOR, NAND})) {
         token &op = previous();
-        right = comparison();
+        right = comparison(true);
         expr = new binary_expr(op.filename, op.line, expr, op, right);
     }
     return expr;

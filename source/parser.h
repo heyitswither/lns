@@ -84,27 +84,25 @@ namespace lns {
 
         stmt *function(bool isglobal);
 
-        expr *assignment();
+        expr *assignment(bool nested);
 
-        expr *comparison();
+        expr *comparison(bool nested);
 
-        expr *addition();
+        expr *addition(bool nested);
 
-        expr *multiplication();
+        expr *multiplication(bool nested);
 
-        expr *power();
+        expr *power(bool nested);
 
+        expr *unary(bool nested);
 
-        expr *unary();
-
-
-        expr *call();
+        expr *call(bool nested);
 
         expr *finish_call(expr *callee);
 
-        expr *special_assignment();
+        expr *special_assignment(bool nested);
 
-        expr *primary();
+        expr *primary(bool nested);
 
     public:
         explicit parser(vector<token *> &tokens);
@@ -113,9 +111,9 @@ namespace lns {
 
         vector<stmt *> &parse(bool ld_std);
 
-        expr *expression();
+        expr *expression(bool nested);
 
-        expr *logical();
+        expr *logical(bool nested);
 
         bool is_at_end();
 
