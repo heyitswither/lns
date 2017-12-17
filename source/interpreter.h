@@ -20,7 +20,7 @@ namespace lns {
     class interpreter;
     runtime_environment *retr_globals(interpreter *i);
 
-    class interpreter : public expr_visitor, stmt_visitor {
+    class interpreter : public expr_visitor, public stmt_visitor {
     public:
         virtual void execute(stmt *s);
 

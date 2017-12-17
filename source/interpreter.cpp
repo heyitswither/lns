@@ -368,7 +368,6 @@ void interpreter::visit_uses_native_stmt(uses_native_stmt *u) {
             globals->add_native(DCAST(callable*,obj));
         else if(DCAST_ASNCHK(ptr,function_container*,obj))
             globals->add_natives(ptr->declare_natives());
-
     } catch (char *what) {
         string &s = *new string();
         s += "Couldn't load the dynamic library: ";
