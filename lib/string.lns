@@ -1,9 +1,8 @@
-dpcheck "string"
-use "defs"
+dpcheck this
 
-context String
+context string
     function length(s)
-        if not (type(s) == STRING) then
+        if not (type(s) == String) then
             return null
         end
         var i = 0
@@ -23,7 +22,7 @@ context String
         end
         return s_
     end
-    if
+
     function sub2(s,start,end_)
         if not ((type(s) == STRING) and (type(start) == NUMBER) and (type(end_) == NUMBER)) then return null end
         var todo = String.length(s) - end_

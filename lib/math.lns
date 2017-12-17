@@ -1,6 +1,5 @@
-dpcheck "math"
+dpcheck this
 
-use "defs"
 use natives "natives/lns_math.so" bind Math
 final var PI     = 3.1415926535897932384
 final var PI_2   = 1.5707963267948966192
