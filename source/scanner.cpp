@@ -150,9 +150,6 @@ void scanner::scan_token() {
         case '+':
             add_token(match('+') ? PLUS_PLUS : (match('=') ? PLUS_EQUALS : PLUS));
             break;
-        case ';':
-            add_token(SEMICOLON);
-            break;
         case '*':
             add_token(match('=') ? STAR_EQUALS : STAR);
             break;

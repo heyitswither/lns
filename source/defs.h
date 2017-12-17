@@ -15,7 +15,7 @@
 #include <set>
 
 
-#define NATIVE_RUNTIME_EXC(msg) throw runtime_exception(__FILE__,__LINE__,*new std::string(msg))
+#define NATIVE_RUNTIME_EXC(msg) throw runtime_exception(__FILE__,__LINE__,*new std::string(msg));
 #define STR(S) *new string(S)
 #define WRONG_OP(OP) throw INVALID_OP(#OP,this->type,&o.type);
 #define WRONG_OP_UN(OP) throw INVALID_OP(#OP,this->type,nullptr);
@@ -46,7 +46,6 @@ namespace lns {
         PLUS_EQUALS,
         PLUS_PLUS,
         MINUS_MINUS,
-        SEMICOLON,
         SLASH,
         SLASH_EQUALS,
         STAR,
@@ -104,12 +103,12 @@ namespace lns {
         EOF_
     };
     enum objtype {
-        NUMBER_T, STRING_T, BOOL_T, NULL_T, MAP_T, CALLABLE_T, NATIVE_CALLABLE_T, CONTEXT_T
+        NUMBER_T, STRING_T, BOOL_T, NULL_T, ARRAY_T, CALLABLE_T, NATIVE_CALLABLE_T, CONTEXT_T
     };
     typedef objtype object_type;
 
     const std::string KEYWORDS_S_VALUES[] = {"LEFT_PAREN", "RIGHT_PAREN", "LEFT_SQR", "RIGHT_SQR", "COMMA", "DOT", "MINUS",
-                                             "MINUS_EQUALS", "PLUS", "PLUS_EQUALS", "PLUS_PLUS", "MINUS_MINUS", "SEMICOLON",
+                                             "MINUS_EQUALS", "PLUS", "PLUS_EQUALS", "PLUS_PLUS", "MINUS_MINUS",
                                              "SLASH", "SLASH_EQUALS", "STAR", "STAR_EQUALS", "HAT", "BANG", "BANG_EQUAL",
                                              "EQUAL", "EQUAL_EQUAL", "GREATER", "GREATER_EQUAL", "LESS", "LESS_EQUAL",
                                              "IDENTIFIER", "STRING", "NUMBER", "NATIVES", "AND", "CLASS", "ELSE", "FALSE",
@@ -381,10 +380,10 @@ namespace lns {
         object *clone() const override;
     };
 
-    class map_o : public object {
+    class array_o : public object {
     private:
     public:
-        explicit map_o();
+        explicit array_o();
 
         std::map<std::string, object *> values;
 
