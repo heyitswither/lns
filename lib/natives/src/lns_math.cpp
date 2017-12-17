@@ -4,8 +4,6 @@
 #include "defs.h"
 #include <cmath>
 
-#define S(s) *new std::string(#s)
-
 using namespace lns;
 
 class log10_c : public callable{

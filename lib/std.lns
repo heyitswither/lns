@@ -1,0 +1,26 @@
+dpcheck this
+
+use natives "natives/std_print.so" bind print
+use natives "natives/std_type.so" bind type
+use natives "natives/std_exit.so" bind exitc
+use natives "natives/std_array.so" bind array
+
+
+global final var Number = "number"
+global final var String = "string"
+global final var Boolean = "boolean"
+global final var Map = "array"
+global final var Callable = "callable"
+global final var Context = "context"
+
+function println(s)
+    print("" + s + "\n")
+end
+
+function exit()
+    exitc(0)
+end
+
+function stringify(obj)
+    return "" + obj
+end

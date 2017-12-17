@@ -1,9 +1,0 @@
-dpcheck "defs"
-
-global final var NUMBER = "number"
-global final var STRING = "string"
-global final var BOOLEAN = "boolean"
-global final var MAP = "map"
-global final var NULL = "null"
-global final var CALLABLE = "callable"
-global final var CONTEXT = "context"
