@@ -89,7 +89,7 @@ lns::object *lns::string_o::operator*(const lns::object &o) const {
 lns::object *lns::string_o::operator/(const lns::object &o) const {
     if(o.type != STRING_T)
         return GET_DEFAULT_NULL();
-    auto *map = new map_o();
+    auto *map = new array_o();
     unsigned long i = 0;
     unsigned long current;
     string partial = this->value;
@@ -134,8 +134,8 @@ object *null_o::clone() const {
 object *bool_o::clone() const{
     return new bool_o(this->value);
 }
-object *map_o::clone() const {
-    map_o* map = new map_o();
+object *array_o::clone() const {
+    array_o* map = new array_o();
     map->values = this->values;
     return map;
 }
@@ -427,90 +427,90 @@ lns::object *lns::null_o::operator--() {
     WRONG_OP_UN(--)
 }
 
-bool map_o::operator==(const object &o) const {
-    if (o.type != MAP_T) return false;
-    return values == dynamic_cast<map_o *>(const_cast<object *>(&o))->values;
+bool array_o::operator==(const object &o) const {
+    if (o.type != ARRAY_T) return false;
+    return values == dynamic_cast<array_o *>(const_cast<object *>(&o))->values;
 }
 
-bool map_o::operator&&(const object &o) const {
+bool array_o::operator&&(const object &o) const {
     WRONG_OP(and)
 }
 
-bool map_o::operator||(const object &o) const {
+bool array_o::operator||(const object &o) const {
     WRONG_OP(or)
 }
 
-object *map_o::operator!() const {
+object *array_o::operator!() const {
     WRONG_OP_UN(not)
 }
 
-bool map_o::operator>(const object &o) const {
+bool array_o::operator>(const object &o) const {
     WRONG_OP(>)
 }
 
-bool map_o::operator>=(const object &o) const {
+bool array_o::operator>=(const object &o) const {
     WRONG_OP(>=)
 }
 
-bool map_o::operator<=(const object &o) const {
+bool array_o::operator<=(const object &o) const {
     WRONG_OP(<=)
 }
 
-bool map_o::operator<(const object &o) const {
+bool array_o::operator<(const object &o) const {
     WRONG_OP(<)
 }
 
-object *map_o::operator+=(const object &o) {
+object *array_o::operator+=(const object &o) {
     WRONG_OP(+=)
 }
 
-object *map_o::operator-=(const object &o) {
+object *array_o::operator-=(const object &o) {
     WRONG_OP(-=)
 }
 
-object *map_o::operator*=(const object &o) {
+object *array_o::operator*=(const object &o) {
     WRONG_OP(*=)
 }
 
-object *map_o::operator/=(const object &o) {
+object *array_o::operator/=(const object &o) {
     WRONG_OP(/=)
 }
 
-object *map_o::operator+(const object &o) const {
+object *array_o::operator+(const object &o) const {
     WRONG_OP(+)
 }
 
-object *map_o::operator-(const object &o) const {
+object *array_o::operator-(const object &o) const {
     WRONG_OP(-)
 }
 
-object *map_o::operator*(const object &o) const {
+object *array_o::operator*(const object &o) const {
     WRONG_OP(*)
 }
 
-object *map_o::operator/(const object &o) const {
+object *array_o::operator/(const object &o) const {
     WRONG_OP(/)
 }
 
-object *map_o::operator^(const object &o) const {
+object *array_o::operator^(const object &o) const {
     WRONG_OP(^)
 }
 
-object *map_o::operator-() const {
+object *array_o::operator-() const {
     WRONG_OP_UN(-)
 }
 
-object *map_o::operator++() {
+object *array_o::operator++() {
     WRONG_OP_UN(++)
 }
 
-object *map_o::operator--() {
+object *array_o::operator--() {
     WRONG_OP_UN(--)
 }
 
-map_o::map_o() : object(MAP_T) {}
+array_o::array_o() : object(ARRAY_T) {}
 
-string map_o::str() const {
+string array_o::str() const {
     stringstream ss;
     ss << "{";
     int i = 0;
@@ -525,7 +525,7 @@ string map_o::str() const {
     return ss.str();
 }
 
-const bool map_o::contains_key(string s) {
+const bool array_o::contains_key(string s) {
     return values.find(s) != values.end();
 }
 
@@ -755,14 +755,14 @@ bool runtime_environment::is_valid_object_type(objtype objtype) {
         case BOOL_T:
         case NULL_T:
         case CALLABLE_T:
-        case MAP_T:
+        case ARRAY_T:
             return true;
     }
     return false;
 }
 
 object *runtime_environment::get_map_field(const token &map_name, string key) {
-    map_o *map = dynamic_cast<map_o *>(get(map_name));
+    array_o *map = dynamic_cast<array_o *>(get(map_name));
     if (map == nullptr) {
         string &s = *new string();
         s += "variable '" + map_name.lexeme + "' is not a map";
@@ -781,8 +781,8 @@ object *runtime_environment::assign_map_field(const token &name, const token_typ
             throw runtime_exception(name, s);
         }
         variable o = values[name.lexeme];
-        map_o *map;
-        if ((map = dynamic_cast<map_o *>(o.value)) == nullptr) {
+        array_o *map;
+        if ((map = dynamic_cast<array_o *>(o.value)) == nullptr) {
             string &s = *new string();
             s += "variable '" + name.lexeme + "' is not a map";
             throw runtime_exception(name, s);
@@ -1031,7 +1031,7 @@ const char *lns::type_to_string(object_type t) {
         case STRING_T:return "string";
         case BOOL_T:return "bool";
         case NULL_T:return "null";
-        case MAP_T:return "map";
+        case ARRAY_T:return "map";
         case CALLABLE_T:return "callable";
         case CONTEXT_T:return "context";
     }

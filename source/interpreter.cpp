@@ -202,7 +202,7 @@ object *interpreter::visit_variable_expr(variable_expr *v) {
 object *interpreter::visit_sub_script_expr(sub_script_expr *m) {
     object *key = evaluate(const_cast<expr *>(m->key));
     object *eval = evaluate(const_cast<expr *>(m->name));
-    if (eval->type == MAP_T) {
+    if (eval->type == ARRAY_T) {
         return get_map_field(const_cast<token &>(m->where), eval, key);
     } else if (eval->type == STRING_T) {
         string evstring = eval->str();
@@ -219,15 +219,15 @@ object *interpreter::visit_sub_script_expr(sub_script_expr *m) {
 }
 
 object *lns::interpreter::get_map_field(token &where, object *obj, object *key) {
-    map_o *map = dynamic_cast<map_o *>(obj);
+    array_o *map = dynamic_cast<array_o *>(obj);
     if (!map->contains_key(key->str())) return new null_o();
     return map->values[key->str()];
 }
 
 object *
 interpreter::assign_map_field(const token &where, object *obj, const token_type op, string_o *key, object *v) {
-    map_o *map;
-    if ((map = dynamic_cast<map_o *>(obj)) == nullptr) {
+    array_o *map;
+    if ((map = dynamic_cast<array_o *>(obj)) == nullptr) {
         throw runtime_exception(where, *new string("object is not a map"));
     }
     try {
