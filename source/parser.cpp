@@ -327,6 +327,33 @@ stmt *parser::function(bool isglobal) {
     }
 }
 
+expr *parser::array() {
+    token& opening = previous();
+    vector<pair<expr*, expr*>>& pairs = *new vector<pair<expr*, expr*>>();
+    int i = 0;
+    expr *e1,*e2;
+    while(!is_at_end()){
+        e1 = expression(true);
+        if(match({COLON})){
+            e2 = expression(true);
+            pairs.push_back(*new pair<expr*,expr*>(e1,e2));
+        }else{
+            e2 = new literal_expr(e1->file,e1->line,new number_o(i));
+            pairs.push_back(*new pair<expr*,expr*>(e2,e1));
+        }
+        ++i;
+        if(is_at_end()) break;
+        if(match({COMMA}))
+            continue;
+        else if(peek().type == RIGHT_BRACE)
+            break;
+        else
+            throw error(peek(),"expected ',' or '}' after array expression");
+    }
+    consume(RIGHT_BRACE,EXPTOCLOSE(array literal, opening.line).c_str());
+    return new array_expr(opening.filename,opening.line,opening,pairs);
+}
+
 expr *parser::assignment(bool nested) {
     variable_expr *var;
     sub_script_expr *map;
@@ -500,7 +527,10 @@ vector<stmt *> &parser::parse(bool ld_std) {
     return statements;
 }
 
-expr *parser::expression(bool nested) { return assignment(nested); }
+expr *parser::expression(bool nested) {
+    if(match({LEFT_BRACE})) return array();
+    return assignment(nested);
+}
 
 expr *parser::logical(bool nested) {
     expr *expr = comparison(nested), *right;

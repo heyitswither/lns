@@ -15,8 +15,8 @@
 #include <fstream>
 #include <climits>
 
-#define EXPTOCLOSE(what, line) (string("expected 'end' to close " #what "(opened at line ") + std::to_string(line) + string(")"))
-#define SIG_EXIT_PARSER (-4096)
+#define EXPTOCLOSE(what, line) (string("expected 'end' to close " #what " (opened at line ") + std::to_string(line) + string(")"))
+#define SIG_EXIT_PARSER (4096)
 
 using namespace std;
 using namespace lns;
@@ -85,6 +85,8 @@ namespace lns {
         stmt *function(bool isglobal);
 
         expr *assignment(bool nested);
+
+        expr *array();
 
         expr *comparison(bool nested);
 

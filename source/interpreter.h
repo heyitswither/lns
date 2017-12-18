@@ -29,6 +29,8 @@ namespace lns {
     public:
         void visit_s_for_each_stmt(s_for_each_stmt *s) override;
 
+        object *visit_array_expr(array_expr *a) override;
+
     protected:
         object *evaluate(expr *e);
 
@@ -81,7 +83,7 @@ namespace lns {
 
         object *assign_map_field(const token &where, object *obj, const token_type op, number_o* key, object *value);
 
-        object *visit_assign_map_field_expr(sub_script_assign_expr *a) override;//
+        object *visit_sub_script_assign_expr(sub_script_assign_expr *a) override;//
 
         object *visit_null_expr(null_expr *n) override; //
 

@@ -256,7 +256,7 @@ object *interpreter::assign_map_field(const token &where, object *obj, const tok
     }
 }
 
-object *interpreter::visit_assign_map_field_expr(sub_script_assign_expr *a) {
+object *interpreter::visit_sub_script_assign_expr(sub_script_assign_expr *a) {
     object *key = evaluate(const_cast<expr *>(a->key));
     object *value = evaluate(const_cast<expr *>(a->value));
     number_o* nr;
@@ -307,7 +307,7 @@ void interpreter::visit_expression_stmt(expression_stmt *e) {
         case ASSIGN_EXPR_T:
         case CALL_EXPR_T:
         case NULL_EXPR_T:
-        case ASSIGN_MAP_FIELD_EXPR_T:
+        case SUB_SCRIPT_ASSIGN_EXPR_T:
         case INCREMENT_EXPR_T:
         case DECREMENT_EXPR_T:
         case CONTEXT_ASSIGN_EXPR_T:
@@ -445,13 +445,28 @@ object *interpreter::clone_or_keep(object *obj, const expr_type type, const toke
         case UNARY_EXPR_T:
         case NULL_EXPR_T:
         case ASSIGN_EXPR_T:
-        case ASSIGN_MAP_FIELD_EXPR_T:
+        case SUB_SCRIPT_ASSIGN_EXPR_T:
         case CONTEXT_ASSIGN_EXPR_T:
             return obj;
     }
     object* ret = obj->clone();
     if(ret == nullptr) throw runtime_exception(where,*new string(obj->type == CONTEXT_T ? "illegal assignment: context" : "illegal assignment: callable"));
     return ret;
+}
+
+object *interpreter::visit_array_expr(array_expr *a) {
+    array_o *array = new array_o;
+    number_o* key;
+    object* obj;
+    for(auto& pair : a->pairs){
+        if(DCAST_ASNCHK(key,number_o*,evaluate(pair.first))){
+            obj = evaluate(pair.second);
+            array->values[key->value] = obj;
+        }else{
+            throw runtime_exception(a->open_brace,*new string("in array literal: key does not evaluate to a number"));
+        }
+    }
+    return array;
 }
 
 const int lns::function::arity() const {
