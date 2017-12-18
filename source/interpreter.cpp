@@ -36,10 +36,8 @@ void interpreter::check_number_operand(const token &token, object *o) {
 }
 
 bool interpreter::is_bool_true_eq(object *o) {
-    if (o->str() == "true") return true;
-    if (o->type == NUMBER_T)
-        return dynamic_cast<number_o *>(o)->value == 1;
-    return false;
+    if(!(o->type == BOOL_T)) return false;
+    return DCAST(bool_o *,o)->value;
 }
 
 void interpreter::execute_block(vector<stmt *> stmts, runtime_environment *env) {
@@ -366,7 +364,6 @@ void interpreter::visit_s_while_stmt(s_while_stmt *s) {
         } catch (continue_signal s) {
             continue;
         }
-        delete o;
     }
 }
 
