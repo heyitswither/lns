@@ -81,7 +81,7 @@ namespace lns {
 
         object *assign_map_field(const token &where, object *obj, const token_type op, number_o* key, object *value);
 
-        object *visit_assign_map_field_expr(assign_map_field_expr *a) override;//
+        object *visit_assign_map_field_expr(sub_script_assign_expr *a) override;//
 
         object *visit_null_expr(null_expr *n) override; //
 

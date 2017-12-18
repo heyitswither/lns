@@ -340,7 +340,7 @@ expr *parser::assignment(bool nested) {
             return new assign_expr(var->file, var->line, name, op.type, value);
         }
         if ((map = dynamic_cast<sub_script_expr *>(expr)) != nullptr) {
-            return new assign_map_field_expr(map->file, map->line, const_cast<token &>(map->where), map->name, op.type,
+            return new sub_script_assign_expr(map->file, map->line, const_cast<token &>(map->where), map->name, op.type,
                                              map->key, value);
         }
         if ((context = dynamic_cast<context_expr *>(expr)) != nullptr) {

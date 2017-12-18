@@ -256,7 +256,7 @@ object *interpreter::assign_map_field(const token &where, object *obj, const tok
     }
 }
 
-object *interpreter::visit_assign_map_field_expr(assign_map_field_expr *a) {
+object *interpreter::visit_assign_map_field_expr(sub_script_assign_expr *a) {
     object *key = evaluate(const_cast<expr *>(a->key));
     object *value = evaluate(const_cast<expr *>(a->value));
     number_o* nr;
