@@ -12,7 +12,7 @@ using namespace lns;
 
 namespace lns{
 enum stmt_type{
-BLOCK_STMT_T, EXPRESSION_STMT_T, FUNCTION_STMT_T, CONTEXT_STMT_T, IF_STMT_T, RETURN_STMT_T, BREAK_STMT_T, CONTINUE_STMT_T, VAR_STMT_T, S_WHILE_STMT_T, S_FOR_STMT_T, USES_NATIVE_STMT_T, NULL_STMT_T, 
+BLOCK_STMT_T, EXPRESSION_STMT_T, FUNCTION_STMT_T, CONTEXT_STMT_T, IF_STMT_T, RETURN_STMT_T, BREAK_STMT_T, CONTINUE_STMT_T, VAR_STMT_T, S_WHILE_STMT_T, S_FOR_STMT_T, S_FOR_EACH_STMT_T, USES_NATIVE_STMT_T, NULL_STMT_T, 
 };
 class stmt_visitor;
 class stmt{
@@ -34,6 +34,7 @@ class continue_stmt;
 class var_stmt;
 class s_while_stmt;
 class s_for_stmt;
+class s_for_each_stmt;
 class uses_native_stmt;
 class null_stmt;
 class stmt_visitor{
@@ -49,6 +50,7 @@ virtual void visit_continue_stmt(continue_stmt *c) = 0;
 virtual void visit_var_stmt(var_stmt *v) = 0;
 virtual void visit_s_while_stmt(s_while_stmt *s) = 0;
 virtual void visit_s_for_stmt(s_for_stmt *s) = 0;
+virtual void visit_s_for_each_stmt(s_for_each_stmt *s) = 0;
 virtual void visit_uses_native_stmt(uses_native_stmt *u) = 0;
 virtual void visit_null_stmt(null_stmt *n) = 0;
 };
@@ -190,6 +192,19 @@ const stmt* body;
 
 
 
+class s_for_each_stmt : public stmt {
+public:
+s_for_each_stmt(const char* file,int line, token& identifier, expr* container, stmt* body) : identifier(identifier), container(container), body(body), stmt(line, file, S_FOR_EACH_STMT_T) {}
+void accept(stmt_visitor *v) override{
+v->visit_s_for_each_stmt(this);
+}
+const token& identifier;
+const expr* container;
+const stmt* body;
+};
+
+
+
 class uses_native_stmt : public stmt {
 public:
 uses_native_stmt(const char* file,int line, token& where, string& lib_name, token& bind) : where(where), lib_name(lib_name), bind(bind), stmt(line, file, USES_NATIVE_STMT_T) {}
@@ -247,6 +262,9 @@ std::cout << "s_while_stmt" << std::endl;
 }
 virtual void visit_s_for_stmt(s_for_stmt *s) override {
 std::cout << "s_for_stmt" << std::endl;
+}
+virtual void visit_s_for_each_stmt(s_for_each_stmt *s) override {
+std::cout << "s_for_each_stmt" << std::endl;
 }
 virtual void visit_uses_native_stmt(uses_native_stmt *u) override {
 std::cout << "uses_native_stmt" << std::endl;
