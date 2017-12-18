@@ -94,14 +94,10 @@ lns::object *lns::string_o::operator/(const lns::object &o) const {
     unsigned long current;
     string partial = this->value;
     while((current = partial.find(o.str())) != string::npos){
-        string& s = *new string();
-        s+= std::to_string(i++);
-        map->values[s] = new string_o(partial.substr(0, current));
+        map->values[i++] = new string_o(partial.substr(0, current));
         partial = partial.substr(current + 1,partial.size()-1);
     }
-    string& s = *new string();
-    s+= std::to_string(i++);
-    map->values[s] = new string_o(move(partial));
+    map->values[i++] = new string_o(move(partial));
     return map;
 }
 
@@ -525,7 +521,7 @@ string array_o::str() const {
     return ss.str();
 }
 
-const bool array_o::contains_key(string s) {
+const bool array_o::contains_key(double s) {
     return values.find(s) != values.end();
 }
 
@@ -761,19 +757,7 @@ bool runtime_environment::is_valid_object_type(objtype objtype) {
     return false;
 }
 
-object *runtime_environment::get_map_field(const token &map_name, string key) {
-    array_o *map = dynamic_cast<array_o *>(get(map_name));
-    if (map == nullptr) {
-        string &s = *new string();
-        s += "variable '" + map_name.lexeme + "' is not a map";
-        throw runtime_exception(map_name, s);
-    } else {
-        if (!map->contains_key(key)) return new null_o();
-        return map->values[key];
-    }
-}
-
-object *runtime_environment::assign_map_field(const token &name, const token_type op, string_o *key, object *value) {
+object *runtime_environment::assign_map_field(const token &name, const token_type op, number_o *key, object *value) {
     if (contains_key(name.lexeme)) {
         if (values[name.lexeme].isfinal) {
             string &s = *new string();
@@ -886,6 +870,10 @@ void runtime_environment::add_natives(const std::set<callable *> &natives) {
 
 void runtime_environment::add_native(callable *ptr) {
     this->natives.insert(ptr);
+}
+
+bool runtime_environment::clear_var(const token &name) {
+    return this->values.erase(name.lexeme) != 0;
 }
 
 variable::variable() : value(new null_o()), isfinal(false) {}

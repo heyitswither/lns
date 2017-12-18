@@ -13,6 +13,7 @@
 #include <utility>
 #include <vector>
 #include <set>
+#include <unordered_map>
 
 
 #define NATIVE_RUNTIME_EXC(msg) throw runtime_exception(__FILE__,__LINE__,*new std::string(msg));
@@ -21,8 +22,8 @@
 #define WRONG_OP_UN(OP) throw INVALID_OP(#OP,this->type,nullptr);
 
 #define DCAST(a,b) (dynamic_cast<a>(b))
-#define DCAST_ASN(a,b,c) (a = DCAST(b,c))
-#define DCAST_ASNCHK(a,b,c) (DCAST_ASN(a,b,c) != nullptr)
+#define DCAST_ASN(a,b,c) a = DCAST(b,c)
+#define DCAST_ASNCHK(a,b,c) ((DCAST_ASN(a,b,c)) != nullptr)
 
 #define LNS_LIBRARY_LOCATION "/lns/lib/"
 #define S(s) *new std::string(#s)
@@ -74,6 +75,7 @@ namespace lns {
         FALSE,
         FUNCTION,
         FOR,
+        FOREACH,
         IF,
         NUL,
         OR,
@@ -98,6 +100,7 @@ namespace lns {
         DO,
         END,
         DPCHECK,
+        IN,
         BIND,
         UNRECOGNIZED,
         EOF_
@@ -112,9 +115,9 @@ namespace lns {
                                              "SLASH", "SLASH_EQUALS", "STAR", "STAR_EQUALS", "HAT", "BANG", "BANG_EQUAL",
                                              "EQUAL", "EQUAL_EQUAL", "GREATER", "GREATER_EQUAL", "LESS", "LESS_EQUAL",
                                              "IDENTIFIER", "STRING", "NUMBER", "NATIVES", "AND", "CLASS", "ELSE", "FALSE",
-                                             "FUNCTION", "FOR", "IF", "NUL", "OR", "XOR", "NOR", "NAND", "NOT", "RETURN",
+                                             "FUNCTION", "FOR", "FOREACH", "IF", "NUL", "OR", "XOR", "NOR", "NAND", "NOT", "RETURN",
                                              "SUPER", "THIS", "TRUE", "VAR", "WHILE", "GLOBAL", "FINAL", "USE", "BREAK",
-                                             "CONTINUE", "CONTEXT", "BEGIN", "THEN", "DO", "DPCHECK", "END", "BIND", "UNRECOGNIZED",
+                                             "CONTINUE", "CONTEXT", "BEGIN", "THEN", "DO", "END",  "DPCHECK", "IN", "BIND", "UNRECOGNIZED",
                                              "EOF_"};
 
     class object {
@@ -385,13 +388,13 @@ namespace lns {
     public:
         explicit array_o();
 
-        std::map<std::string, object *> values;
+        std::map<double, object *> values;
 
         bool operator==(const object &o) const override;
 
         std::string str() const override;
 
-        const bool contains_key(std::string s);
+        const bool contains_key(double t);
 
         bool operator&&(const object &o) const override;
 
@@ -550,9 +553,9 @@ namespace lns {
 
         bool is_valid_object_type(objtype objtype);
 
-        object *get_map_field(const token &map_name, std::string key);
+        object *assign_map_field(const token &name,const token_type op,number_o *key, object *value);
 
-        object *assign_map_field(const token &name,const token_type op,string_o *key, object *value);
+        bool clear_var(const token &name);
 
         bool is_native(callable *ptr);
 
