@@ -1,41 +1,44 @@
 #!/bin/bash
 CHK(){
     if [ $1 -ne 0 ]; then
+        printf "\n"
         echo "$2. Exiting." & exit
     fi
 }
-sudo cd "${0%/*}" #make sure we're in the right directory
+cd "${0%/*}" #make sure we're in the right directory
 cd ..
 
-echo "Removing symbolic link (if present)..."
+printf "Removing symbolic link (if present)..."
 sudo rm -f /usr/bin/lns
+printf " done\n"
 
-echo "Removing previous installation folder (if present)..."
+printf "Removing previous installation folder (if present)..."
 sudo rm -r -f /lns
+printf " done\n"
 
-echo "Creating install directory..."
+printf "Creating install directory..."
 sudo mkdir --parents /lns/lib
 CHK $? "Unable to create install directory"
+printf " done\n"
 
-echo "Compiling executable..."
+printf "Compiling executable..."
 sudo g++ -w -Wall -fpermissive -rdynamic -Wl,--no-as-needed -ldl source/lns.cpp source/errors.h source/exceptions.h source/scanner.h source/defs.h source/parser.h source/options.h source/interpreter.h source/debug.h source/commands.h source/commands.cpp source/debug.cpp source/defs.cpp source/errors.cpp source/exceptions.cpp source/interpreter.cpp source/parser.cpp source/scanner.cpp source/options.cpp -o ./lns
+CHK $? "\nCompilation failed"
+printf " done\n"
 
-CHK $? "Compilation failed"
-
-echo "Moving executable..."
+printf "Moving executable..."
 sudo mv lns /lns/
-
 CHK $? "Unable to move the executable"
+printf " done\n"
 
-echo "Creating link to executable in /usr/bin..."
+printf "Creating link to executable in /usr/bin..."
 sudo ln -s /lns/lns /usr/bin/
-
 cp source/defs.h lib/natives/src/
-
 CHK $? "Unable to create link to executable"
+printf " done\n"
 
 cd lib/natives/
-echo "Removed any previously compiled .so files..."
+printf "Removed any previously compiled .so files..."
 for f in *.so
 do
     if [ $f = "*.so" ]; then
@@ -43,6 +46,7 @@ do
     fi
     rm -f $f
 done
+printf " done\n"
 
 cd src
 
@@ -61,15 +65,17 @@ cd ../../..
 
 sudo rm lib/natives/src/defs.h
 
-echo "Moving libraries..."
+printf "Moving libraries..."
 sudo cp -r lib /lns/
-
 CHK $? "Unable to move libraries"
+printf " done\n"
 
-echo "Removing sources from installation directory..."
+printf "Removing sources from installation directory..."
 sudo rm -r /lns/lib/natives/src
+printf " done\n"
 
-echo "Installing manual entry..."
-sudo cp manual/lns.1 /usr/local/man/
+printf "Installing manual entry..."
+sudo cp manual/lns.1 /usr/share/man/man1/
+printf " done\n"
 
-echo "Done."
+echo "Installation completed."
