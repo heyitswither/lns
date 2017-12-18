@@ -158,6 +158,15 @@ void scanner::scan_token() {
         case '!':
             add_token(match('=') ? BANG_EQUAL : BANG);
             break;
+        case '{':
+            add_token(LEFT_BRACE);
+            break;
+        case '}':
+            add_token(RIGHT_BRACE);
+            break;
+        case ':':
+            add_token(COLON);
+            break;
         case '=':
             add_token(match('=') ? EQUAL_EQUAL : EQUAL);
             break;
