@@ -31,7 +31,7 @@ class literal_expr;
 class unary_expr;
 class variable_expr;
 class sub_script_expr;
-class assign_map_field_expr;
+class sub_script_assign_expr;
 class context_expr;
 class context_assign_expr;
 class null_expr;
@@ -47,7 +47,7 @@ virtual object* visit_literal_expr(literal_expr *l) = 0;
 virtual object* visit_unary_expr(unary_expr *u) = 0;
 virtual object* visit_variable_expr(variable_expr *v) = 0;
 virtual object* visit_sub_script_expr(sub_script_expr *s) = 0;
-virtual object* visit_assign_map_field_expr(assign_map_field_expr *a) = 0;
+virtual object* visit_assign_map_field_expr(sub_script_assign_expr *a) = 0;
 virtual object* visit_context_expr(context_expr *c) = 0;
 virtual object* visit_context_assign_expr(context_assign_expr *c) = 0;
 virtual object* visit_null_expr(null_expr *n) = 0;
@@ -174,9 +174,9 @@ const expr* key;
 
 
 
-class assign_map_field_expr : public expr {
+class sub_script_assign_expr : public expr {
 public:
-assign_map_field_expr(const char* file,int line, token& where, expr* name, token_type op, expr* key, expr* value) : where(where), name(name), op(op), key(key), value(value), expr(line, file, ASSIGN_MAP_FIELD_EXPR_T) {}
+sub_script_assign_expr(const char* file,int line, token& where, expr* name, token_type op, expr* key, expr* value) : where(where), name(name), op(op), key(key), value(value), expr(line, file, ASSIGN_MAP_FIELD_EXPR_T) {}
 object* accept(expr_visitor *v) override{
 return v->visit_assign_map_field_expr(this);
 }
@@ -257,8 +257,8 @@ std::cout << "variable_expr" << std::endl;
 virtual object* visit_sub_script_expr(sub_script_expr *s) override {
 std::cout << "sub_script_expr" << std::endl;
 }
-virtual object* visit_assign_map_field_expr(assign_map_field_expr *a) override {
-std::cout << "assign_map_field_expr" << std::endl;
+virtual object* visit_assign_map_field_expr(sub_script_assign_expr *a) override {
+std::cout << "sub_script_assign_expr" << std::endl;
 }
 virtual object* visit_context_expr(context_expr *c) override {
 std::cout << "context_expr" << std::endl;
