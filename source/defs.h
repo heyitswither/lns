@@ -34,13 +34,15 @@
 namespace lns {
     const char* best_file_path(const char* filename);
     enum token_type {
-        // Single-character tokens.
-                LEFT_PAREN,
+        LEFT_PAREN,
         RIGHT_PAREN,
         LEFT_SQR,
         RIGHT_SQR,
+        LEFT_BRACE,
+        RIGHT_BRACE,
         COMMA,
         DOT,
+        COLON,
         MINUS,
         MINUS_EQUALS,
         PLUS,
@@ -52,8 +54,7 @@ namespace lns {
         STAR,
         STAR_EQUALS,
         HAT,
-        // One or two character tokens.
-                BANG,
+        BANG,
         BANG_EQUAL,
         EQUAL,
         EQUAL_EQUAL,
@@ -61,14 +62,10 @@ namespace lns {
         GREATER_EQUAL,
         LESS,
         LESS_EQUAL,
-
-        // Literals.
-                IDENTIFIER,
+        IDENTIFIER,
         STRING,
         NUMBER,
-
-        // Keywords.
-                NATIVES,
+        NATIVES,
         AND,
         CLASS,
         ELSE,
@@ -110,7 +107,7 @@ namespace lns {
     };
     typedef objtype object_type;
 
-    const std::string KEYWORDS_S_VALUES[] = {"LEFT_PAREN", "RIGHT_PAREN", "LEFT_SQR", "RIGHT_SQR", "COMMA", "DOT", "MINUS",
+    const std::string KEYWORDS_S_VALUES[] = {"COMMA","LEFT_PAREN", "RIGHT_PAREN", "LEFT_SQR", "RIGHT_SQR","LEFT_BRACE","RIGHT_BRACE", "COMMA", "DOT", "COLON", "MINUS",
                                              "MINUS_EQUALS", "PLUS", "PLUS_EQUALS", "PLUS_PLUS", "MINUS_MINUS",
                                              "SLASH", "SLASH_EQUALS", "STAR", "STAR_EQUALS", "HAT", "BANG", "BANG_EQUAL",
                                              "EQUAL", "EQUAL_EQUAL", "GREATER", "GREATER_EQUAL", "LESS", "LESS_EQUAL",
