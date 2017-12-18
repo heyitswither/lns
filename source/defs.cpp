@@ -189,7 +189,7 @@ bool lns::number_o::operator<(const lns::object &o) const {
 }
 
 lns::object *lns::number_o::operator+=(const lns::object &o) {
-    if (!check_type(NUMBER_T, *this, o)) WRONG_OP(+=);
+    if (!check_type(NUMBER_T, *this, o))WRONG_OP(+=);
     this->value += dynamic_cast<const number_o &>(o).value;
     return this;
 }
@@ -213,7 +213,9 @@ lns::object *lns::number_o::operator/=(const lns::object &o) {
 }
 
 lns::object *lns::number_o::operator+(const lns::object &o) const {
-    if (!check_type(NUMBER_T, *this, o)) WRONG_OP(+);
+    if (!check_type(NUMBER_T, *this, o))  if(!(o.type == STRING_T)) WRONG_OP(+);
+    if(o.type == STRING_T)
+        return new string_o(this->str() + o.str());
     return new number_o(this->value + dynamic_cast<const number_o &>(o).value);
 }
 
@@ -306,6 +308,7 @@ lns::object *lns::bool_o::operator/=(const lns::object &o) {
 }
 
 lns::object *lns::bool_o::operator+(const lns::object &o) const {
+    if(o.type == STRING_T) return new string_o(this->str() + o.str());
     WRONG_OP(+)
 }
 
@@ -392,6 +395,7 @@ lns::object *lns::null_o::operator/=(const lns::object &o) {
 }
 
 lns::object *lns::null_o::operator+(const lns::object &o) const {
+    if(o.type == STRING_T) return new string_o(this->str() + o.str());
     WRONG_OP(+)
 }
 
@@ -473,6 +477,7 @@ object *array_o::operator/=(const object &o) {
 }
 
 object *array_o::operator+(const object &o) const {
+    if(o.type == STRING_T) return new string_o(this->str() + o.str());
     WRONG_OP(+)
 }
 
