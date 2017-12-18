@@ -512,7 +512,7 @@ string array_o::str() const {
     int i = 0;
     for (auto p : values) {
         if (++i != 1) ss << ", ";
-        ss << "\"" << p.first << "\" : ";
+        ss << p.first << " : ";
         if (p.second->type == STRING_T) ss << "\"";
         ss << p.second->str();
         if (p.second->type == STRING_T) ss << "\"";
@@ -1019,7 +1019,7 @@ const char *lns::type_to_string(object_type t) {
         case STRING_T:return "string";
         case BOOL_T:return "bool";
         case NULL_T:return "null";
-        case ARRAY_T:return "map";
+        case ARRAY_T:return "array";
         case CALLABLE_T:return "callable";
         case CONTEXT_T:return "context";
     }
