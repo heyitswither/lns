@@ -196,8 +196,8 @@ stmt *parser::statement() {
     if (match({BREAK})) return break_statement();
     if (match({CONTINUE})) return continue_statement();
     if (match({WHILE})) return while_statement();
-    if (match({FOR}))
-        return for_statement();
+    if (match({FOR})) return for_statement();
+    if (match({FOREACH})) return foreach_statement();
     if (match({BEGIN})) return new block_stmt(previous().filename, previous().line, block());
     return expression_statement();
 }
@@ -254,6 +254,19 @@ stmt *parser::while_statement() {
         throw error(previous(), EXPTOCLOSE(if statement, d.line).c_str());
     }
     return new s_while_stmt(condition->file, condition->line, *condition, body);
+}
+
+
+stmt *parser::foreach_statement() {
+    token& init = consume(IDENTIFIER,"expected identifier after 'foreach' keyword");
+    consume(IN,"expected 'in' after identifier");
+    expr* container = expression(true);
+    token& p = consume(DO,"expected 'do'");
+    try{
+        return new s_for_each_stmt(p.filename,p.line,init,container,new block_stmt(p.filename,p.line,stmts_until({END})));
+    }catch(int){
+        throw error(previous(), EXPTOCLOSE(foreach statement, p.line).c_str());
+    }
 }
 
 stmt *parser::for_statement() {

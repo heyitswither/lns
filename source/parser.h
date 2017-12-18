@@ -120,6 +120,8 @@ namespace lns {
         void reset(vector<token *> tokens);
 
         void ld_stmts(string &s);
+
+        stmt *foreach_statement();
     };
 
 
