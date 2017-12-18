@@ -12,6 +12,7 @@ token_type lns::get_token_type(string &key) {
     if (key == "else") return ELSE;
     if (key == "false") return FALSE;
     if (key == "for") return FOR;
+    if (key == "foreach") return FOREACH;
     if (key == "function") return FUNCTION;
     if (key == "if") return IF;
     if (key == "null") return NUL;
@@ -39,6 +40,7 @@ token_type lns::get_token_type(string &key) {
     if (key == "do") return DO;
     if (key == "bind") return BIND;
     if (key == "dpcheck") return DPCHECK;
+    if (key == "in") return IN;
     return UNRECOGNIZED;
 }
 
