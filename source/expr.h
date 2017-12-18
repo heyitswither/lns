@@ -4,13 +4,14 @@
 #include <list>
 #include <string>
 #include <iostream>
+#include <utility>
 using namespace std;
 using namespace lns;
 
 
 namespace lns{
 enum expr_type{
-INCREMENT_EXPR_T, DECREMENT_EXPR_T, ASSIGN_EXPR_T, BINARY_EXPR_T, CALL_EXPR_T, GROUPING_EXPR_T, LITERAL_EXPR_T, UNARY_EXPR_T, VARIABLE_EXPR_T, SUB_SCRIPT_EXPR_T, ASSIGN_MAP_FIELD_EXPR_T, CONTEXT_EXPR_T, CONTEXT_ASSIGN_EXPR_T, NULL_EXPR_T, 
+INCREMENT_EXPR_T, DECREMENT_EXPR_T, ASSIGN_EXPR_T, BINARY_EXPR_T, CALL_EXPR_T, GROUPING_EXPR_T, LITERAL_EXPR_T, UNARY_EXPR_T, VARIABLE_EXPR_T, SUB_SCRIPT_EXPR_T, SUB_SCRIPT_ASSIGN_EXPR_T, CONTEXT_EXPR_T, CONTEXT_ASSIGN_EXPR_T, ARRAY_EXPR_T, NULL_EXPR_T, 
 };
 class expr_visitor;
 class expr{
@@ -34,6 +35,7 @@ class sub_script_expr;
 class sub_script_assign_expr;
 class context_expr;
 class context_assign_expr;
+class array_expr;
 class null_expr;
 class expr_visitor{
 public:
@@ -47,9 +49,10 @@ virtual object* visit_literal_expr(literal_expr *l) = 0;
 virtual object* visit_unary_expr(unary_expr *u) = 0;
 virtual object* visit_variable_expr(variable_expr *v) = 0;
 virtual object* visit_sub_script_expr(sub_script_expr *s) = 0;
-virtual object* visit_assign_map_field_expr(sub_script_assign_expr *a) = 0;
+virtual object* visit_sub_script_assign_expr(sub_script_assign_expr *s) = 0;
 virtual object* visit_context_expr(context_expr *c) = 0;
 virtual object* visit_context_assign_expr(context_assign_expr *c) = 0;
+virtual object* visit_array_expr(array_expr *a) = 0;
 virtual object* visit_null_expr(null_expr *n) = 0;
 };
 
@@ -176,9 +179,9 @@ const expr* key;
 
 class sub_script_assign_expr : public expr {
 public:
-sub_script_assign_expr(const char* file,int line, token& where, expr* name, token_type op, expr* key, expr* value) : where(where), name(name), op(op), key(key), value(value), expr(line, file, ASSIGN_MAP_FIELD_EXPR_T) {}
+sub_script_assign_expr(const char* file,int line, token& where, expr* name, token_type op, expr* key, expr* value) : where(where), name(name), op(op), key(key), value(value), expr(line, file, SUB_SCRIPT_ASSIGN_EXPR_T) {}
 object* accept(expr_visitor *v) override{
-return v->visit_assign_map_field_expr(this);
+return v->visit_sub_script_assign_expr(this);
 }
 const token& where;
 const expr* name;
@@ -211,6 +214,18 @@ const expr* context_name;
 const token_type op;
 const token& context_identifier;
 const expr* value;
+};
+
+
+
+class array_expr : public expr {
+public:
+array_expr(const char* file,int line, token& open_brace, vector<pair<expr*,expr*>>& pairs) : open_brace(open_brace), pairs(pairs), expr(line, file, ARRAY_EXPR_T) {}
+object* accept(expr_visitor *v) override{
+return v->visit_array_expr(this);
+}
+const token& open_brace;
+const vector<pair<expr*,expr*>>& pairs;
 };
 
 
@@ -257,7 +272,7 @@ std::cout << "variable_expr" << std::endl;
 virtual object* visit_sub_script_expr(sub_script_expr *s) override {
 std::cout << "sub_script_expr" << std::endl;
 }
-virtual object* visit_assign_map_field_expr(sub_script_assign_expr *a) override {
+virtual object* visit_sub_script_assign_expr(sub_script_assign_expr *s) override {
 std::cout << "sub_script_assign_expr" << std::endl;
 }
 virtual object* visit_context_expr(context_expr *c) override {
@@ -265,6 +280,9 @@ std::cout << "context_expr" << std::endl;
 }
 virtual object* visit_context_assign_expr(context_assign_expr *c) override {
 std::cout << "context_assign_expr" << std::endl;
+}
+virtual object* visit_array_expr(array_expr *a) override {
+std::cout << "array_expr" << std::endl;
 }
 virtual object* visit_null_expr(null_expr *n) override {
 std::cout << "null_expr" << std::endl;
