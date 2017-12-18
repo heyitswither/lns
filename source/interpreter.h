@@ -26,6 +26,10 @@ namespace lns {
 
         vector<stack_call *>& stack_trace;
     protected:
+    public:
+        void visit_s_for_each_stmt(s_for_each_stmt *s) override;
+
+    protected:
         object *evaluate(expr *e);
 
     private:
@@ -75,7 +79,7 @@ namespace lns {
 
         object *visit_sub_script_expr(sub_script_expr *m) override; //
 
-        object *assign_map_field(const token &where, object *obj, const token_type op, string_o *key, object *value);
+        object *assign_map_field(const token &where, object *obj, const token_type op, number_o* key, object *value);
 
         object *visit_assign_map_field_expr(assign_map_field_expr *a) override;//
 

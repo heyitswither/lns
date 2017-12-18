@@ -219,16 +219,17 @@ object *interpreter::visit_sub_script_expr(sub_script_expr *m) {
 }
 
 object *lns::interpreter::get_map_field(token &where, object *obj, object *key) {
-    array_o *map = dynamic_cast<array_o *>(obj);
-    if (!map->contains_key(key->str())) return new null_o();
-    return map->values[key->str()];
+    auto DCAST_ASN(map,array_o*,obj);
+    if(key->type != NUMBER_T) throw runtime_exception(where, *new string("given key is not a number"));
+    auto DCAST_ASN(nr,number_o*,key);
+    if (!map->contains_key(nr->value)) return new null_o();
+    return map->values[nr->value];
 }
 
-object *
-interpreter::assign_map_field(const token &where, object *obj, const token_type op, string_o *key, object *v) {
+object *interpreter::assign_map_field(const token &where, object *obj, const token_type op, number_o *key, object *v) {
     array_o *map;
     if ((map = dynamic_cast<array_o *>(obj)) == nullptr) {
-        throw runtime_exception(where, *new string("object is not a map"));
+        throw runtime_exception(where, *new string("object is not an array"));
     }
     try {
         object* value = clone_or_keep(v, static_cast<const expr_type>(op), where);
@@ -258,11 +259,11 @@ interpreter::assign_map_field(const token &where, object *obj, const token_type 
 object *interpreter::visit_assign_map_field_expr(assign_map_field_expr *a) {
     object *key = evaluate(const_cast<expr *>(a->key));
     object *value = evaluate(const_cast<expr *>(a->value));
-    string_o *k = dynamic_cast<string_o *>(key);
-    if (k == nullptr) {
-        k = new string_o(key->str());
-    }
-    return assign_map_field(a->where, evaluate(const_cast<expr *>(a->name)), a->op, k, value);
+    number_o* nr;
+    if(DCAST_ASNCHK(nr,number_o*,key))
+        return assign_map_field(a->where, evaluate(const_cast<expr *>(a->name)), a->op, nr, value);
+    else
+        throw runtime_exception(a->where,STR("given key is not a number"));
 }
 
 object *interpreter::visit_null_expr(null_expr *n) {
@@ -273,6 +274,22 @@ void interpreter::visit_block_stmt(block_stmt *b) {
     runtime_environment *env = new runtime_environment(environment);
     execute_block(b->statements, env);
 }
+
+void interpreter::visit_s_for_each_stmt(s_for_each_stmt *s) {
+    object* container = evaluate(const_cast<expr *>(s->container));
+    if(container->type == ARRAY_T){
+        auto DCAST_ASN(array,array_o*,container);
+        environment->define(s->identifier,new null_o(),false,false);
+        for(const auto &a : array->values){
+            environment->assign(s->identifier,token_type::EQUAL,a.second);
+            execute(const_cast<stmt *>(s->body));
+        }
+        environment->clear_var(s->identifier);
+    }else{
+        throw runtime_exception(s->identifier,STR("object is not an array"));
+    }
+}
+
 
 void interpreter::visit_s_for_stmt(s_for_stmt *s) {
     execute(const_cast<stmt *>(s->init));
@@ -318,8 +335,7 @@ void interpreter::visit_if_stmt(if_stmt *i) {
 
 void interpreter::visit_return_stmt(return_stmt *r) {
     object *value = lns::GET_DEFAULT_NULL();
-    null_expr *null = dynamic_cast<null_expr *>(const_cast<expr *>(&r->value));
-    if (null == nullptr) value = evaluate(const_cast<expr *>(&r->value));
+    if (r->value.type != NULL_EXPR_T) value = evaluate(const_cast<expr *>(&r->value));
     throw return_signal(value, r->keyword);
 }
 
@@ -437,7 +453,6 @@ object *interpreter::clone_or_keep(object *obj, const expr_type type, const toke
     if(ret == nullptr) throw runtime_exception(where,*new string(obj->type == CONTEXT_T ? "illegal assignment: context" : "illegal assignment: callable"));
     return ret;
 }
-
 
 const int lns::function::arity() const {
     return static_cast<int>(declaration->parameters.size());
