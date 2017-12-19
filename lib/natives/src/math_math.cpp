@@ -5,6 +5,31 @@
 #include <cmath>
 
 using namespace lns;
+using namespace std;
+
+class parse_c : public callable{
+public:
+    const int arity() const override {
+        return 1;
+    }
+
+    const std::string &name() const override {
+        return S(parse);
+    }
+
+    object *call(std::vector<object *> &args) override {
+        string_o *str;
+        if(DCAST_ASNCHK(str,string_o*,args[0])){
+            stringstream ss(str->value);
+            number_o *nr = new number_o(0);
+            ss >> nr->value;
+            if(ss.fail()) return new null_o();
+            return nr;
+        }
+        return new null_o();
+    }
+};
+
 
 class log10_c : public callable{
 public:
@@ -230,6 +255,7 @@ object* gen(){
     ctx->define(S(cbrt),new cbrt_c, true);
     ctx->define(S(ceil),new ceil_c, true);
     ctx->define(S(floor),new floor_c, true);
+    ctx->define(S(parse),new parse_c, true);
     return ctx;
 }
 
