@@ -70,7 +70,7 @@ stmt *parser::use() {
     bool isnatives = false;
     if (!use_allowed)use_not_allowed();
     if (match({NATIVES})) isnatives = true;
-    token &t = consume(STRING, "expected filename in use statement");
+    token &t = consume(STRING, "expected filename");
     string &s = dynamic_cast<string_o *>(&t.literal)->value;
     if (isnatives) {
         consume(BIND,"expected 'bind' after filename");
