@@ -99,6 +99,9 @@ namespace lns {
         DPCHECK,
         IN,
         BIND,
+        EXCEPTION,
+        AS,
+        WITH,
         UNRECOGNIZED,
         EOF_
     };
@@ -114,7 +117,7 @@ namespace lns {
                                              "IDENTIFIER", "STRING", "NUMBER", "NATIVES", "AND", "CLASS", "ELSE", "FALSE",
                                              "FUNCTION", "FOR", "FOREACH", "IF", "NUL", "OR", "XOR", "NOR", "NAND", "NOT", "RETURN",
                                              "SUPER", "THIS", "TRUE", "VAR", "WHILE", "GLOBAL", "FINAL", "USE", "BREAK",
-                                             "CONTINUE", "CONTEXT", "BEGIN", "THEN", "DO", "END",  "DPCHECK", "IN", "BIND", "UNRECOGNIZED",
+                                             "CONTINUE", "CONTEXT", "BEGIN", "THEN", "DO", "END",  "DPCHECK", "IN", "BIND", "EXCEPTION", "AS", "WITH", "UNRECOGNIZED",
                                              "EOF_"};
 
     class object {
