@@ -183,6 +183,8 @@ namespace lns {
 
         explicit string_o(std::string value);
 
+        string_o();
+
         std::string str() const override;
 
         bool operator==(const object &o) const override;

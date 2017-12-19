@@ -121,6 +121,10 @@ object *string_o::clone() const {
     return new string_o(*new string(this->value));
 }
 
+string_o::string_o() : object(STRING_T), value(*new string()){
+
+}
+
 object *number_o::clone() const {
     return new number_o(this->value);
 }
