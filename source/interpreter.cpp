@@ -438,7 +438,7 @@ void interpreter::interpret(vector<stmt *> &statements) {
         runtime_exception e(s.keyword, *new string("break statements can only be used inside of loops"));
         errors::runtime_error(e, stack_trace);
     }
-    if(errors::had_runtime_error && !lns::prompt) std::exit(RUNTIME_ERROR);
+    if(errors::had_runtime_error && !lns::prompt) std::exit(errors::exit_status);
 }
 
 object *interpreter::clone_or_keep(object *obj, const expr_type type, const token &where) {
