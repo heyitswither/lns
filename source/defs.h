@@ -24,6 +24,8 @@
 #define DCAST(a,b) (dynamic_cast<a>(b))
 #define DCAST_ASN(a,b,c) a = DCAST(b,c)
 #define DCAST_ASNCHK(a,b,c) ((DCAST_ASN(a,b,c)) != nullptr)
+#define DCAST_CHK(b,c) (DCAST(b,c) != nullptr)
+
 
 #define LNS_LIBRARY_LOCATION "/lns/lib/"
 #define S(s) *new std::string(#s)
@@ -464,7 +466,7 @@ namespace lns {
         const char *what() const throw() override;
     };
 
-    class incode_exception : public runtime_exception, public object{
+    class incode_exception : public lns::runtime_exception, public lns::object{
     private:
         std::map<std::string,lns::object*> fields;
     public:
