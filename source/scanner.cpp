@@ -42,8 +42,9 @@ token_type lns::get_token_type(string &key) {
     if (key == "dpcheck") return DPCHECK;
     if (key == "in") return IN;
     if (key == "exception") return EXCEPTION;
-    if (key == "as") return AS;
     if (key == "with") return WITH;
+    if (key == "raise") return RAISE;
+    if (key == "handle") return HANDLE;
     return UNRECOGNIZED;
 }
 
