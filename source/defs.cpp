@@ -649,7 +649,7 @@ const char *incode_exception::what() const throw() {
     string& s = *new string();
     s += "unhandled exception: \"";
     s += message;
-    s += "\" ";
+    s += "\"";
     if(this->fields.find("message") != this->fields.end()){
         s += " (message = \"";
         s += fields["message"]->str();
