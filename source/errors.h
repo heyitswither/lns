@@ -6,14 +6,17 @@
 #define CPPLNS_ERRORS_H
 #include "defs.h"
 #include "exceptions.h"
+
 #define EXIT_SUCCESS 0
 #define FATAL_ERROR 1
 #define PARSE_ERROR 2
 #define RUNTIME_ERROR 3
+#define UNHANDLED_EXCEPTION 4
 
 namespace errors {
 
     extern bool had_parse_error;
+    extern int exit_status;
     extern bool had_runtime_error;
 
     void fatal_error(std::exception &e, int code);

@@ -11,6 +11,7 @@ using namespace std;
 using namespace lns;
 bool errors::had_parse_error = false;
 bool errors::had_runtime_error = false;
+int  errors::exit_status;
 void errors::parse_error(const char *&file, int line, const char *message) {
     report(PARSE_ERROR_S, file, line, "", message);
 }
@@ -27,6 +28,7 @@ void errors::runtime_error(lns::runtime_exception &error, std::vector<lns::stack
     cerr << error.what();
     cerr << ".\n";
     cerr << stringstack << endl;
+    exit_status = DCAST_CHK(lns::incode_exception*,&error) ? UNHANDLED_EXCEPTION : RUNTIME_ERROR;
     //printf("%s in file %s%s: %s.\n%s",RUNTIME_ERROR_S,error.token.filename,stringstack.empty() ? (":" + error.token.line) : "",error.what(),stringstack.c_str());
 }
 
