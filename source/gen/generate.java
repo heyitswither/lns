@@ -26,8 +26,8 @@ public class generate {
                 "variable  : token& name",
                 "sub_script : token& where, expr* name, expr* key",
                 "sub_script_assign : token& where, expr* name, token_type op, expr* key, expr* value",
-                "context : expr* context_name, token& context_identifier",
-                "context_assign : expr* context_name, token_type op, token& context_identifier, expr* value",
+                "member : expr* container_name, token& member_identifier",
+                "member_assign : expr* container_name, token_type op, token& member_identifier, expr* value",
                 "array     : token& open_brace, vector<pair<expr*,expr*>>& pairs",
                 "null      : token& where"
         ), Arrays.asList("<utility>"), "object*");
