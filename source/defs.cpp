@@ -6,7 +6,6 @@
 #include "defs.h"
 #include "exceptions.h"
 #include "options.h"
-
 using namespace lns;
 using namespace std;
 
@@ -644,4 +643,17 @@ std::string incode_exception::str() const {
 
 object *incode_exception::clone() const {
     return nullptr;
+}
+
+const char *incode_exception::what() const throw() {
+    string& s = *new string();
+    s += "unhandled exception: \"";
+    s += message;
+    s += "\" ";
+    if(this->fields.find("message") != this->fields.end()){
+        s += " (message = \"";
+        s += fields["message"]->str();
+        s += "\")";
+    }
+    return s.c_str();
 }

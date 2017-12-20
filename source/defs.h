@@ -479,6 +479,7 @@ namespace lns {
 
         object *clone() const override;
 
+        const char *what() const throw() override;
     };
 
     const char *type_to_string(object_type t);
