@@ -12,6 +12,7 @@
 #include <cmath>
 #include <ctime>
 #include "exceptions.h"
+#include "exception_manager.h"
 #include <string>
 #include <chrono>
 #include <thread>
@@ -25,7 +26,6 @@ namespace lns {
         virtual void execute(stmt *s);
 
         vector<stack_call *>& stack_trace;
-    protected:
     public:
         void visit_s_for_each_stmt(s_for_each_stmt *s) override;
 
@@ -51,6 +51,8 @@ namespace lns {
 
         runtime_environment *globals = new runtime_environment();
         runtime_environment *environment = globals;
+        lns::exception_manager * exception_manager;
+
 
         void execute_block(vector<stmt *> stmts, runtime_environment *env);
 
@@ -58,6 +60,11 @@ namespace lns {
 
         object *visit_context_assign_expr(context_assign_expr *c) override;
 
+        void visit_handle_stmt(handle_stmt *h) override;
+
+        void visit_begin_handle_stmt(begin_handle_stmt *b) override;
+
+        void visit_raise_stmt(raise_stmt *r) override;
 
         object *visit_increment_expr(increment_expr *i) override;
 
@@ -120,6 +127,8 @@ namespace lns {
         void interpret(vector<stmt *> &statements);
 
         object *clone_or_keep(object *obj, const expr_type type, const token &where);
+
+        void visit_exception_decl_stmt(exception_decl_stmt *e) override;
 
     };
 

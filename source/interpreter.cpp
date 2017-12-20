@@ -61,10 +61,13 @@ void interpreter::execute_block(vector<stmt *> stmts, runtime_environment *env) 
 
 object *interpreter::visit_context_expr(context_expr *c) {
     object *o = evaluate(const_cast<expr *>(c->context_name));
-    if (o->type != CONTEXT_T) {
-        throw runtime_exception(c->context_identifier, *new string("object is not a context"));
+    if (o->type == CONTEXT_T) {
+        return DCAST(context*,o)->get(c->context_identifier);
+    }else if(o->type == EXCEPTION_T){
+        object* o2 = DCAST(incode_exception*,o)->get(const_cast<string&>(c->context_identifier.lexeme));
+        return o2;
     }
-    return dynamic_cast<context *>(o)->get(c->context_identifier);
+    throw runtime_exception(c->context_identifier, *new string("object is not a context"));
 }
 
 object *interpreter::visit_context_assign_expr(context_assign_expr *c) {
@@ -163,8 +166,14 @@ object *interpreter::visit_call_expr(call_expr *c) {
     }
     stack_trace.push_back(
             new stack_call(c->paren.filename, c->paren.line, function->name(), globals->is_native(function)));
-    object *p = function->call(args);
-    stack_trace.pop_back();
+    object * p;
+    try{
+        p = function->call(args);
+        stack_trace.pop_back();
+    }catch(incode_exception& ex){
+        ++ex.calls_bypassed;
+        throw ex;
+    }
     return p;
 }
 
@@ -403,7 +412,7 @@ void interpreter::visit_context_stmt(context_stmt *c) {
     environment->define(c->name, ctx, c->is_global, c->isfinal);
 }
 
-interpreter::interpreter() : stack_trace(*new vector<stack_call *>()) {
+interpreter::interpreter() : stack_trace(*new vector<stack_call *>()) , exception_manager(new lns::exception_manager()) {
     dsv = new default_stmt_visitor();
     dev = new default_expr_visitor();
 }
@@ -417,7 +426,7 @@ void interpreter::interpret(vector<stmt *> &statements) {
             if (s == nullptr) continue;
             execute(s);
         }
-    } catch (runtime_exception e) {
+    } catch (runtime_exception& e) {
         errors::runtime_error(e, stack_trace);
     } catch (return_signal &s) {
         runtime_exception e(s.keyword, *new string("return statements can only be used inside of functions"));
@@ -464,6 +473,66 @@ object *interpreter::visit_array_expr(array_expr *a) {
         }
     }
     return array;
+}
+
+void interpreter::visit_exception_decl_stmt(exception_decl_stmt *e) {
+    try{
+        exception_manager->define(new exception_definition(e->file,e->line,e->name.lexeme,e->identifiers));
+    }catch(exception_definition& ptr){
+        string& s = *new string();
+        s += "exception previously defined at ";
+        s += ptr.def_file;
+        s += ":";
+        s += std::to_string(ptr.def_line);
+        throw runtime_exception(e->name,s);
+    }
+}
+
+void interpreter::visit_raise_stmt(raise_stmt *r) {
+    exception_definition* exc;
+    if((exc = exception_manager->get(r->name.lexeme)) == nullptr){
+        string &s = *new string();
+        s += "exception '" + r->name.lexeme + "' is undefined";
+        throw runtime_exception(r->name,s);
+    }
+    map<string,object*> fields = *new map<string,object*>();
+    for(auto& pair : r->fields)
+        if(exc->fields.find(pair.first) == exc->fields.end())
+            throw runtime_exception(r->name,STR(string("exception \"") + r->name.lexeme + "\" has no field named \"" + pair.first + "\""));
+        else
+            fields.insert(*new std::pair<string,object*>(pair.first,evaluate(pair.second)));
+
+    for(auto& key : exc->fields)
+        if(fields.find(key) == fields.end()) fields[key] = new null_o;
+
+    throw *new incode_exception(r->where,r->name.lexeme,fields);
+}
+
+void interpreter::visit_handle_stmt(handle_stmt *h) {} //this should remain empty
+
+void interpreter::visit_begin_handle_stmt(begin_handle_stmt *b) {
+    try{
+        execute_block(b->body,new runtime_environment(environment));
+    }catch(incode_exception& e){
+        bool found = false;
+        for(auto& handle : b->handles){
+            if(exception_manager->get(handle->exception_name.lexeme) == nullptr && !lns::permissive){
+                string &s = *new string();
+                s += "exception '" + handle->exception_name.lexeme + "' is undefined";
+                throw runtime_exception(handle->exception_name,s);
+            }
+            if(handle->exception_name.lexeme == e.message) {
+                found = true;
+                for(int i = 0; i < e.calls_bypassed; i++)
+                    stack_trace.pop_back();
+                runtime_environment* env = new runtime_environment(environment);
+                if(handle->bind.type != UNRECOGNIZED) env->define(handle->bind,&e,true,false);
+                execute_block(handle->block,env);
+                break;
+            }
+        }
+        if(!found) throw e;
+    }
 }
 
 const int lns::function::arity() const {

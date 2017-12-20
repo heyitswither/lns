@@ -124,6 +124,12 @@ namespace lns {
         void ld_stmts(string &s);
 
         stmt *foreach_statement();
+
+        stmt *exception_();
+
+        stmt *raise();
+
+        stmt *begin_handle_statement();
     };
 
 
