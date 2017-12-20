@@ -1,8 +1,13 @@
 #!/usr/bin/env bash
 cd source
 javac gen/generate.java
-java gen.generate ./
-if [ -f "gen/generate.class" ]; then
-  rm gen/generate.class
+
+if [ $? -ne 0 ]; then
+    echo "Compilation failed." & exit
 fi
+
+java gen.generate ./
+
+rm -f gen/generate.class
+
 echo Done.
