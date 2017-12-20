@@ -28,6 +28,7 @@ public class generate {
                 "sub_script_assign : token& where, expr* name, token_type op, expr* key, expr* value",
                 "context : expr* context_name, token& context_identifier",
                 "context_assign : expr* context_name, token_type op, token& context_identifier, expr* value",
+                "array     : token& open_brace, vector<pair<expr*,expr*>>& pairs",
                 "null      : token& where"
         ), Arrays.asList("<utility>"), "object*");
         defineAst(outputDir, "stmt", Arrays.asList(
@@ -43,7 +44,11 @@ public class generate {
                 "s_while    : expr& condition, stmt* body",
                 "s_for      : stmt* init, expr* condition, expr* increment, stmt* body",
                 "s_for_each : token& identifier, expr* container, stmt* body",
+                "exception_decl : token& name, set<string>& identifiers",
+                "raise      : token& where, token& name, map<string,expr*>& fields",
                 "uses_native : token& where, string& lib_name, token& bind",
+                "handle     :  token& exception_name, token& bind, vector<stmt*>& block",
+                "begin_handle : vector<stmt*>& body, vector<handle_stmt*> handles",
                 "null       : token& where"
         ), Arrays.asList("\"expr.h\"","<memory>"), "void");
     }

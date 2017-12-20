@@ -12,7 +12,7 @@ using namespace lns;
 
 namespace lns{
 enum stmt_type{
-BLOCK_STMT_T, EXPRESSION_STMT_T, FUNCTION_STMT_T, CONTEXT_STMT_T, IF_STMT_T, RETURN_STMT_T, BREAK_STMT_T, CONTINUE_STMT_T, VAR_STMT_T, S_WHILE_STMT_T, S_FOR_STMT_T, S_FOR_EACH_STMT_T, USES_NATIVE_STMT_T, NULL_STMT_T, 
+BLOCK_STMT_T, EXPRESSION_STMT_T, FUNCTION_STMT_T, CONTEXT_STMT_T, IF_STMT_T, RETURN_STMT_T, BREAK_STMT_T, CONTINUE_STMT_T, VAR_STMT_T, S_WHILE_STMT_T, S_FOR_STMT_T, S_FOR_EACH_STMT_T, EXCEPTION_DECL_STMT_T, RAISE_STMT_T, USES_NATIVE_STMT_T, HANDLE_STMT_T, BEGIN_HANDLE_STMT_T, NULL_STMT_T, 
 };
 class stmt_visitor;
 class stmt{
@@ -35,7 +35,11 @@ class var_stmt;
 class s_while_stmt;
 class s_for_stmt;
 class s_for_each_stmt;
+class exception_decl_stmt;
+class raise_stmt;
 class uses_native_stmt;
+class handle_stmt;
+class begin_handle_stmt;
 class null_stmt;
 class stmt_visitor{
 public:
@@ -51,7 +55,11 @@ virtual void visit_var_stmt(var_stmt *v) = 0;
 virtual void visit_s_while_stmt(s_while_stmt *s) = 0;
 virtual void visit_s_for_stmt(s_for_stmt *s) = 0;
 virtual void visit_s_for_each_stmt(s_for_each_stmt *s) = 0;
+virtual void visit_exception_decl_stmt(exception_decl_stmt *e) = 0;
+virtual void visit_raise_stmt(raise_stmt *r) = 0;
 virtual void visit_uses_native_stmt(uses_native_stmt *u) = 0;
+virtual void visit_handle_stmt(handle_stmt *h) = 0;
+virtual void visit_begin_handle_stmt(begin_handle_stmt *b) = 0;
 virtual void visit_null_stmt(null_stmt *n) = 0;
 };
 
@@ -205,6 +213,31 @@ const stmt* body;
 
 
 
+class exception_decl_stmt : public stmt {
+public:
+exception_decl_stmt(const char* file,int line, token& name, set<string>& identifiers) : name(name), identifiers(identifiers), stmt(line, file, EXCEPTION_DECL_STMT_T) {}
+void accept(stmt_visitor *v) override{
+v->visit_exception_decl_stmt(this);
+}
+const token& name;
+const set<string>& identifiers;
+};
+
+
+
+class raise_stmt : public stmt {
+public:
+raise_stmt(const char* file,int line, token& where, token& name, map<string,expr*>& fields) : where(where), name(name), fields(fields), stmt(line, file, RAISE_STMT_T) {}
+void accept(stmt_visitor *v) override{
+v->visit_raise_stmt(this);
+}
+const token& where;
+const token& name;
+const map<string,expr*>& fields;
+};
+
+
+
 class uses_native_stmt : public stmt {
 public:
 uses_native_stmt(const char* file,int line, token& where, string& lib_name, token& bind) : where(where), lib_name(lib_name), bind(bind), stmt(line, file, USES_NATIVE_STMT_T) {}
@@ -214,6 +247,31 @@ v->visit_uses_native_stmt(this);
 const token& where;
 const string& lib_name;
 const token& bind;
+};
+
+
+
+class handle_stmt : public stmt {
+public:
+handle_stmt(const char* file,int line, token& exception_name, token& bind, vector<stmt*>& block) : exception_name(exception_name), bind(bind), block(block), stmt(line, file, HANDLE_STMT_T) {}
+void accept(stmt_visitor *v) override{
+v->visit_handle_stmt(this);
+}
+const token& exception_name;
+const token& bind;
+const vector<stmt*>& block;
+};
+
+
+
+class begin_handle_stmt : public stmt {
+public:
+begin_handle_stmt(const char* file,int line, vector<stmt*>& body, vector<handle_stmt*> handles) : body(body), handles(handles), stmt(line, file, BEGIN_HANDLE_STMT_T) {}
+void accept(stmt_visitor *v) override{
+v->visit_begin_handle_stmt(this);
+}
+const vector<stmt*>& body;
+const vector<handle_stmt*> handles;
 };
 
 
@@ -266,8 +324,20 @@ std::cout << "s_for_stmt" << std::endl;
 virtual void visit_s_for_each_stmt(s_for_each_stmt *s) override {
 std::cout << "s_for_each_stmt" << std::endl;
 }
+virtual void visit_exception_decl_stmt(exception_decl_stmt *e) override {
+std::cout << "exception_decl_stmt" << std::endl;
+}
+virtual void visit_raise_stmt(raise_stmt *r) override {
+std::cout << "raise_stmt" << std::endl;
+}
 virtual void visit_uses_native_stmt(uses_native_stmt *u) override {
 std::cout << "uses_native_stmt" << std::endl;
+}
+virtual void visit_handle_stmt(handle_stmt *h) override {
+std::cout << "handle_stmt" << std::endl;
+}
+virtual void visit_begin_handle_stmt(begin_handle_stmt *b) override {
+std::cout << "begin_handle_stmt" << std::endl;
 }
 virtual void visit_null_stmt(null_stmt *n) override {
 std::cout << "null_stmt" << std::endl;
