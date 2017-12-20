@@ -418,7 +418,7 @@ expr *parser::assignment(bool nested) {
 
 expr *parser::comparison(bool nested) {
     expr *expr = addition(nested), *right;
-    while (match({GREATER, GREATER_EQUAL, LESS, LESS_EQUAL})) {
+    while (match({BANG_EQUAL, EQUAL_EQUAL, GREATER, GREATER_EQUAL, LESS, LESS_EQUAL})) {
         token &op = previous();
         right = addition(true);
         expr = new binary_expr(op.filename, op.line, expr, op, right);
@@ -554,7 +554,7 @@ expr *parser::expression(bool nested) {
 
 expr *parser::logical(bool nested) {
     expr *expr = comparison(nested), *right;
-    while (match({BANG_EQUAL, EQUAL_EQUAL, AND, OR, NOR, XOR, NAND})) {
+    while (match({AND, OR, NOR, XOR, NAND})) {
         token &op = previous();
         right = comparison(true);
         expr = new binary_expr(op.filename, op.line, expr, op, right);
