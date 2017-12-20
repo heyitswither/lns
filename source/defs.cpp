@@ -9,6 +9,7 @@
 
 using namespace lns;
 using namespace std;
+
 lns::object::object() {}
 
 lns::object::object(lns::objtype t) : type(t) {}
@@ -25,33 +26,9 @@ bool lns::string_o::operator==(const lns::object &o) const {
     return (value == dynamic_cast<const string_o *>(&o)->value);
 }
 
-bool lns::string_o::operator||(const lns::object &o) const {
-    WRONG_OP(or)
-}
-
-lns::object *lns::string_o::operator!() const {
-    WRONG_OP_UN(not)
-}
-
-bool lns::string_o::operator&&(const lns::object &o) const {
-    WRONG_OP(and);
-}
-
 lns::object *lns::string_o::operator+=(const lns::object &o) {
     this->value += o.str();
     return this;
-}
-
-lns::object *lns::string_o::operator-=(const lns::object &o) {
-    WRONG_OP(-);
-}
-
-lns::object *lns::string_o::operator*=(const lns::object &o) {
-    WRONG_OP(*);
-}
-
-lns::object *lns::string_o::operator/=(const lns::object &o) {
-    WRONG_OP(/);
 }
 
 bool lns::string_o::operator>(const lns::object &o) const {
@@ -78,14 +55,6 @@ lns::object *lns::string_o::operator+(const lns::object &o) const {
     return new string_o(this->value + o.str());
 }
 
-lns::object *lns::string_o::operator-(const lns::object &o) const {
-    WRONG_OP(-);
-}
-
-lns::object *lns::string_o::operator*(const lns::object &o) const {
-    WRONG_OP(*);
-}
-
 lns::object *lns::string_o::operator/(const lns::object &o) const {
     if(o.type != STRING_T)
         return GET_DEFAULT_NULL();
@@ -99,22 +68,6 @@ lns::object *lns::string_o::operator/(const lns::object &o) const {
     }
     map->values[i++] = new string_o(move(partial));
     return map;
-}
-
-lns::object *lns::string_o::operator^(const lns::object &o) const {
-    WRONG_OP(^);
-}
-
-lns::object *lns::string_o::operator++() {
-    WRONG_OP_UN(++);
-}
-
-lns::object *lns::string_o::operator--() {
-    WRONG_OP_UN(--);
-}
-
-lns::object *lns::string_o::operator-() const {
-    WRONG_OP_UN(- (unary));
 }
 
 object *string_o::clone() const {
@@ -158,18 +111,6 @@ string lns::number_o::str() const {
 bool lns::number_o::operator==(const lns::object &o) const {
     if (o.type != NUMBER_T) return false;
     return value == dynamic_cast<number_o *>(const_cast<object *>(&o))->value;
-}
-
-bool lns::number_o::operator&&(const lns::object &o) const {
-    WRONG_OP(and)
-}
-
-bool lns::number_o::operator||(const lns::object &o) const {
-    WRONG_OP(or)
-}
-
-lns::object *lns::number_o::operator!() const {
-    WRONG_OP_UN(not)
 }
 
 bool lns::number_o::operator>(const lns::object &o) const {
@@ -279,70 +220,12 @@ lns::object *lns::bool_o::operator!() const {
     return new bool_o(!this->value);
 }
 
-bool lns::bool_o::operator>(const lns::object &o) const {
-    WRONG_OP(>)
-}
-
-bool lns::bool_o::operator>=(const lns::object &o) const {
-    WRONG_OP(>=)
-}
-
-bool lns::bool_o::operator<=(const lns::object &o) const {
-    WRONG_OP(<=)
-}
-
-bool lns::bool_o::operator<(const lns::object &o) const {
-    WRONG_OP(<)
-}
-
-lns::object *lns::bool_o::operator+=(const lns::object &o) {
-    WRONG_OP(+=)
-}
-
-lns::object *lns::bool_o::operator-=(const lns::object &o) {
-    WRONG_OP(-=)
-}
-
-lns::object *lns::bool_o::operator*=(const lns::object &o) {
-    WRONG_OP(*=)
-}
-
-lns::object *lns::bool_o::operator/=(const lns::object &o) {
-    WRONG_OP(/=)
-}
 
 lns::object *lns::bool_o::operator+(const lns::object &o) const {
     if(o.type == STRING_T) return new string_o(this->str() + o.str());
     WRONG_OP(+)
 }
 
-lns::object *lns::bool_o::operator-(const lns::object &o) const {
-    WRONG_OP(-)
-}
-
-lns::object *lns::bool_o::operator*(const lns::object &o) const {
-    WRONG_OP(*)
-}
-
-lns::object *lns::bool_o::operator/(const lns::object &o) const {
-    WRONG_OP(/)
-}
-
-lns::object *lns::bool_o::operator^(const lns::object &o) const {
-    WRONG_OP(^)
-}
-
-lns::object *lns::bool_o::operator-() const {
-    WRONG_OP_UN(-)
-}
-
-lns::object *lns::bool_o::operator++() {
-    WRONG_OP_UN(++)
-}
-
-lns::object *lns::bool_o::operator--() {
-    WRONG_OP_UN(--)
-}
 
 lns::null_o::null_o() : object(NULL_T) {}
 
@@ -354,164 +237,18 @@ bool lns::null_o::operator==(const lns::object &o) const {
     return o.type == NULL_T;
 }
 
-bool lns::null_o::operator&&(const lns::object &o) const {
-    WRONG_OP_UN(and)
-}
-
-bool lns::null_o::operator||(const lns::object &o) const {
-    WRONG_OP_UN(or)
-}
-
-lns::object *lns::null_o::operator!() const {
-    WRONG_OP_UN(not)
-}
-
-bool lns::null_o::operator>(const lns::object &o) const {
-    WRONG_OP(>)
-}
-
-bool lns::null_o::operator>=(const lns::object &o) const {
-    WRONG_OP(>=)
-}
-
-bool lns::null_o::operator<=(const lns::object &o) const {
-    WRONG_OP(<=)
-}
-
-bool lns::null_o::operator<(const lns::object &o) const {
-    WRONG_OP(<)
-}
-
-lns::object *lns::null_o::operator+=(const lns::object &o) {
-    WRONG_OP(+=)
-}
-
-lns::object *lns::null_o::operator-=(const lns::object &o) {
-    WRONG_OP(-=)
-}
-
-lns::object *lns::null_o::operator*=(const lns::object &o) {
-    WRONG_OP(*=)
-}
-
-lns::object *lns::null_o::operator/=(const lns::object &o) {
-    WRONG_OP(/=)
-}
-
-lns::object *lns::null_o::operator+(const lns::object &o) const {
-    if(o.type == STRING_T) return new string_o(this->str() + o.str());
-    WRONG_OP(+)
-}
-
-lns::object *lns::null_o::operator-(const lns::object &o) const {
-    WRONG_OP(-)
-}
-
-lns::object *lns::null_o::operator*(const lns::object &o) const {
-    WRONG_OP(*)
-}
-
-lns::object *lns::null_o::operator/(const lns::object &o) const {
-    WRONG_OP(/)
-}
-
-lns::object *lns::null_o::operator^(const lns::object &o) const {
-    WRONG_OP(^)
-}
-
-lns::object *lns::null_o::operator-() const {
-    WRONG_OP_UN(-)
-}
-
-lns::object *lns::null_o::operator++() {
-    WRONG_OP_UN(++)
-}
-
-lns::object *lns::null_o::operator--() {
-    WRONG_OP_UN(--)
-}
 
 bool array_o::operator==(const object &o) const {
     if (o.type != ARRAY_T) return false;
     return values == dynamic_cast<array_o *>(const_cast<object *>(&o))->values;
 }
 
-bool array_o::operator&&(const object &o) const {
-    WRONG_OP(and)
-}
-
-bool array_o::operator||(const object &o) const {
-    WRONG_OP(or)
-}
-
-object *array_o::operator!() const {
-    WRONG_OP_UN(not)
-}
-
-bool array_o::operator>(const object &o) const {
-    WRONG_OP(>)
-}
-
-bool array_o::operator>=(const object &o) const {
-    WRONG_OP(>=)
-}
-
-bool array_o::operator<=(const object &o) const {
-    WRONG_OP(<=)
-}
-
-bool array_o::operator<(const object &o) const {
-    WRONG_OP(<)
-}
-
-object *array_o::operator+=(const object &o) {
-    WRONG_OP(+=)
-}
-
-object *array_o::operator-=(const object &o) {
-    WRONG_OP(-=)
-}
-
-object *array_o::operator*=(const object &o) {
-    WRONG_OP(*=)
-}
-
-object *array_o::operator/=(const object &o) {
-    WRONG_OP(/=)
-}
 
 object *array_o::operator+(const object &o) const {
     if(o.type == STRING_T) return new string_o(this->str() + o.str());
     WRONG_OP(+)
 }
 
-object *array_o::operator-(const object &o) const {
-    WRONG_OP(-)
-}
-
-object *array_o::operator*(const object &o) const {
-    WRONG_OP(*)
-}
-
-object *array_o::operator/(const object &o) const {
-    WRONG_OP(/)
-}
-
-object *array_o::operator^(const object &o) const {
-    WRONG_OP(^)
-}
-
-object *array_o::operator-() const {
-    WRONG_OP_UN(-)
-}
-
-object *array_o::operator++() {
-    WRONG_OP_UN(++)
-}
-
-object *array_o::operator--() {
-    WRONG_OP_UN(--)
-}
 
 array_o::array_o() : object(ARRAY_T) {}
 
@@ -577,82 +314,6 @@ string context::str() const {
 
 bool context::operator==(const object &o) const {
     return false;
-}
-
-bool context::operator&&(const object &o) const {
-    WRONG_OP_UN(and)
-}
-
-bool context::operator||(const object &o) const {
-    WRONG_OP_UN(or)
-}
-
-object *context::operator!() const {
-    WRONG_OP_UN(not)
-}
-
-bool context::operator>(const object &o) const {
-    WRONG_OP(>)
-}
-
-bool context::operator>=(const object &o) const {
-    WRONG_OP(>=)
-}
-
-bool context::operator<=(const object &o) const {
-    WRONG_OP(<=)
-}
-
-bool context::operator<(const object &o) const {
-    WRONG_OP(<)
-}
-
-object *context::operator+=(const object &o) {
-    WRONG_OP(+=)
-}
-
-object *context::operator-=(const object &o) {
-    WRONG_OP(-=)
-}
-
-object *context::operator*=(const object &o) {
-    WRONG_OP(*=)
-}
-
-object *context::operator/=(const object &o) {
-    WRONG_OP(/=)
-}
-
-object *context::operator+(const object &o) const {
-    WRONG_OP(+)
-}
-
-object *context::operator-(const object &o) const {
-    WRONG_OP(-)
-}
-
-object *context::operator*(const object &o) const {
-    WRONG_OP(*)
-}
-
-object *context::operator/(const object &o) const {
-    WRONG_OP(/)
-}
-
-object *context::operator^(const object &o) const {
-    WRONG_OP(^)
-}
-
-object *context::operator-() const {
-    WRONG_OP_UN(-)
-}
-
-object *context::operator++() {
-    WRONG_OP_UN(++)
-}
-
-object *context::operator--() {
-    WRONG_OP_UN(--)
 }
 
 set<callable *> & context::declare_natives() const{
@@ -929,81 +590,6 @@ string callable::str() const {
     return s.str();
 }
 
-bool callable::operator&&(const object &o) const {
-    WRONG_OP_UN(and)
-}
-
-bool callable::operator||(const object &o) const {
-    WRONG_OP_UN(or)
-}
-
-object *callable::operator!() const {
-    WRONG_OP_UN(not)
-}
-
-bool callable::operator>(const object &o) const {
-    WRONG_OP(>)
-}
-
-bool callable::operator>=(const object &o) const {
-    WRONG_OP(>=)
-}
-
-bool callable::operator<=(const object &o) const {
-    WRONG_OP(<=)
-}
-
-bool callable::operator<(const object &o) const {
-    WRONG_OP(<)
-}
-
-object *callable::operator+=(const object &o) {
-    WRONG_OP(+=)
-}
-
-object *callable::operator-=(const object &o) {
-    WRONG_OP(-=)
-}
-
-object *callable::operator*=(const object &o) {
-    WRONG_OP(*=)
-}
-
-object *callable::operator/=(const object &o) {
-    WRONG_OP(/=)
-}
-
-object *callable::operator+(const object &o) const {
-    WRONG_OP(+)
-}
-
-object *callable::operator-(const object &o) const {
-    WRONG_OP(-)
-}
-
-object *callable::operator*(const object &o) const {
-    WRONG_OP(*)
-}
-
-object *callable::operator/(const object &o) const {
-    WRONG_OP(/)
-}
-
-object *callable::operator^(const object &o) const {
-    WRONG_OP(^)
-}
-
-object *callable::operator-() const {
-    WRONG_OP_UN(-)
-}
-
-object *callable::operator++() {
-    WRONG_OP_UN(++)
-}
-
-object *callable::operator--() {
-    WRONG_OP_UN(--)
-}
 
 callable::callable() : object(NATIVE_CALLABLE_T) {}
 
@@ -1036,3 +622,26 @@ const char *lns::type_to_string(object_type t) {
 }
 
 function_container::function_container(objtype type) : object(type) {}
+
+incode_exception::incode_exception(const lns::token &token, const std::string &name,
+                                   const std::map<std::string, lns::object *> &fields) : lns::runtime_exception(token,
+                                                                                                                const_cast<string &>(name)), lns::object(EXCEPTION_T), fields(fields), calls_bypassed(0) {}
+
+object *incode_exception::get(std::string &key) {
+    if(fields.find(key) != fields.end()) return this->fields[key];
+    return nullptr;
+}
+
+bool incode_exception::operator==(const object &o) const {
+    return false;
+}
+
+std::string incode_exception::str() const {
+    stringstream s;
+    s << "<exception@" << static_cast<const void *>(this) << ", name: \"" << message << "\">";
+    return s.str();
+}
+
+object *incode_exception::clone() const {
+    return nullptr;
+}

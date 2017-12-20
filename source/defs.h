@@ -18,8 +18,8 @@
 
 #define NATIVE_RUNTIME_EXC(msg) throw runtime_exception(__FILE__,__LINE__,*new std::string(msg));
 #define STR(S) *new string(S)
-#define WRONG_OP(OP) throw INVALID_OP(#OP,this->type,&o.type);
-#define WRONG_OP_UN(OP) throw INVALID_OP(#OP,this->type,nullptr);
+#define WRONG_OP(OP) throw lns::INVALID_OP(#OP,this->type,&o.type);
+#define WRONG_OP_UN(OP) throw lns::INVALID_OP(#OP,this->type,nullptr);
 
 #define DCAST(a,b) (dynamic_cast<a>(b))
 #define DCAST_ASN(a,b,c) a = DCAST(b,c)
@@ -32,6 +32,7 @@
 
 
 namespace lns {
+
     const char* best_file_path(const char* filename);
     enum token_type {
         LEFT_PAREN,
@@ -100,15 +101,17 @@ namespace lns {
         IN,
         BIND,
         EXCEPTION,
-        AS,
         WITH,
+        RAISE,
+        HANDLE,
         UNRECOGNIZED,
         EOF_
     };
     enum objtype {
-        NUMBER_T, STRING_T, BOOL_T, NULL_T, ARRAY_T, CALLABLE_T, NATIVE_CALLABLE_T, CONTEXT_T
+        NUMBER_T, STRING_T, BOOL_T, NULL_T, ARRAY_T, CALLABLE_T, NATIVE_CALLABLE_T, CONTEXT_T, EXCEPTION_T
     };
     typedef objtype object_type;
+
 
     const std::string KEYWORDS_S_VALUES[] = {"COMMA","LEFT_PAREN", "RIGHT_PAREN", "LEFT_SQR", "RIGHT_SQR","LEFT_BRACE","RIGHT_BRACE", "COMMA", "DOT", "COLON", "MINUS",
                                              "MINUS_EQUALS", "PLUS", "PLUS_EQUALS", "PLUS_PLUS", "MINUS_MINUS",
@@ -117,8 +120,10 @@ namespace lns {
                                              "IDENTIFIER", "STRING", "NUMBER", "NATIVES", "AND", "CLASS", "ELSE", "FALSE",
                                              "FUNCTION", "FOR", "FOREACH", "IF", "NUL", "OR", "XOR", "NOR", "NAND", "NOT", "RETURN",
                                              "SUPER", "THIS", "TRUE", "VAR", "WHILE", "GLOBAL", "FINAL", "USE", "BREAK",
-                                             "CONTINUE", "CONTEXT", "BEGIN", "THEN", "DO", "END",  "DPCHECK", "IN", "BIND", "EXCEPTION", "AS", "WITH", "UNRECOGNIZED",
+                                             "CONTINUE", "CONTEXT", "BEGIN", "THEN", "DO", "END",  "DPCHECK", "IN", "BIND", "EXCEPTION", "WITH", "RAISE","HANDLE", "UNRECOGNIZED",
                                              "EOF_"};
+
+    const char* INVALID_OP(const char* OP, const lns::object_type t1, const lns::object_type* t2);
 
     class object {
     private:
@@ -133,50 +138,50 @@ namespace lns {
 
         //    return *new string("object::plain");
         //};
-        virtual bool operator==(const object &o) const = 0;
+        virtual bool operator==(const object &o) const { WRONG_OP(==) };
 
-        virtual bool operator&&(const object &o) const = 0;
+        virtual bool operator&&(const object &o) const { WRONG_OP(and) };
 
-        virtual bool operator||(const object &o) const = 0;
+        virtual bool operator||(const object &o) const { WRONG_OP(or) };
 
-        virtual object *operator!() const = 0;
+        virtual object *operator!() const { WRONG_OP_UN(not) };
 
-        virtual bool operator>(const object &o2) const = 0;
+        virtual bool operator>(const object &o) const { WRONG_OP(>) };
 
-        virtual bool operator>=(const object &o2) const = 0;
+        virtual bool operator>=(const object &o) const{ WRONG_OP(>=) };
 
-        virtual bool operator<=(const object &o2) const = 0;
+        virtual bool operator<=(const object &o) const{ WRONG_OP(<=) };
 
-        virtual bool operator<(const object &o2) const = 0;
+        virtual bool operator<(const object &o) const{ WRONG_OP(<) };
 
-        virtual object *operator+=(const object &o) = 0;
+        virtual object *operator+=(const object &o){ WRONG_OP(+=) };
 
-        virtual object *operator-=(const object &o) = 0;
+        virtual object *operator-=(const object &o){ WRONG_OP(-=) };
 
-        virtual object *operator*=(const object &o) = 0;
+        virtual object *operator*=(const object &o){ WRONG_OP(*=) };
 
-        virtual object *operator/=(const object &o) = 0;
+        virtual object *operator/=(const object &o){ WRONG_OP(/=) };
 
-        virtual object *operator+(const object &o2) const = 0;
+        virtual object *operator+(const object &o) const{ WRONG_OP(+) };
 
-        virtual object *operator-(const object &o2) const = 0;
+        virtual object *operator-(const object &o) const{ WRONG_OP(-) };
 
-        virtual object *operator*(const object &o2) const = 0;
+        virtual object *operator*(const object &o) const{ WRONG_OP(*) };
 
-        virtual object *operator/(const object &o2) const = 0;
+        virtual object *operator/(const object &o) const{ WRONG_OP(/) };
 
-        virtual object *operator^(const object &o2) const = 0;
+        virtual object *operator^(const object &o) const{ WRONG_OP(^) };
 
-        virtual object *operator-() const = 0;
+        virtual object *operator-() const{ WRONG_OP_UN(-) };
 
-        virtual object *operator++() = 0;
+        virtual object *operator++(){ WRONG_OP_UN(++) };
 
-        virtual object *operator--() = 0;
+        virtual object *operator--(){ WRONG_OP_UN(--) };
 
         virtual object *clone() const = 0;
     };
 
-    bool check_type(object_type type, const object &o1, const object &o2);
+    bool check_type(object_type type, const object &o1, const object &o);
 
     class string_o : public object {
     public:
@@ -192,44 +197,19 @@ namespace lns {
 
         bool operator==(const object &o) const override;
 
-        bool operator||(const object &o) const override;
-
-        object *operator!() const override;
-
-        bool operator&&(const object &o) const override;
-
         object *operator+=(const object &o) override;
 
-        object *operator-=(const object &o) override;
+        bool operator>(const object &o) const override;
 
-        object *operator*=(const object &o) override;
+        bool operator>=(const object &o) const override;
 
-        object *operator/=(const object &o) override;
+        bool operator<=(const object &o) const override;
 
-        bool operator>(const object &o2) const override;
+        bool operator<(const object &o) const override;
 
-        bool operator>=(const object &o2) const override;
+        object *operator+(const object &o) const override;
 
-        bool operator<=(const object &o2) const override;
-
-        bool operator<(const object &o2) const override;
-
-        object *operator+(const object &o2) const override;
-
-        object *operator-(const object &o2) const override;
-
-        object *operator*(const object &o2) const override;
-
-        object *operator/(const object &o2) const override;
-
-        object *operator^(const object &o2) const override;
-
-        object *operator++() override;
-
-        object *operator--() override;
-
-        object *operator-() const override;
-
+        virtual object *operator/(const object &o) const;
     };
 
     class number_o : public object {
@@ -242,19 +222,13 @@ namespace lns {
 
         bool operator==(const object &o) const override;
 
-        bool operator&&(const object &o) const override;
+        bool operator>(const object &o) const override;
 
-        bool operator||(const object &o) const override;
+        bool operator>=(const object &o) const override;
 
-        object *operator!() const override;
+        bool operator<=(const object &o) const override;
 
-        bool operator>(const object &o2) const override;
-
-        bool operator>=(const object &o2) const override;
-
-        bool operator<=(const object &o2) const override;
-
-        bool operator<(const object &o2) const override;
+        bool operator<(const object &o) const override;
 
         object *operator+=(const object &o) override;
 
@@ -264,15 +238,15 @@ namespace lns {
 
         object *operator/=(const object &o) override;
 
-        object *operator+(const object &o2) const override;
+        object *operator+(const object &o) const override;
 
-        object *operator-(const object &o2) const override;
+        object *operator-(const object &o) const override;
 
-        object *operator*(const object &o2) const override;
+        object *operator*(const object &o) const override;
 
-        object *operator/(const object &o2) const override;
+        object *operator/(const object &o) const override;
 
-        object *operator^(const object &o2) const override;
+        object *operator^(const object &o) const override;
 
         object *operator-() const override;
 
@@ -301,37 +275,7 @@ namespace lns {
 
         object *operator!() const override;
 
-        bool operator>(const object &o2) const override;
-
-        bool operator>=(const object &o2) const override;
-
-        bool operator<=(const object &o2) const override;
-
-        bool operator<(const object &o2) const override;
-
-        object *operator+=(const object &o) override;
-
-        object *operator-=(const object &o) override;
-
-        object *operator*=(const object &o) override;
-
-        object *operator/=(const object &o) override;
-
-        object *operator+(const object &o2) const override;
-
-        object *operator-(const object &o2) const override;
-
-        object *operator*(const object &o2) const override;
-
-        object *operator/(const object &o2) const override;
-
-        object *operator^(const object &o2) const override;
-
-        object *operator-() const override;
-
-        object *operator++() override;
-
-        object *operator--() override;
+        object *operator+(const object &o) const override;
 
         object *clone() const override;
     };
@@ -343,44 +287,6 @@ namespace lns {
         std::string str() const override;
 
         bool operator==(const object &o) const override;
-
-        bool operator&&(const object &o) const override;
-
-        bool operator||(const object &o) const override;
-
-        object *operator!() const override;
-
-        bool operator>(const object &o2) const override;
-
-        bool operator>=(const object &o2) const override;
-
-        bool operator<=(const object &o2) const override;
-
-        bool operator<(const object &o2) const override;
-
-        object *operator+=(const object &o) override;
-
-        object *operator-=(const object &o) override;
-
-        object *operator*=(const object &o) override;
-
-        object *operator/=(const object &o) override;
-
-        object *operator+(const object &o2) const override;
-
-        object *operator-(const object &o2) const override;
-
-        object *operator*(const object &o2) const override;
-
-        object *operator/(const object &o2) const override;
-
-        object *operator^(const object &o2) const override;
-
-        object *operator-() const override;
-
-        object *operator++() override;
-
-        object *operator--() override;
 
         object *clone() const override;
     };
@@ -398,45 +304,9 @@ namespace lns {
 
         const bool contains_key(double t);
 
-        bool operator&&(const object &o) const override;
-
-        bool operator||(const object &o) const override;
-
-        object *operator!() const override;
-
-        bool operator>(const object &o2) const override;
-
-        bool operator>=(const object &o2) const override;
-
-        bool operator<=(const object &o2) const override;
-
-        bool operator<(const object &o2) const override;
-
-        object *operator+=(const object &o) override;
-
-        object *operator-=(const object &o) override;
-
-        object *operator*=(const object &o) override;
-
-        object *operator/=(const object &o) override;
-
-        object *operator+(const object &o2) const override;
-
-        object *operator-(const object &o2) const override;
-
-        object *operator*(const object &o2) const override;
-
-        object *operator/(const object &o2) const override;
-
-        object *operator^(const object &o2) const override;
-
-        object *operator-() const override;
-
-        object *operator++() override;
-
-        object *operator--() override;
-
         object *clone() const;
+
+        object *operator+(const object &o) const override;
     };
 
     class variable {
@@ -475,44 +345,6 @@ namespace lns {
         virtual object *call(std::vector<object *> &args) = 0;
         bool operator==(const object &o) const override;
         std::string str() const override;
-        bool operator&&(const object &o) const override;
-
-        bool operator||(const object &o) const override;
-
-        object *operator!() const override;
-
-        bool operator>(const object &o2) const override;
-
-        bool operator>=(const object &o2) const override;
-
-        bool operator<=(const object &o2) const override;
-
-        bool operator<(const object &o2) const override;
-
-        object *operator+=(const object &o) override;
-
-        object *operator-=(const object &o) override;
-
-        object *operator*=(const object &o) override;
-
-        object *operator/=(const object &o) override;
-
-        object *operator+(const object &o2) const override;
-
-        object *operator-(const object &o2) const override;
-
-        object *operator*(const object &o2) const override;
-
-        object *operator/(const object &o2) const override;
-
-        object *operator^(const object &o2) const override;
-
-        object *operator-() const override;
-
-        object *operator++() override;
-
-        object *operator--() override;
-
         object *clone() const override;
 
     };
@@ -580,44 +412,6 @@ namespace lns {
 
         bool operator==(const object &o) const override;
 
-        bool operator&&(const object &o) const override;
-
-        bool operator||(const object &o) const override;
-
-        object *operator!() const override;
-
-        bool operator>(const object &o2) const override;
-
-        bool operator>=(const object &o2) const override;
-
-        bool operator<=(const object &o2) const override;
-
-        bool operator<(const object &o2) const override;
-
-        object *operator+=(const object &o) override;
-
-        object *operator-=(const object &o) override;
-
-        object *operator*=(const object &o) override;
-
-        object *operator/=(const object &o) override;
-
-        object *operator+(const object &o2) const override;
-
-        object *operator-(const object &o2) const override;
-
-        object *operator*(const object &o2) const override;
-
-        object *operator/(const object &o2) const override;
-
-        object *operator^(const object &o2) const override;
-
-        object *operator-() const override;
-
-        object *operator++() override;
-
-        object *operator--() override;
-
         object *clone() const override;
 
         std::set<callable *> &declare_natives() const override;
@@ -655,8 +449,8 @@ namespace lns {
 
     object *GET_DEFAULT_NULL();
 
-    inline bool check_type(object_type type, const object &o1, const object &o2) {
-        return (o1.type == type && o2.type == type);
+    inline bool check_type(object_type type, const object &o1, const object &o) {
+        return (o1.type == type && o.type == type);
     }
 
     class runtime_exception : public std::exception {
@@ -670,7 +464,22 @@ namespace lns {
         const char *what() const throw() override;
     };
 
-    const char* INVALID_OP(const char* OP, const lns::object_type t1, const lns::object_type* t2);
+    class incode_exception : public runtime_exception, public object{
+    private:
+        std::map<std::string,lns::object*> fields;
+    public:
+        int calls_bypassed;
+        incode_exception(const lns::token &token, const std::string &m, const std::map<std::string,lns::object*>& fields);
+
+        object *get(std::string &key);
+
+        bool operator==(const object &o) const override;
+
+        std::string str() const override;
+
+        object *clone() const override;
+
+    };
 
     const char *type_to_string(object_type t);
 
