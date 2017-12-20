@@ -56,9 +56,9 @@ namespace lns {
 
         void execute_block(vector<stmt *> stmts, runtime_environment *env);
 
-        object *visit_context_expr(context_expr *c) override;
+        object *visit_member_expr(member_expr *c) override;
 
-        object *visit_context_assign_expr(context_assign_expr *c) override;
+        object *visit_member_assign_expr(member_assign_expr *c) override;
 
         void visit_handle_stmt(handle_stmt *h) override;
 

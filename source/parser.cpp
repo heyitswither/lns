@@ -377,7 +377,7 @@ expr *parser::array() {
 expr *parser::assignment(bool nested) {
     variable_expr *var;
     sub_script_expr *map;
-    context_expr *context;
+    member_expr *context;
     expr *expr = logical(nested), *value, *key;
     if (match({EQUAL, PLUS_EQUALS, MINUS_EQUALS, STAR_EQUALS, SLASH_EQUALS})) {
         token &op = previous();
@@ -390,10 +390,10 @@ expr *parser::assignment(bool nested) {
             return new sub_script_assign_expr(map->file, map->line, const_cast<token &>(map->where), map->name, op.type,
                                               map->key, value);
         }
-        if ((context = dynamic_cast<context_expr *>(expr)) != nullptr) {
-            return new context_assign_expr(context->file, context->line,
-                                           context->context_name, op.type,
-                                           const_cast<token &>(context->context_identifier), value);
+        if ((context = dynamic_cast<member_expr *>(expr)) != nullptr) {
+            return new member_assign_expr(context->file, context->line,
+                                           context->container_name, op.type,
+                                           const_cast<token &>(context->member_identifier), value);
         }
         throw error(op, "invalid assignment target");
     }
@@ -500,7 +500,7 @@ expr *parser::special_assignment(bool nested) {
         token &op = previous();
         if (op.type == DOT) {
             token &fname = consume(IDENTIFIER, "expected field name");
-            expr = new context_expr(expr->file, expr->line, expr, fname);
+            expr = new member_expr(expr->file, expr->line, expr, fname);
         } else {
             key = expression(true);
             consume(RIGHT_SQR, "expected closing ']' after key expression");

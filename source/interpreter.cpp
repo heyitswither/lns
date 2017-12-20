@@ -59,24 +59,24 @@ void interpreter::execute_block(vector<stmt *> stmts, runtime_environment *env) 
     //delete env;
 }
 
-object *interpreter::visit_context_expr(context_expr *c) {
-    object *o = evaluate(const_cast<expr *>(c->context_name));
+object *interpreter::visit_member_expr(member_expr *c) {
+    object *o = evaluate(const_cast<expr *>(c->container_name));
     if (o->type == CONTEXT_T) {
-        return DCAST(context*,o)->get(c->context_identifier);
+        return DCAST(context*,o)->get(c->member_identifier);
     }else if(o->type == EXCEPTION_T){
-        object* o2 = DCAST(incode_exception*,o)->get(const_cast<string&>(c->context_identifier.lexeme));
+        object* o2 = DCAST(incode_exception*,o)->get(const_cast<string&>(c->member_identifier.lexeme));
         return o2;
     }
-    throw runtime_exception(c->context_identifier, *new string("object is not a context"));
+    throw runtime_exception(c->member_identifier, *new string("object is not a context"));
 }
 
-object *interpreter::visit_context_assign_expr(context_assign_expr *c) {
-    object *o = evaluate(const_cast<expr *>(c->context_name));
+object *interpreter::visit_member_assign_expr(member_assign_expr *c) {
+    object *o = evaluate(const_cast<expr *>(c->container_name));
     if (o->type != CONTEXT_T) {
-        throw runtime_exception(c->context_identifier, *new string("object is not a context"));
+        throw runtime_exception(c->member_identifier, *new string("object is not a context"));
     }
     object *value = evaluate(const_cast<expr *>(c->value));
-    dynamic_cast<context *>(o)->assign(c->context_identifier, c->op, clone_or_keep(value,c->value->type,c->context_identifier));
+    dynamic_cast<context *>(o)->assign(c->member_identifier, c->op, clone_or_keep(value,c->value->type,c->member_identifier));
     return value;
 }
 
@@ -317,7 +317,7 @@ void interpreter::visit_expression_stmt(expression_stmt *e) {
         case SUB_SCRIPT_ASSIGN_EXPR_T:
         case INCREMENT_EXPR_T:
         case DECREMENT_EXPR_T:
-        case CONTEXT_ASSIGN_EXPR_T:
+        case MEMBER_ASSIGN_EXPR_T:
             return;
     }
     cout << o->str() << endl;
@@ -452,7 +452,7 @@ object *interpreter::clone_or_keep(object *obj, const expr_type type, const toke
         case NULL_EXPR_T:
         case ASSIGN_EXPR_T:
         case SUB_SCRIPT_ASSIGN_EXPR_T:
-        case CONTEXT_ASSIGN_EXPR_T:
+        case MEMBER_ASSIGN_EXPR_T:
             return obj;
     }
     object* ret = obj->clone();
