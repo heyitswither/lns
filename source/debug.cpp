@@ -155,27 +155,10 @@ void debugger::remove_break_point(int id) {
 
 void debugger::execute(stmt *s) {
     breakpoint *bp;
-    if ((bp = check_bp(s)) != nullptr) {
-        debug_env->break_(false, bp, bp_id);
-        execute(s);
-    } else if (current_action == BREAK_A) {
-        debug_env->break_(true,new breakpoint(s->file,s->line),0);
-        execute(s);
-    } else {
-        switch (current_action) {
-            case CONTINUE_A:
-                CHK_EXEC(s);
-                break;
-            case STEP_IN:
-                current_action = BREAK_A;
-                CHK_EXEC(s);
-                break;
-            case STEP_OUT:
-                break;
-            case STEP_OVER:
-                break;
-        }
+    if((bp = check_bp(s)) != nullptr){
+        debug_env->break_(false,bp,bp_id);
     }
+    interpreter::execute(s);
 }
 
 void debugger::action(lns::action action) {
