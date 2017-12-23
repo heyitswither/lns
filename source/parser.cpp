@@ -18,28 +18,28 @@ bool parser::match(initializer_list<token_type> types) {
     return false;
 }
 
-token &parser::advance() {
+token *parser::advance() {
     if (!is_at_end()) current++;
     return previous();
 }
 
-token &parser::previous() {
-    return *tokens.at(current - 1);
+token *parser::previous() {
+    return tokens.at(current - 1);
 }
 
 bool parser::check(token_type tokenType) {
     if (is_at_end()) return false;
-    return peek().type == tokenType;
+    return peek()->type == tokenType;
 }
 
-token &parser::peek() {
-    return *tokens[current];
+token *parser::peek() {
+    return tokens[current];
 }
 
 void parser::synchronize() {
     advance();
     while (!is_at_end()) {
-        switch (peek().type) {
+        switch (peek()->type) {
             case CLASS:
             case FUNCTION:
             case VAR:
@@ -59,37 +59,37 @@ void parser::synchronize() {
     }
 }
 
-token &parser::consume(token_type type, const char *message) {
+token *parser::consume(token_type type, const char *message) {
     if (check({type})) return advance();
     throw error(peek(), message);
 }
 
 void parser::use_not_allowed() {
-    token &name = previous();
-    throw error(name, "'use' statements are not allowed at this location");
+    throw error(previous(), "'use' statements are not allowed at this location");
 }
 
 stmt *parser::use() {
     bool isnatives = false;
     if (!use_allowed)use_not_allowed();
     if (match({NATIVES})) isnatives = true;
-    token &t = consume(STRING, "expected filename");
-    string &s = dynamic_cast<string_o *>(&t.literal)->value;
+    token *t = consume(STRING, "expected filename");
+    string &s = dynamic_cast<string_o *>(t->literal)->value;
     if (isnatives) {
         consume(BIND, "expected 'bind' after filename");
-        return new uses_native_stmt(t.filename, t.line, t, s, consume(IDENTIFIER, "expected identifier after 'bind'"));
+        return new uses_native_stmt(t->filename, t->line, t, s, consume(IDENTIFIER, "expected identifier after 'bind'"));
     }
     ld_stmts(s);
     return nullptr;
 }
 
 vector<stmt *> &parser::context_block() {
-    int line = previous().line;
+    int line = previous()->line;
     stmt *s;
     vector<stmt *> &stmts = *new vector<stmt *>();
     while (!check(END) && !is_at_end()) {
         s = declaration();
-        if (s->type == CONTEXT_STMT_T || s->type == VAR_STMT_T || s->type == FUNCTION_STMT_T || s->type == EXCEPTION_DECL_STMT_T) {
+        if (s->type == CONTEXT_STMT_T || s->type == VAR_STMT_T || s->type == FUNCTION_STMT_T ||
+            s->type == EXCEPTION_DECL_STMT_T) {
             stmts.push_back(s);
             continue;
         }
@@ -116,7 +116,7 @@ vector<stmt *> &parser::stmts_until(initializer_list<token_type> list) {
 }
 
 vector<stmt *> &parser::block() {
-    int line = previous().line;
+    int line = previous()->line;
     vector<stmt *> &stmts = *new vector<stmt *>();
     while (!check(END) && !is_at_end()) {
         stmts.push_back(declaration());
@@ -126,9 +126,9 @@ vector<stmt *> &parser::block() {
 }
 
 stmt *parser::context_declaration(bool global, bool final) {
-    token &name = consume(IDENTIFIER, "expected context name");
+    token *name = consume(IDENTIFIER, "expected context name");
     vector<stmt *> &stmts = context_block();
-    return new context_stmt(name.filename, name.line, name, stmts, global, final);
+    return new context_stmt(name->filename, name->line, name, stmts, global, final);
 }
 
 bool parser::check_file(const char *str) {
@@ -139,11 +139,11 @@ bool parser::check_file(const char *str) {
 
 bool parser::dpcheck() {
     if (check(STRING)) {
-        token &s = advance();
-        return check_file(s.literal.str().c_str());
+        token *s = advance();
+        return check_file(s->literal->str().c_str());
     } else if (check(THIS)) {
-        token &s = advance();
-        return check_file(s.filename);
+        token *s = advance();
+        return check_file(s->filename);
     } else throw error(previous(), "expected string or 'this' after dpcheck");
 }
 
@@ -157,17 +157,22 @@ stmt *parser::declaration() {
         use_allowed = false;
         bool is_global = false, is_final = false;
         while (match({GLOBAL, FINAL})) {
-            is_global = previous().type == GLOBAL;
-            is_final = previous().type == FINAL;
+            is_global = previous()->type == GLOBAL;
+            is_final = previous()->type == FINAL;
         }
-        if (match({EXCEPTION})){
-            if (is_final) if (!permissive) throw error(peek(),"keyword 'final' is not allowed for " "exception declaration" " (--permissive)");
+        if (match({EXCEPTION})) {
+            if (is_final)
+                if (!permissive)
+                    throw error(peek(),
+                                "keyword 'final' is not allowed for " "exception declaration" " (--permissive)");
             return exception_(is_global);
         }
         if (match({CONTEXT})) return context_declaration(is_global, is_final);
         if (match({VAR})) return var_declaration(is_global, is_final);
         if (match({FUNCTION})) {
-            if (is_final) if (!permissive) throw error(peek(),"keyword 'final' is not allowed for " "functions" " (--permissive)");
+            if (is_final)
+                if (!permissive)
+                    throw error(peek(), "keyword 'final' is not allowed for " "functions" " (--permissive)");
             return function(is_global);
         }
         return statement();
@@ -177,20 +182,20 @@ stmt *parser::declaration() {
     }
 }
 
-int parser::error(token &token, const char *message) {
-    errors::parse_error(token.filename, token.line, message);
+int parser::error(token *token, const char *message) {
+    errors::parse_error(token->filename, token->line, message);
     return PARSE_ERROR;
 }
 
 var_stmt *parser::var_declaration(bool is_global, bool is_final) {
-    token &name = consume(IDENTIFIER, "expected identifier in variable declaration");
-    expr *initializer = new null_expr(name.filename, name.line, name);
+    token *name = consume(IDENTIFIER, "expected identifier in variable declaration");
+    expr *initializer = new null_expr(name->filename, name->line, name);
     if (match({EQUAL})) {
         delete initializer;
         initializer = expression(true);
     }
     //consume(SEMICOLON, "expected ';' after variable declaration");
-    return new var_stmt(name.filename, name.line, name, *initializer, is_global, is_final);
+    return new var_stmt(name->filename, name->line, name, *initializer, is_global, is_final);
 }
 
 stmt *parser::statement() {
@@ -209,15 +214,15 @@ stmt *parser::statement() {
 }
 
 stmt *parser::raise() {
-    token &raise = previous();
-    expr* name = expression(true);
+    token *raise = previous();
+    expr *name = expression(true);
     if (match({WITH})) {
         map<string, expr *> &v = *new map<string, expr *>();
         do {
-            token &vname = consume(IDENTIFIER, "expected exception field identifier");
+            token *vname = consume(IDENTIFIER, "expected exception field identifier");
             consume(EQUAL, "expected '=' after exception field identifier");
             expr *val = expression(true);
-            v[vname.lexeme] = val;
+            v[vname->lexeme] = val;
         } while (match({COMMA}));
         return new raise_stmt(name->file, name->line, raise, name, v);
     }
@@ -226,68 +231,68 @@ stmt *parser::raise() {
 
 
 stmt *parser::return_statement() {
-    token &keyword = previous();
-    expr *value = new null_expr(keyword.filename, keyword.line, previous());
+    token *keyword = previous();
+    expr *value = new null_expr(keyword->filename, keyword->line, previous());
     if (!is_at_end())
-        if (peek().line == keyword.line)
+        if (peek()->line == keyword->line)
             value = expression(true);
-    return new return_stmt(keyword.filename, keyword.line, keyword, *value);
+    return new return_stmt(keyword->filename, keyword->line, keyword, *value);
 }
 
 stmt *parser::break_statement() {
-    token &t = previous();
-    return new break_stmt(t.filename, t.line, t);
+    token *t = previous();
+    return new break_stmt(t->filename, t->line, t);
 }
 
 stmt *parser::continue_statement() {
-    token &t = previous();
-    return new continue_stmt(t.filename, t.line, t);
+    token *t = previous();
+    return new continue_stmt(t->filename, t->line, t);
 }
 
 stmt *parser::if_statement() {
-    token keyword = previous();
+    token *keyword = previous();
     expr *condition = expression(true);
     consume(THEN, "expected 'then' after if condition");
     stmt *then_branch;
     try {
         then_branch = new block_stmt(condition->file, condition->line, stmts_until({ELSE, END}));
     } catch (int) {
-        throw error(previous(), EXPTOCLOSE(if statement, keyword.line).c_str());
+        throw error(previous(), EXPTOCLOSE(if statement, keyword->line).c_str());
     }
-    stmt *else_branch = new null_stmt(keyword.filename, keyword.line, keyword);
-    token &closing = previous();
-    if (closing.type == ELSE)
+    stmt *else_branch = new null_stmt(keyword->filename, keyword->line, keyword);
+    token *closing = previous();
+    if (closing->type == ELSE)
         if (match({IF})) else_branch = if_statement();
         else
-            try { else_branch = new block_stmt(previous().filename, previous().line, stmts_until({END})); } catch (
-                    int) { throw error(previous(), EXPTOCLOSE(else statement, closing.line).c_str()); }
-    return new if_stmt(keyword.filename, keyword.line, *condition, then_branch, else_branch);
+            try { else_branch = new block_stmt(previous()->filename, previous()->line, stmts_until({END})); } catch (
+                    int) { throw error(previous(), EXPTOCLOSE(else statement, closing->line).c_str()); }
+    return new if_stmt(keyword->filename, keyword->line, *condition, then_branch, else_branch);
 }
 
 stmt *parser::while_statement() {
     expr *condition = expression(true);
-    token &d = consume(DO, "expected 'do' after loop condition");
+    token *d = consume(DO, "expected 'do' after loop condition");
     stmt *body;
     try {
-        body = new block_stmt(d.filename, d.line, stmts_until({END}));
+        body = new block_stmt(d->filename, d->line, stmts_until({END}));
     } catch (int) {
-        throw error(previous(), EXPTOCLOSE(if statement, d.line).c_str());
+        throw error(previous(), EXPTOCLOSE(if statement, d->line).c_str());
     }
     return new s_while_stmt(condition->file, condition->line, *condition, body);
 }
 
 
 stmt *parser::foreach_statement() {
-    token &init = consume(IDENTIFIER, "expected identifier after 'foreach' keyword");
+    token *init = consume(IDENTIFIER, "expected identifier after 'foreach' keyword");
     consume(IN, "expected 'in' after identifier");
     expr *container = expression(true);
-    token &p = consume(DO, "expected 'do'");
+    token *p = consume(DO, "expected 'do'");
     try {
-        return new s_for_each_stmt(p.filename, p.line, init, container,
-                                   new block_stmt(p.filename, p.line, stmts_until({END})));
+        return new s_for_each_stmt(p->filename, p->line, init, container,
+                                   new block_stmt(p->filename, p->line, stmts_until({END})));
     } catch (int) {
         throw error(previous(), EXPTOCLOSE(foreach
-                                                   statement, p.line).c_str());
+                                                   statement, p->line).c_str());
     }
 }
 
@@ -308,16 +313,16 @@ stmt *parser::for_statement() {
     if (!check(DO)) {
         increment = expression(true);
     }
-    token p = consume(DO, "expected 'do' after for loop increment");
+    token *p = consume(DO, "expected 'do' after for loop increment");
     stmt *body;
     try {
-        body = new block_stmt(p.filename, p.line, stmts_until({END}));
+        body = new block_stmt(p->filename, p->line, stmts_until({END}));
     } catch (int) {
         throw error(previous(), EXPTOCLOSE(for
-                                                   statement, p.line).c_str());
+                                                   statement, p->line).c_str());
     }
-    s_for_stmt *s = new s_for_stmt(condition == nullptr ? p.filename : condition->file,
-                                   condition == nullptr ? p.line : condition->line, initializer, condition, increment,
+    s_for_stmt *s = new s_for_stmt(condition == nullptr ? p->filename : condition->file,
+                                   condition == nullptr ? p->line : condition->line, initializer, condition, increment,
                                    body);
     return s;
 }
@@ -329,27 +334,27 @@ stmt *parser::expression_statement() {
 }
 
 stmt *parser::function(bool isglobal) {
-    token &name = consume(IDENTIFIER, "expected function name");
+    token *name = consume(IDENTIFIER, "expected function name");
     consume(LEFT_PAREN, "expected '(' after function name");
-    vector<token> &parameters = *new vector<token>();
+    vector<token *> &parameters = *new vector<token *>();
     if (!check(RIGHT_PAREN)) {
         do {
-            token &t = consume(IDENTIFIER, "expected parameter name");
+            token *t = consume(IDENTIFIER, "expected parameter name");
             parameters.push_back(t);
         } while (match({COMMA}));
     }
     consume(RIGHT_PAREN, "expected ')' after parameter list");
     try {
         vector<stmt *> &body = stmts_until({END});
-        return new function_stmt(name.filename, name.line, name, parameters, body, isglobal);
+        return new function_stmt(name->filename, name->line, name, parameters, body, isglobal);
     } catch (int) {
-        int l = name.line;
+        int l = name->line;
         throw error(previous(), EXPTOCLOSE(function, l).c_str());
     }
 }
 
 expr *parser::array() {
-    token &opening = previous();
+    token *opening = previous();
     vector<pair<expr *, expr *>> &pairs = *new vector<pair<expr *, expr *>>();
     int i = 0;
     expr *e1, *e2;
@@ -366,14 +371,14 @@ expr *parser::array() {
         if (is_at_end()) break;
         if (match({COMMA}))
             continue;
-        else if (peek().type == RIGHT_BRACE)
+        else if (peek()->type == RIGHT_BRACE)
             break;
         else
             throw error(peek(), "expected ',' or '}' after array expression");
     }
     consume(RIGHT_BRACE, EXPTOCLOSE(array
-                                            literal, opening.line).c_str());
-    return new array_expr(opening.filename, opening.line, opening, pairs);
+                                            literal, opening->line).c_str());
+    return new array_expr(opening->filename, opening->line, opening, pairs);
 }
 
 expr *parser::assignment(bool nested) {
@@ -382,36 +387,36 @@ expr *parser::assignment(bool nested) {
     member_expr *context;
     expr *expr = logical(nested), *value, *key;
     if (match({EQUAL, PLUS_EQUALS, MINUS_EQUALS, STAR_EQUALS, SLASH_EQUALS})) {
-        token &op = previous();
+        token *op = previous();
         value = assignment(true);
         if ((var = dynamic_cast<variable_expr *>(expr)) != nullptr) {
-            token &name = const_cast<token &>(var->name);
-            return new assign_expr(var->file, var->line, name, op.type, value);
+            token *name = const_cast<token *>(var->name);
+            return new assign_expr(var->file, var->line, name, op->type, value);
         }
         if ((map = dynamic_cast<sub_script_expr *>(expr)) != nullptr) {
-            return new sub_script_assign_expr(map->file, map->line, const_cast<token &>(map->where), map->name, op.type,
+            return new sub_script_assign_expr(map->file, map->line, const_cast<token *>(map->where), map->name, op->type,
                                               map->key, value);
         }
         if ((context = dynamic_cast<member_expr *>(expr)) != nullptr) {
             return new member_assign_expr(context->file, context->line,
-                                           context->container_name, op.type,
-                                           const_cast<token &>(context->member_identifier), value);
+                                          context->container_name, op->type,
+                                          const_cast<token *>(context->member_identifier), value);
         }
         throw error(op, "invalid assignment target");
     }
     if (match({PLUS_PLUS})) {
-        token &pp = previous();
+        token *pp = previous();
         if ((var = dynamic_cast<variable_expr *>(expr)) != nullptr) {
-            const token &name = var->name;
-            return new increment_expr(name.filename, name.line, const_cast<token &>(name), expr);
+            const token *name = var->name;
+            return new increment_expr(name->filename, name->line, const_cast<token *>(name), expr);
         }
         error(pp, "invalid increment target");
     }
     if (match({MINUS_MINUS})) {
-        token &mm = previous();
+        token *mm = previous();
         if ((var = dynamic_cast<variable_expr *>(expr)) != nullptr) {
-            const token &name = var->name;
-            return new decrement_expr(name.filename, name.line, const_cast<token &>(name), expr);
+            const token *name = var->name;
+            return new decrement_expr(name->filename, name->line, const_cast<token *>(name), expr);
         }
         error(mm, "Invalid decrement target");
     }
@@ -421,9 +426,9 @@ expr *parser::assignment(bool nested) {
 expr *parser::comparison(bool nested) {
     expr *expr = addition(nested), *right;
     while (match({BANG_EQUAL, EQUAL_EQUAL, GREATER, GREATER_EQUAL, LESS, LESS_EQUAL})) {
-        token &op = previous();
+        token *op = previous();
         right = addition(true);
-        expr = new binary_expr(op.filename, op.line, expr, op, right);
+        expr = new binary_expr(op->filename, op->line, expr, op, right);
     }
     return expr;
 }
@@ -431,9 +436,9 @@ expr *parser::comparison(bool nested) {
 expr *parser::addition(bool nested) {
     expr *expr = multiplication(nested), *right;
     while (match({MINUS, PLUS})) {
-        token &op = previous();
+        token *op = previous();
         right = multiplication(true);
-        expr = new binary_expr(op.filename, op.line, expr, op, right);
+        expr = new binary_expr(op->filename, op->line, expr, op, right);
     }
     return expr;
 }
@@ -441,9 +446,9 @@ expr *parser::addition(bool nested) {
 expr *parser::multiplication(bool nested) {
     expr *expr = power(nested), *right;
     while (match({SLASH, STAR})) {
-        token &op = previous();
+        token *op = previous();
         right = power(true);
-        expr = new binary_expr(op.filename, op.line, expr, op, right);
+        expr = new binary_expr(op->filename, op->line, expr, op, right);
     }
     return expr;
 }
@@ -451,18 +456,18 @@ expr *parser::multiplication(bool nested) {
 expr *parser::power(bool nested) {
     expr *expr = unary(nested), *right;
     while (match({HAT})) {
-        token &op = previous();
+        token *op = previous();
         right = unary(true);
-        expr = new binary_expr(op.filename, op.line, expr, op, right);
+        expr = new binary_expr(op->filename, op->line, expr, op, right);
     }
     return expr;
 }
 
 expr *parser::unary(bool nested) {
     if (match({NOT, MINUS})) {
-        token &op = previous();
+        token *op = previous();
         expr *right = unary(true);
-        return new unary_expr(op.filename, op.line, op, right);
+        return new unary_expr(op->filename, op->line, op, right);
     }
     return call(nested);
 }
@@ -470,7 +475,7 @@ expr *parser::unary(bool nested) {
 expr *parser::call(bool nested) {
     vector<expr *> &args = *new vector<expr *>();
     expr *expr = special_assignment(nested), *keyexpr;
-    token &identifier = previous();
+    token *identifier = previous();
     while (true)
         if (match({LEFT_PAREN})) {
             if (!check(RIGHT_PAREN)) {
@@ -478,8 +483,8 @@ expr *parser::call(bool nested) {
                     args.push_back(expression(true));
                 } while (match({COMMA}));
             }
-            token &paren = consume(RIGHT_PAREN, "expected ')' after arguments");
-            expr = new call_expr(paren.filename, paren.line, expr, paren, args);
+            token *paren = consume(RIGHT_PAREN, "expected ')' after arguments");
+            expr = new call_expr(paren->filename, paren->line, expr, paren, args);
         } else break;
     return expr;
 }
@@ -491,17 +496,17 @@ expr *parser::finish_call(expr *callee) {
             args.push_back(expression(true));
         } while (match({COMMA}));
     }
-    token paren = consume(RIGHT_PAREN, "expected ')' after arguments");
-    call_expr *expr = new call_expr(paren.filename, paren.line, callee, paren, args);
+    token *paren = consume(RIGHT_PAREN, "expected ')' after arguments");
+    call_expr *expr = new call_expr(paren->filename, paren->line, callee, paren, args);
     return expr;
 }
 
 expr *parser::special_assignment(bool nested) {
     expr *expr = primary(nested), *key;
     while (match({DOT, LEFT_SQR})) {
-        token &op = previous();
-        if (op.type == DOT) {
-            token &fname = consume(IDENTIFIER, "expected field name");
+        token *op = previous();
+        if (op->type == DOT) {
+            token *fname = consume(IDENTIFIER, "expected field name");
             expr = new member_expr(expr->file, expr->line, expr, fname);
         } else {
             key = expression(true);
@@ -513,13 +518,13 @@ expr *parser::special_assignment(bool nested) {
 }
 
 expr *parser::primary(bool nested) {
-    if (match({FALSE})) return new literal_expr(previous().filename, previous().line, new bool_o(false));
-    if (match({TRUE})) return new literal_expr(previous().filename, previous().line, new bool_o(true));
-    if (match({NUL})) return new literal_expr(previous().filename, previous().line, new null_o());
-    if (match({NUMBER, STRING})) return new literal_expr(previous().filename, previous().line, &previous().literal);
+    if (match({FALSE})) return new literal_expr(previous()->filename, previous()->line, new bool_o(false));
+    if (match({TRUE})) return new literal_expr(previous()->filename, previous()->line, new bool_o(true));
+    if (match({NUL})) return new literal_expr(previous()->filename, previous()->line, new null_o());
+    if (match({NUMBER, STRING})) return new literal_expr(previous()->filename, previous()->line, previous()->literal);
     if (match({IDENTIFIER})) {
-        token &identifier = previous();
-        return new variable_expr(identifier.filename, identifier.line, identifier);
+        token *identifier = previous();
+        return new variable_expr(identifier->filename, identifier->line, identifier);
     }
     if (match({LEFT_PAREN})) {
         expr *expr = expression(true);
@@ -557,15 +562,15 @@ expr *parser::expression(bool nested) {
 expr *parser::logical(bool nested) {
     expr *expr = comparison(nested), *right;
     while (match({AND, OR, NOR, XOR, NAND})) {
-        token &op = previous();
+        token *op = previous();
         right = comparison(true);
-        expr = new binary_expr(op.filename, op.line, expr, op, right);
+        expr = new binary_expr(op->filename, op->line, expr, op, right);
     }
     return expr;
 }
 
 bool parser::is_at_end() {
-    return peek().type == EOF_;
+    return peek()->type == EOF_;
 }
 
 void parser::reset(vector<token *> tokens) {
@@ -598,38 +603,38 @@ void parser::ld_stmts(string &s) {
 }
 
 stmt *parser::exception_(bool is_global) {
-    token &name = consume(IDENTIFIER, "expected exception name");
+    token *name = consume(IDENTIFIER, "expected exception name");
     if (match({WITH})) {
         set<string> &tokens = *new set<string>();
         do {
-            token &t = consume(IDENTIFIER, "expected identifier(s)");
-            tokens.insert(t.lexeme);
+            token *t = consume(IDENTIFIER, "expected identifier(s)");
+            tokens.insert(t->lexeme);
         } while (match({COMMA}));
 
-        return new exception_decl_stmt(name.filename, name.line, name, tokens,is_global);
+        return new exception_decl_stmt(name->filename, name->line, name, tokens, is_global);
     }
-    return new exception_decl_stmt(name.filename, name.line, name, *new set<string>(), is_global);
+    return new exception_decl_stmt(name->filename, name->line, name, *new set<string>(), is_global);
 }
 
 stmt *parser::begin_handle_statement() {
-    token &keyword = previous();
+    token *keyword = previous();
     vector<stmt *> &stmts = stmts_until({HANDLE});
     vector<handle_stmt *> handles = *new vector<handle_stmt *>();
     int last_line = 0;
     do {
-        if (peek().type == END) break;
+        if (peek()->type == END) break;
         expr *e_iden = expression(true);
-        token *name = new token(UNRECOGNIZED, string(), *new null_o(), e_iden->file, e_iden->line);
+        token *name = new token(UNRECOGNIZED, string(), new null_o(), e_iden->file, e_iden->line);
         if (match({BIND}))
-            name = &consume(IDENTIFIER, "expected variable name after 'bind'");
-        vector<stmt *>& hstmts = *new vector<stmt *>();
+            name = consume(IDENTIFIER, "expected variable name after 'bind'");
+        vector<stmt *> &hstmts = *new vector<stmt *>();
         while (!(check(HANDLE) || check(END))) {
             hstmts.push_back(declaration());
         }
-        handles.push_back(new handle_stmt(name->filename, name->line, e_iden, *name, hstmts));
+        handles.push_back(new handle_stmt(name->filename, name->line, e_iden, name, hstmts));
     } while (match({HANDLE}) || check(END));
     consume(END, EXPTOCLOSE(handle, last_line).c_str());
-    return new begin_handle_stmt(keyword.filename, keyword.line, stmts, handles);
+    return new begin_handle_stmt(keyword->filename, keyword->line, stmts, handles);
 }
 
 

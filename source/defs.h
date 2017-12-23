@@ -326,11 +326,11 @@ namespace lns {
 
     class token {
     public:
-        token(token_type type, std::string lexeme, object &literal, const char *filename, int line);
+        token(token_type type, std::string lexeme, object *literal, const char *filename, int line);
 
         token_type type;
         std::string lexeme;
-        object &literal;
+        object *literal;
         const char *filename;
         int line;
 
@@ -380,25 +380,25 @@ namespace lns {
 
         explicit runtime_environment(runtime_environment *enc);
 
-        object *get(const token &name);
+        object *get(const token *name);
 
-        void define(const token &name, object *o, bool is_final, bool is_global);
+        void define(const token *name, object *o, bool is_final, bool is_global);
 
         void define(const std::string &name, object *o, bool is_final);
 
-        void assign(const token &name,token_type op, object *obj);
+        void assign(const token *name,token_type op, object *obj);
 
         bool is_valid_object_type(objtype objtype);
 
-        object *assign_map_field(const token &name,const token_type op,number_o *key, object *value);
+        object *assign_map_field(const token *name,const token_type op,number_o *key, object *value);
 
-        bool clear_var(const token &name);
+        bool clear_var(const token *name);
 
         bool is_native(callable *ptr);
 
-        object *increment(const token &name);
+        object *increment(const token *name);
 
-        object *decrement(const token &name);
+        object *decrement(const token *name);
 
         void reset();
 
@@ -425,29 +425,29 @@ namespace lns {
     class return_signal : public std::exception {
     public:
         object *value;
-        const token &keyword;
+        const token *keyword;
 
-        return_signal(object *value, const token &keyword);
+        return_signal(object *value, const token *keyword);
 
         const char *what() const throw() override;
     };
 
     class break_signal : public std::exception {
     public:
-        const token &keyword;
+        const token *keyword;
 
-        explicit break_signal(const token &keyword);
+        explicit break_signal(const token *keyword);
 
         const char *what() const throw() override;
     };
 
     class continue_signal : public std::exception {
     public:
-        const token &keyword;
+        const token *keyword;
 
         const char *what() const throw() override;
 
-        explicit continue_signal(const token &keyword);
+        explicit continue_signal(const token *keyword);
     };
 
     object *GET_DEFAULT_NULL();
@@ -460,9 +460,9 @@ namespace lns {
     public:
         std::string &message;
         bool native_throw;
-        const lns::token &token;
+        const lns::token *token;
         runtime_exception(const char *filename, int line, std::string& message);
-        runtime_exception(const lns::token &token, std::string &m);
+        runtime_exception(const lns::token *token, std::string &m);
 
         const char *what() const throw() override;
     };
@@ -472,7 +472,7 @@ namespace lns {
         std::map<std::string,lns::object*> fields;
     public:
         int calls_bypassed;
-        incode_exception(const lns::token &token, const std::string &m, const std::map<std::string,lns::object*>& fields);
+        incode_exception(const lns::token *token, const std::string &m, const std::map<std::string,lns::object*>& fields);
 
         object *get(std::string &key);
 

@@ -87,12 +87,12 @@ const expr& exprs;
 
 class function_stmt : public stmt {
 public:
-function_stmt(const char* file,int line, token& name, vector<token>& parameters, vector<stmt*>& body, bool isglobal) : name(name), parameters(parameters), body(body), isglobal(isglobal), stmt(line, file, FUNCTION_STMT_T) {}
+function_stmt(const char* file,int line, token* name, vector<token*>& parameters, vector<stmt*>& body, bool isglobal) : name(name), parameters(parameters), body(body), isglobal(isglobal), stmt(line, file, FUNCTION_STMT_T) {}
 void accept(stmt_visitor *v) override{
 v->visit_function_stmt(this);
 }
-const token& name;
-const vector<token>& parameters;
+const token* name;
+const vector<token*>& parameters;
 const vector<stmt*>& body;
 const bool isglobal;
 };
@@ -101,11 +101,11 @@ const bool isglobal;
 
 class context_stmt : public stmt {
 public:
-context_stmt(const char* file,int line, token& name, vector<stmt*> body, bool is_global, bool isfinal) : name(name), body(body), is_global(is_global), isfinal(isfinal), stmt(line, file, CONTEXT_STMT_T) {}
+context_stmt(const char* file,int line, token* name, vector<stmt*> body, bool is_global, bool isfinal) : name(name), body(body), is_global(is_global), isfinal(isfinal), stmt(line, file, CONTEXT_STMT_T) {}
 void accept(stmt_visitor *v) override{
 v->visit_context_stmt(this);
 }
-const token& name;
+const token* name;
 const vector<stmt*> body;
 const bool is_global;
 const bool isfinal;
@@ -128,11 +128,11 @@ const stmt* elseBranch;
 
 class return_stmt : public stmt {
 public:
-return_stmt(const char* file,int line, token& keyword, expr& value) : keyword(keyword), value(value), stmt(line, file, RETURN_STMT_T) {}
+return_stmt(const char* file,int line, token* keyword, expr& value) : keyword(keyword), value(value), stmt(line, file, RETURN_STMT_T) {}
 void accept(stmt_visitor *v) override{
 v->visit_return_stmt(this);
 }
-const token& keyword;
+const token* keyword;
 const expr& value;
 };
 
@@ -140,33 +140,33 @@ const expr& value;
 
 class break_stmt : public stmt {
 public:
-explicit break_stmt(const char* file,int line, token& keyword) : keyword(keyword), stmt(line, file, BREAK_STMT_T) {}
+explicit break_stmt(const char* file,int line, token* keyword) : keyword(keyword), stmt(line, file, BREAK_STMT_T) {}
 void accept(stmt_visitor *v) override{
 v->visit_break_stmt(this);
 }
-const token& keyword;
+const token* keyword;
 };
 
 
 
 class continue_stmt : public stmt {
 public:
-explicit continue_stmt(const char* file,int line, token& keyword) : keyword(keyword), stmt(line, file, CONTINUE_STMT_T) {}
+explicit continue_stmt(const char* file,int line, token* keyword) : keyword(keyword), stmt(line, file, CONTINUE_STMT_T) {}
 void accept(stmt_visitor *v) override{
 v->visit_continue_stmt(this);
 }
-const token& keyword;
+const token* keyword;
 };
 
 
 
 class var_stmt : public stmt {
 public:
-var_stmt(const char* file,int line, token& name, expr& initializer, bool isglobal, bool isfinal) : name(name), initializer(initializer), isglobal(isglobal), isfinal(isfinal), stmt(line, file, VAR_STMT_T) {}
+var_stmt(const char* file,int line, token* name, expr& initializer, bool isglobal, bool isfinal) : name(name), initializer(initializer), isglobal(isglobal), isfinal(isfinal), stmt(line, file, VAR_STMT_T) {}
 void accept(stmt_visitor *v) override{
 v->visit_var_stmt(this);
 }
-const token& name;
+const token* name;
 const expr& initializer;
 const bool isglobal;
 const bool isfinal;
@@ -202,11 +202,11 @@ const stmt* body;
 
 class s_for_each_stmt : public stmt {
 public:
-s_for_each_stmt(const char* file,int line, token& identifier, expr* container, stmt* body) : identifier(identifier), container(container), body(body), stmt(line, file, S_FOR_EACH_STMT_T) {}
+s_for_each_stmt(const char* file,int line, token* identifier, expr* container, stmt* body) : identifier(identifier), container(container), body(body), stmt(line, file, S_FOR_EACH_STMT_T) {}
 void accept(stmt_visitor *v) override{
 v->visit_s_for_each_stmt(this);
 }
-const token& identifier;
+const token* identifier;
 const expr* container;
 const stmt* body;
 };
@@ -215,11 +215,11 @@ const stmt* body;
 
 class exception_decl_stmt : public stmt {
 public:
-exception_decl_stmt(const char* file,int line, token& name, set<string>& identifiers, bool is_global) : name(name), identifiers(identifiers), is_global(is_global), stmt(line, file, EXCEPTION_DECL_STMT_T) {}
+exception_decl_stmt(const char* file,int line, token* name, set<string>& identifiers, bool is_global) : name(name), identifiers(identifiers), is_global(is_global), stmt(line, file, EXCEPTION_DECL_STMT_T) {}
 void accept(stmt_visitor *v) override{
 v->visit_exception_decl_stmt(this);
 }
-const token& name;
+const token* name;
 const set<string>& identifiers;
 const bool is_global;
 };
@@ -228,11 +228,11 @@ const bool is_global;
 
 class raise_stmt : public stmt {
 public:
-raise_stmt(const char* file,int line, token& where, expr* name, map<string,expr*>& fields) : where(where), name(name), fields(fields), stmt(line, file, RAISE_STMT_T) {}
+raise_stmt(const char* file,int line, token* where, expr* name, map<string,expr*>& fields) : where(where), name(name), fields(fields), stmt(line, file, RAISE_STMT_T) {}
 void accept(stmt_visitor *v) override{
 v->visit_raise_stmt(this);
 }
-const token& where;
+const token* where;
 const expr* name;
 const map<string,expr*>& fields;
 };
@@ -241,25 +241,25 @@ const map<string,expr*>& fields;
 
 class uses_native_stmt : public stmt {
 public:
-uses_native_stmt(const char* file,int line, token& where, string& lib_name, token& bind) : where(where), lib_name(lib_name), bind(bind), stmt(line, file, USES_NATIVE_STMT_T) {}
+uses_native_stmt(const char* file,int line, token* where, string& lib_name, token* bind) : where(where), lib_name(lib_name), bind(bind), stmt(line, file, USES_NATIVE_STMT_T) {}
 void accept(stmt_visitor *v) override{
 v->visit_uses_native_stmt(this);
 }
-const token& where;
+const token* where;
 const string& lib_name;
-const token& bind;
+const token* bind;
 };
 
 
 
 class handle_stmt : public stmt {
 public:
-handle_stmt(const char* file,int line, expr* exception_name, token& bind, vector<stmt*>& block) : exception_name(exception_name), bind(bind), block(block), stmt(line, file, HANDLE_STMT_T) {}
+handle_stmt(const char* file,int line, expr* exception_name, token* bind, vector<stmt*>& block) : exception_name(exception_name), bind(bind), block(block), stmt(line, file, HANDLE_STMT_T) {}
 void accept(stmt_visitor *v) override{
 v->visit_handle_stmt(this);
 }
 const expr* exception_name;
-const token& bind;
+const token* bind;
 const vector<stmt*>& block;
 };
 
@@ -279,11 +279,11 @@ const vector<handle_stmt*> handles;
 
 class null_stmt : public stmt {
 public:
-explicit null_stmt(const char* file,int line, token& where) : where(where), stmt(line, file, NULL_STMT_T) {}
+explicit null_stmt(const char* file,int line, token* where) : where(where), stmt(line, file, NULL_STMT_T) {}
 void accept(stmt_visitor *v) override{
 v->visit_null_stmt(this);
 }
-const token& where;
+const token* where;
 };
 
 

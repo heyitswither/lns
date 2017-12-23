@@ -52,7 +52,7 @@ namespace lns {
             return source.at(current - 1);
         }
 
-        void add_token(token_type type, object &f);
+        void add_token(token_type type, object *f);
 
         void add_token(token_type type);
 

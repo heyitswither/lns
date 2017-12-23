@@ -32,17 +32,17 @@ namespace lns {
 
         bool match(initializer_list<token_type> types);
 
-        token &advance();
+        token *advance();
 
-        token &previous();
+        token *previous();
 
         bool check(token_type tokenType);
 
-        token &peek();
+        token *peek();
 
         void synchronize();
 
-        token &consume(token_type type, const char message[]);
+        token *consume(token_type type, const char message[]);
 
         void use_not_allowed();
 
@@ -62,7 +62,7 @@ namespace lns {
 
         stmt *declaration();
 
-        int error(token &token, const char *message);
+        int error(token *token, const char *message);
 
         var_stmt *var_declaration(bool is_global, bool is_final);
 

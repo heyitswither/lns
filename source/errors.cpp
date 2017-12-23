@@ -19,11 +19,11 @@ void errors::parse_error(const char *&file, int line, const char *message) {
 void errors::runtime_error(lns::runtime_exception &error, std::vector<lns::stack_call *> &stack) {
     had_runtime_error = true;
     if (lns::silent_execution || lns::silent_full) return;
-    lns::token t = error.token;
-    auto *first = new lns::stack_call(t.filename, t.line, t.lexeme,error.native_throw);
+    lns::token *t = const_cast<token *>(error.token);
+    auto *first = new lns::stack_call(t->filename, t->line, t->lexeme,error.native_throw);
     string &stringstack = gen_stack_trace_desc(first, stack);
     cerr << RUNTIME_ERROR_S << " in file ";
-    cerr << t.filename << ":" << t.line;
+    cerr << t->filename << ":" << t->line;
     cerr << ": ";
     cerr << error.what();
     cerr << ".\n";

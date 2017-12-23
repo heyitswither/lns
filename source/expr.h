@@ -58,11 +58,11 @@ virtual object* visit_null_expr(null_expr *n) = 0;
 
 class increment_expr : public expr {
 public:
-increment_expr(const char* file,int line, token& name, expr* value) : name(name), value(value), expr(line, file, INCREMENT_EXPR_T) {}
+increment_expr(const char* file,int line, token* name, expr* value) : name(name), value(value), expr(line, file, INCREMENT_EXPR_T) {}
 object* accept(expr_visitor *v) override{
 return v->visit_increment_expr(this);
 }
-const token& name;
+const token* name;
 const expr* value;
 };
 
@@ -70,11 +70,11 @@ const expr* value;
 
 class decrement_expr : public expr {
 public:
-decrement_expr(const char* file,int line, token& name, expr* value) : name(name), value(value), expr(line, file, DECREMENT_EXPR_T) {}
+decrement_expr(const char* file,int line, token* name, expr* value) : name(name), value(value), expr(line, file, DECREMENT_EXPR_T) {}
 object* accept(expr_visitor *v) override{
 return v->visit_decrement_expr(this);
 }
-const token& name;
+const token* name;
 const expr* value;
 };
 
@@ -82,11 +82,11 @@ const expr* value;
 
 class assign_expr : public expr {
 public:
-assign_expr(const char* file,int line, token& name, token_type op, expr* value) : name(name), op(op), value(value), expr(line, file, ASSIGN_EXPR_T) {}
+assign_expr(const char* file,int line, token* name, token_type op, expr* value) : name(name), op(op), value(value), expr(line, file, ASSIGN_EXPR_T) {}
 object* accept(expr_visitor *v) override{
 return v->visit_assign_expr(this);
 }
-const token& name;
+const token* name;
 const token_type op;
 const expr* value;
 };
@@ -95,12 +95,12 @@ const expr* value;
 
 class binary_expr : public expr {
 public:
-binary_expr(const char* file,int line, expr* left, token& op, expr* right) : left(left), op(op), right(right), expr(line, file, BINARY_EXPR_T) {}
+binary_expr(const char* file,int line, expr* left, token* op, expr* right) : left(left), op(op), right(right), expr(line, file, BINARY_EXPR_T) {}
 object* accept(expr_visitor *v) override{
 return v->visit_binary_expr(this);
 }
 const expr* left;
-const token& op;
+const token* op;
 const expr* right;
 };
 
@@ -108,12 +108,12 @@ const expr* right;
 
 class call_expr : public expr {
 public:
-call_expr(const char* file,int line, expr* callee, token& paren, vector<expr*>& args) : callee(callee), paren(paren), args(args), expr(line, file, CALL_EXPR_T) {}
+call_expr(const char* file,int line, expr* callee, token* paren, vector<expr*>& args) : callee(callee), paren(paren), args(args), expr(line, file, CALL_EXPR_T) {}
 object* accept(expr_visitor *v) override{
 return v->visit_call_expr(this);
 }
 const expr* callee;
-const token& paren;
+const token* paren;
 const vector<expr*>& args;
 };
 
@@ -143,11 +143,11 @@ const object* value;
 
 class unary_expr : public expr {
 public:
-unary_expr(const char* file,int line, token& op, expr* right) : op(op), right(right), expr(line, file, UNARY_EXPR_T) {}
+unary_expr(const char* file,int line, token* op, expr* right) : op(op), right(right), expr(line, file, UNARY_EXPR_T) {}
 object* accept(expr_visitor *v) override{
 return v->visit_unary_expr(this);
 }
-const token& op;
+const token* op;
 const expr* right;
 };
 
@@ -155,22 +155,22 @@ const expr* right;
 
 class variable_expr : public expr {
 public:
-explicit variable_expr(const char* file,int line, token& name) : name(name), expr(line, file, VARIABLE_EXPR_T) {}
+explicit variable_expr(const char* file,int line, token* name) : name(name), expr(line, file, VARIABLE_EXPR_T) {}
 object* accept(expr_visitor *v) override{
 return v->visit_variable_expr(this);
 }
-const token& name;
+const token* name;
 };
 
 
 
 class sub_script_expr : public expr {
 public:
-sub_script_expr(const char* file,int line, token& where, expr* name, expr* key) : where(where), name(name), key(key), expr(line, file, SUB_SCRIPT_EXPR_T) {}
+sub_script_expr(const char* file,int line, token* where, expr* name, expr* key) : where(where), name(name), key(key), expr(line, file, SUB_SCRIPT_EXPR_T) {}
 object* accept(expr_visitor *v) override{
 return v->visit_sub_script_expr(this);
 }
-const token& where;
+const token* where;
 const expr* name;
 const expr* key;
 };
@@ -179,11 +179,11 @@ const expr* key;
 
 class sub_script_assign_expr : public expr {
 public:
-sub_script_assign_expr(const char* file,int line, token& where, expr* name, token_type op, expr* key, expr* value) : where(where), name(name), op(op), key(key), value(value), expr(line, file, SUB_SCRIPT_ASSIGN_EXPR_T) {}
+sub_script_assign_expr(const char* file,int line, token* where, expr* name, token_type op, expr* key, expr* value) : where(where), name(name), op(op), key(key), value(value), expr(line, file, SUB_SCRIPT_ASSIGN_EXPR_T) {}
 object* accept(expr_visitor *v) override{
 return v->visit_sub_script_assign_expr(this);
 }
-const token& where;
+const token* where;
 const expr* name;
 const token_type op;
 const expr* key;
@@ -194,25 +194,25 @@ const expr* value;
 
 class member_expr : public expr {
 public:
-member_expr(const char* file,int line, expr* container_name, token& member_identifier) : container_name(container_name), member_identifier(member_identifier), expr(line, file, MEMBER_EXPR_T) {}
+member_expr(const char* file,int line, expr* container_name, token* member_identifier) : container_name(container_name), member_identifier(member_identifier), expr(line, file, MEMBER_EXPR_T) {}
 object* accept(expr_visitor *v) override{
 return v->visit_member_expr(this);
 }
 const expr* container_name;
-const token& member_identifier;
+const token* member_identifier;
 };
 
 
 
 class member_assign_expr : public expr {
 public:
-member_assign_expr(const char* file,int line, expr* container_name, token_type op, token& member_identifier, expr* value) : container_name(container_name), op(op), member_identifier(member_identifier), value(value), expr(line, file, MEMBER_ASSIGN_EXPR_T) {}
+member_assign_expr(const char* file,int line, expr* container_name, token_type op, token* member_identifier, expr* value) : container_name(container_name), op(op), member_identifier(member_identifier), value(value), expr(line, file, MEMBER_ASSIGN_EXPR_T) {}
 object* accept(expr_visitor *v) override{
 return v->visit_member_assign_expr(this);
 }
 const expr* container_name;
 const token_type op;
-const token& member_identifier;
+const token* member_identifier;
 const expr* value;
 };
 
@@ -220,11 +220,11 @@ const expr* value;
 
 class array_expr : public expr {
 public:
-array_expr(const char* file,int line, token& open_brace, vector<pair<expr*,expr*>>& pairs) : open_brace(open_brace), pairs(pairs), expr(line, file, ARRAY_EXPR_T) {}
+array_expr(const char* file,int line, token* open_brace, vector<pair<expr*,expr*>>& pairs) : open_brace(open_brace), pairs(pairs), expr(line, file, ARRAY_EXPR_T) {}
 object* accept(expr_visitor *v) override{
 return v->visit_array_expr(this);
 }
-const token& open_brace;
+const token* open_brace;
 const vector<pair<expr*,expr*>>& pairs;
 };
 
@@ -232,11 +232,11 @@ const vector<pair<expr*,expr*>>& pairs;
 
 class null_expr : public expr {
 public:
-explicit null_expr(const char* file,int line, token& where) : where(where), expr(line, file, NULL_EXPR_T) {}
+explicit null_expr(const char* file,int line, token* where) : where(where), expr(line, file, NULL_EXPR_T) {}
 object* accept(expr_visitor *v) override{
 return v->visit_null_expr(this);
 }
-const token& where;
+const token* where;
 };
 
 

@@ -270,7 +270,7 @@ const bool array_o::contains_key(double s) {
     return values.find(s) != values.end();
 }
 
-token::token(token_type type, string lexeme, object &literal, const char *filename, int line) : type(type),
+token::token(token_type type, string lexeme, object *literal, const char *filename, int line) : type(type),
                                                                                                 lexeme(std::move(
                                                                                                         lexeme)),
                                                                                                 literal(literal),
@@ -280,7 +280,7 @@ token::token(token_type type, string lexeme, object &literal, const char *filena
 string token::format() const {
     stringstream ss;
     ss << "type: " << KEYWORDS_S_VALUES[type] << ", lexeme: " << lexeme << ", literal: |";
-    string str = literal.str();
+    string str = literal->str();
     ss << str;
     ss << "|, file: \"" << filename << "\", line:" << line;
     return *new string(ss.str());
@@ -289,7 +289,7 @@ string token::format() const {
 stack_call::stack_call(const char *filename, const int line, const string &method, const bool native) : filename(filename), line(line),
                                                                                      method(method) , native(native){}
 
-return_signal::return_signal(object *value, const token &keyword) : value(value), keyword(keyword) {}
+return_signal::return_signal(object *value, const token *keyword) : value(value), keyword(keyword) {}
 
 const char *lns::return_signal::what() const throw(){
     return exception::what();
@@ -299,9 +299,9 @@ const char *lns::break_signal::what() const throw(){
     return exception::what();
 }
 
-break_signal::break_signal(const token &keyword) : keyword(keyword) {}
+break_signal::break_signal(const token *keyword) : keyword(keyword) {}
 
-continue_signal::continue_signal(const token &keyword) : keyword(keyword) {}
+continue_signal::continue_signal(const token *keyword) : keyword(keyword) {}
 
 const char *continue_signal::what() const throw(){
     return exception::what();
@@ -339,23 +339,23 @@ lns::runtime_environment::runtime_environment() : enclosing(nullptr), values(*ne
 lns::runtime_environment::runtime_environment(runtime_environment *enc) : enclosing(enc),
                                                                           values(*new std::map<std::string, variable>) {}
 
-object *runtime_environment::get(const token &name) {
-    if (contains_key(name.lexeme)) {
-        variable s = values[name.lexeme];
+object *runtime_environment::get(const token *name) {
+    if (contains_key(name->lexeme)) {
+        variable s = values[name->lexeme];
         return s.value;
     }
     if (enclosing != nullptr) return enclosing->get(name);
     if (permissive) { return lns::GET_DEFAULT_NULL(); }
     string &s = *new string();
-    s += "'" + name.lexeme + "' is undefined";
+    s += "'" + name->lexeme + "' is undefined";
     throw runtime_exception(name, s);
 }
 
 
-void runtime_environment::define(const token &name, object *o, bool is_final, bool is_global) {
-    if (contains_key(name.lexeme)) {
+void runtime_environment::define(const token *name, object *o, bool is_final, bool is_global) {
+    if (contains_key(name->lexeme)) {
         string &s = *new string();
-        s += "variable " + name.lexeme + " is already defined";
+        s += "variable " + name->lexeme + " is already defined";
         throw runtime_exception(name, s);
     }
 
@@ -364,7 +364,7 @@ void runtime_environment::define(const token &name, object *o, bool is_final, bo
             return enclosing->define(name, o, is_final, is_global);
         }
     }
-    define(name.lexeme,o,is_final);
+    define(name->lexeme,o,is_final);
 }
 
 
@@ -372,19 +372,19 @@ object* lns::GET_DEFAULT_NULL() {
     return new null_o();
 }
 
-void runtime_environment::assign(const token &name, token_type op, object *obj) {
-    if (contains_key(name.lexeme)) {
-        if (values[name.lexeme].isfinal) {
+void runtime_environment::assign(const token *name, token_type op, object *obj) {
+    if (contains_key(name->lexeme)) {
+        if (values[name->lexeme].isfinal) {
             string &s = *new string();
-            s += "variable " + name.lexeme + " is final";
+            s += "variable " + name->lexeme + " is final";
             throw runtime_exception(name, s);
         }
         //values[name.lexeme]->isfinal = false;
         try {
-            variable v = values[name.lexeme];
+            variable v = values[name->lexeme];
             switch (op) {
                 case EQUAL:
-                    values[name.lexeme].value = obj;
+                    values[name->lexeme].value = obj;
                     break;
                 case PLUS_EQUALS:
                     *v.value += *obj;
@@ -409,7 +409,7 @@ void runtime_environment::assign(const token &name, token_type op, object *obj) 
     }
     if (permissive) { return define(name, obj, false, false); }
     string &s = *new string();
-    s += "undefined variable '" + name.lexeme + "'";
+    s += "undefined variable '" + name->lexeme + "'";
     throw runtime_exception(name, s);
 }
 
@@ -426,18 +426,18 @@ bool runtime_environment::is_valid_object_type(objtype objtype) {
     return false;
 }
 
-object *runtime_environment::assign_map_field(const token &name, const token_type op, number_o *key, object *value) {
-    if (contains_key(name.lexeme)) {
-        if (values[name.lexeme].isfinal) {
+object *runtime_environment::assign_map_field(const token *name, const token_type op, number_o *key, object *value) {
+    if (contains_key(name->lexeme)) {
+        if (values[name->lexeme].isfinal) {
             string &s = *new string();
-            s += "variable '" + name.lexeme + "' is final";
+            s += "variable '" + name->lexeme + "' is final";
             throw runtime_exception(name, s);
         }
-        variable o = values[name.lexeme];
+        variable o = values[name->lexeme];
         array_o *map;
         if ((map = dynamic_cast<array_o *>(o.value)) == nullptr) {
             string &s = *new string();
-            s += "variable '" + name.lexeme + "' is not a map";
+            s += "variable '" + name->lexeme + "' is not a map";
             throw runtime_exception(name, s);
         }
         try {
@@ -468,7 +468,7 @@ object *runtime_environment::assign_map_field(const token &name, const token_typ
     }
     if (permissive) { return lns::GET_DEFAULT_NULL(); }
     string &s = *new string();
-    s += "undefined variable '" + name.lexeme + "'";
+    s += "undefined variable '" + name->lexeme + "'";
     throw runtime_exception(name, s);
 }
 
@@ -476,17 +476,17 @@ bool runtime_environment::is_native(callable *ptr) {
     return natives.find(ptr) != natives.end();
 }
 
-object *runtime_environment::increment(const token &name) {
-    if (contains_key(name.lexeme)) {
-        variable s = values[name.lexeme];
+object *runtime_environment::increment(const token *name) {
+    if (contains_key(name->lexeme)) {
+        variable s = values[name->lexeme];
         if (s.isfinal) {
             string &s = *new string();
-            s += "variable '" + name.lexeme + "' is final";
+            s += "variable '" + name->lexeme + "' is final";
             throw runtime_exception(name, s);
         }
         if (s.value->type != NUMBER_T) {
             string &s = *new string();
-            s += "variable '" + name.lexeme + "' is not a number";
+            s += "variable '" + name->lexeme + "' is not a number";
             throw runtime_exception(name, s);
         }
         number_o *n = dynamic_cast<number_o *>(s.value);
@@ -496,21 +496,21 @@ object *runtime_environment::increment(const token &name) {
     if (enclosing != nullptr) return enclosing->increment(name);
     if (permissive) { return lns::GET_DEFAULT_NULL(); }
     string &s = *new string();
-    s += "'" + name.lexeme + "' is undefined";
+    s += "'" + name->lexeme + "' is undefined";
     throw runtime_exception(name, s);
 }
 
-object *runtime_environment::decrement(const token &name) {
-    if (contains_key(name.lexeme)) {
-        variable s = values[name.lexeme];
+object *runtime_environment::decrement(const token *name) {
+    if (contains_key(name->lexeme)) {
+        variable s = values[name->lexeme];
         if (s.isfinal) {
             string &s = *new string();
-            s += "variable '" + name.lexeme + "' is final";
+            s += "variable '" + name->lexeme + "' is final";
             throw runtime_exception(name, s);
         }
         if (s.value->type != NUMBER_T) {
             string &s = *new string();
-            s += "variable '" + name.lexeme + "' is not a number";
+            s += "variable '" + name->lexeme + "' is not a number";
             throw runtime_exception(name, s);
         }
         number_o *n = dynamic_cast<number_o *>(s.value);
@@ -520,7 +520,7 @@ object *runtime_environment::decrement(const token &name) {
     if (enclosing != nullptr) return enclosing->increment(name);
     if (lns::permissive) { return lns::GET_DEFAULT_NULL(); }
     string &s = *new string();
-    s += "'" + name.lexeme + "' is undefined";
+    s += "'" + name->lexeme + "' is undefined";
     throw lns::runtime_exception(name, s);
 }
 
@@ -541,8 +541,8 @@ void runtime_environment::add_native(callable *ptr) {
     this->natives.insert(ptr);
 }
 
-bool runtime_environment::clear_var(const token &name) {
-    return this->values.erase(name.lexeme) != 0;
+bool runtime_environment::clear_var(const token *name) {
+    return this->values.erase(name->lexeme) != 0;
 }
 
 variable::variable() : value(new null_o()), isfinal(false) {}
@@ -555,13 +555,13 @@ const variable& variable::operator=(const variable &v) {
 variable::variable(const bool isfinal, object *value) : isfinal(isfinal), value(value) {}
 
 
-lns::runtime_exception::runtime_exception(const lns::token &token, string &m) : native_throw(false),message(m), token(token) {}
+lns::runtime_exception::runtime_exception(const lns::token *token, string &m) : native_throw(false),message(m), token(token) {}
 
 const char *lns::runtime_exception::what() const throw(){
     return message.c_str();
 }
 
-runtime_exception::runtime_exception(const char* filename, int line, string& message) : native_throw(true), message(message), token(*new lns::token(UNRECOGNIZED,STR(""),*new null_o(),filename,line)){}
+runtime_exception::runtime_exception(const char* filename, int line, string& message) : native_throw(true), message(message), token(new lns::token(UNRECOGNIZED,STR(""),new null_o(),filename,line)){}
 const char *lns::best_file_path(const char *filename) {
     ifstream rel_file(filename);
     auto buf = (char*) malloc(1024 * sizeof(char));
@@ -624,7 +624,7 @@ const char *lns::type_to_string(object_type t) {
 
 function_container::function_container(objtype type) : object(type) {}
 
-incode_exception::incode_exception(const lns::token &token, const std::string &name,
+incode_exception::incode_exception(const lns::token *token, const std::string &name,
                                    const std::map<std::string, lns::object *> &fields) : lns::runtime_exception(token,
                                                                                                                 const_cast<string &>(name)), lns::object(EXCEPTION_T), fields(fields), calls_bypassed(0) {}
 

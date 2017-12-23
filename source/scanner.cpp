@@ -54,9 +54,7 @@ scanner::scanner(const char *filename, std::string &source) : source(source), st
 }
 
 void scanner::add_eof() {
-
-    object &o = *new null_o();
-    token *eof = new token(EOF_, "", o, filename, line + 1);
+    token *eof = new token(EOF_, "", nullptr, filename, line + 1);
     tokens.push_back(eof);
 }
 
@@ -100,7 +98,7 @@ void scanner::number() {
     double value;
     stringstream ss(lexeme);
     ss >> value;
-    number_o &n = *new number_o(value);
+    number_o *n = new number_o(value);
     add_token(type, n);
 }
 
@@ -216,15 +214,14 @@ void scanner::scan_token() {
     }
 }
 
-void scanner::add_token(token_type type, object &f) {
+void scanner::add_token(token_type type, object *f) {
     std::string text = source.substr(start, current - start);
     token *t = new token(type, text.c_str(), f, filename, line);
     tokens.push_back(t);
 }
 
 void scanner::add_token(token_type type) {
-    object &obj = *new null_o();
-    add_token(type, obj);
+    add_token(type, nullptr);
 }
 
 bool scanner::match(char expected) {
@@ -293,7 +290,7 @@ void scanner::string_() {
         return;
     }
     advance();
-    add_token(STRING, *new string_o(s));
+    add_token(STRING, new string_o(s));
 }
 
 
