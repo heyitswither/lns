@@ -110,7 +110,8 @@ namespace lns {
         EOF_
     };
     enum objtype {
-        NUMBER_T, STRING_T, BOOL_T, NULL_T, ARRAY_T, CALLABLE_T, NATIVE_CALLABLE_T, CONTEXT_T, EXCEPTION_T
+        NUMBER_T, STRING_T, BOOL_T, NULL_T, ARRAY_T, CALLABLE_T, NATIVE_CALLABLE_T, CONTEXT_T, EXCEPTION_T,
+        EXCEPTION_DEFINITION_T, CLASS_DEFINITION_T, OBJECT_T
     };
     typedef objtype object_type;
 
@@ -489,6 +490,22 @@ namespace lns {
     const inline bool ISFUNCTR(const object * o){
         return dynamic_cast<const function_container*>(o) == nullptr;
     }
+
+    class exception_definition : public object{
+    public:
+        const std::string &name;
+        const std::set<std::string>& fields;
+        const char* def_file;
+        int def_line;
+        exception_definition(const char* def_file, int def_line, const std::string& name, const std::set<std::string>& fields);
+
+        std::string str() const override;
+
+        bool operator==(const object &o) const override;
+
+        object *clone() const override;
+    };
+
 }
 
 #endif //CPPLNS_DEFS_H

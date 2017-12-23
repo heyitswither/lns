@@ -616,6 +616,8 @@ const char *lns::type_to_string(object_type t) {
         case ARRAY_T:return "array";
         case CALLABLE_T:return "callable";
         case CONTEXT_T:return "context";
+        case NATIVE_CALLABLE_T: return "native_callable";
+        case EXCEPTION_T: return "exception";
     }
     return "unknown";
 }
@@ -656,4 +658,23 @@ const char *incode_exception::what() const throw() {
         s += "\")";
     }
     return s.c_str();
+}
+
+lns::exception_definition::exception_definition(const char * file, int line, const std::string &name, const std::set<std::string> &fields) : object(EXCEPTION_DEFINITION_T), name(name), fields(fields), def_file(file), def_line(line){}
+
+string exception_definition::str() const {
+    stringstream s;
+    s << "<exception_definition@" << static_cast<const void *>(this) << ", name: \"" << name << "\">";
+    return s.str();
+}
+
+bool exception_definition::operator==(const object &o) const {
+    if(o.type != EXCEPTION_DEFINITION_T) return false;
+    const exception_definition *e;
+    if(DCAST_ASNCHK(e,const exception_definition *,&o)) return this->def_file == e->def_file && this->def_line == e->def_line;
+    return false;
+}
+
+object *exception_definition::clone() const {
+    return nullptr;
 }
