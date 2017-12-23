@@ -20,17 +20,17 @@ object *interpreter::evaluate(expr *e) {
     return o == nullptr ? lns::GET_DEFAULT_NULL() : o;
 }
 
-void interpreter::check_bool_operands(const token &op, object *left, object *right) {
+void interpreter::check_bool_operands(const token *op, object *left, object *right) {
     if (left->type == BOOL_T && right->type == BOOL_T) return;
     throw runtime_exception(op, *new string("operands must be booleans"));
 }
 
-void interpreter::check_number_operands(const token &op, object *left, object *right) {
+void interpreter::check_number_operands(const token *op, object *left, object *right) {
     if (left->type == NUMBER_T && right->type == NUMBER_T) return;
     throw runtime_exception(op, *new string("operands must be numbers"));
 }
 
-void interpreter::check_number_operand(const token &token, object *o) {
+void interpreter::check_number_operand(const token *token, object *o) {
     if (o->type == NUMBER_T)return;
     throw runtime_exception(token, *new string("operand must be a number"));
 }
@@ -64,10 +64,12 @@ object *interpreter::visit_member_expr(member_expr *c) {
     if (o->type == CONTEXT_T) {
         return DCAST(context*,o)->get(c->member_identifier);
     }else if(o->type == EXCEPTION_T){
-        object* o2 = DCAST(incode_exception*,o)->get(const_cast<string&>(c->member_identifier.lexeme));
+        auto DCAST_ASN(cast,incode_exception*,o);
+        object* o2 = cast->get(const_cast<string&>(c->member_identifier->lexeme));
+        if(o2 == nullptr) throw runtime_exception(c->member_identifier,STR(string("exception \"") + cast->message + "\" has no member named \"" + c->member_identifier->lexeme + "\""));
         return o2;
     }
-    throw runtime_exception(c->member_identifier, *new string("object is not a context"));
+    throw runtime_exception(c->member_identifier, *new string("object is not a container"));
 }
 
 object *interpreter::visit_member_assign_expr(member_assign_expr *c) {
@@ -81,7 +83,7 @@ object *interpreter::visit_member_assign_expr(member_assign_expr *c) {
 }
 
 object *interpreter::visit_increment_expr(increment_expr *i) {
-    return environment->increment(i->name);;
+    return environment->increment(i->name);
 }
 
 object *interpreter::visit_decrement_expr(decrement_expr *d) {
@@ -102,7 +104,7 @@ object *interpreter::visit_binary_expr(binary_expr *b) {
     if (right == nullptr) {
         right = lns::GET_DEFAULT_NULL();
     }
-    token_type type = b->op.type;
+    token_type type = b->op->type;
     try {
         switch (type) {
             case AND:
@@ -165,7 +167,7 @@ object *interpreter::visit_call_expr(call_expr *c) {
         throw runtime_exception(c->paren, *new string(s.c_str()));
     }
     stack_trace.push_back(
-            new stack_call(c->paren.filename, c->paren.line, function->name(), globals->is_native(function)));
+            new stack_call(c->paren->filename, c->paren->line, function->name(), globals->is_native(function)));
     object * p;
     try{
         p = function->call(args);
@@ -188,7 +190,7 @@ object *interpreter::visit_literal_expr(literal_expr *l) {
 object *interpreter::visit_unary_expr(unary_expr *u) {//
     object *right = evaluate(const_cast<expr *>(u->right));
     try {
-        switch (u->op.type) {
+        switch (u->op->type) {
             case NOT:
                 return new bool_o(is_bool_true_eq(!*right));
             case MINUS:
@@ -210,7 +212,7 @@ object *interpreter::visit_sub_script_expr(sub_script_expr *m) {
     object *key = evaluate(const_cast<expr *>(m->key));
     object *eval = evaluate(const_cast<expr *>(m->name));
     if (eval->type == ARRAY_T) {
-        return get_map_field(const_cast<token &>(m->where), eval, key);
+        return get_map_field(const_cast<token *>(m->where), eval, key);
     } else if (eval->type == STRING_T) {
         string evstring = eval->str();
         if (key->type != NUMBER_T)
@@ -225,7 +227,7 @@ object *interpreter::visit_sub_script_expr(sub_script_expr *m) {
     }
 }
 
-object *lns::interpreter::get_map_field(token &where, object *obj, object *key) {
+object *lns::interpreter::get_map_field(token *where, object *obj, object *key) {
     auto DCAST_ASN(map,array_o*,obj);
     if(key->type != NUMBER_T) throw runtime_exception(where, *new string("given key is not a number"));
     auto DCAST_ASN(nr,number_o*,key);
@@ -233,7 +235,7 @@ object *lns::interpreter::get_map_field(token &where, object *obj, object *key) 
     return map->values[nr->value];
 }
 
-object *interpreter::assign_map_field(const token &where, object *obj, const token_type op, number_o *key, object *v) {
+object *interpreter::assign_map_field(const token *where, object *obj, const token_type op, number_o *key, object *v) {
     array_o *map;
     if ((map = dynamic_cast<array_o *>(obj)) == nullptr) {
         throw runtime_exception(where, *new string("object is not an array"));
@@ -325,7 +327,7 @@ void interpreter::visit_expression_stmt(expression_stmt *e) {
 
 void interpreter::visit_function_stmt(function_stmt *f) {
     callable *func = new function(this, f);
-    environment->define(const_cast<token &>(f->name), func, true, f->isglobal);
+    environment->define(const_cast<token *>(f->name), func, true, f->isglobal);
 }
 
 void interpreter::visit_if_stmt(if_stmt *i) {
@@ -357,9 +359,9 @@ void interpreter::visit_continue_stmt(continue_stmt *c) {
 void interpreter::visit_var_stmt(var_stmt *v) {
     if (v->initializer.type != NULL_STMT_T) {
         object* val = evaluate(const_cast<expr *>(&v->initializer));
-        environment->define(const_cast<token &>(v->name), clone_or_keep(val,v->initializer.type,v->name), v->isfinal, v->isglobal);
+        environment->define(const_cast<token *>(v->name), clone_or_keep(val,v->initializer.type,v->name), v->isfinal, v->isglobal);
     }else{
-        environment->define(const_cast<token &>(v->name), new null_o, v->isfinal, v->isglobal);
+        environment->define(const_cast<token *>(v->name), new null_o, v->isfinal, v->isglobal);
     }
 }
 
@@ -441,7 +443,7 @@ void interpreter::interpret(vector<stmt *> &statements) {
     if(errors::had_runtime_error && !lns::prompt) std::exit(errors::exit_status);
 }
 
-object *interpreter::clone_or_keep(object *obj, const expr_type type, const token &where) {
+object *interpreter::clone_or_keep(object *obj, const expr_type type, const token *where) {
     switch(type){
         case INCREMENT_EXPR_T:
         case DECREMENT_EXPR_T:
@@ -477,7 +479,7 @@ object *interpreter::visit_array_expr(array_expr *a) {
 
 void interpreter::visit_exception_decl_stmt(exception_decl_stmt *e) {
     try{
-        environment->define(e->name,new exception_definition(e->file,e->line,e->name.lexeme,e->identifiers),true,e->is_global);
+        environment->define(e->name,new exception_definition(e->file,e->line,e->name->lexeme,e->identifiers),true,e->is_global);
     }catch(exception_definition& ptr){
         string& s = *new string();
         s += "exception previously defined at ";
@@ -526,7 +528,7 @@ void interpreter::visit_begin_handle_stmt(begin_handle_stmt *b) {
                 for(int i = 0; i < e.calls_bypassed; i++)
                     stack_trace.pop_back();
                 runtime_environment* env = new runtime_environment(environment);
-                if(handle->bind.type != UNRECOGNIZED) env->define(handle->bind,&e,true,false);
+                if(handle->bind->type != UNRECOGNIZED) env->define(handle->bind,&e,true,false);
                 execute_block(handle->block,env);
                 break;
             }
@@ -543,7 +545,7 @@ object *lns::function::call(vector<object *> &args) {
     runtime_environment *env = new runtime_environment(retr_globals(i));
     int j;
     for (j = 0; j < declaration->parameters.size(); j++) {
-        env->define(const_cast<token &>(declaration->parameters.at(j)), args.at(j), false, false);
+        env->define(const_cast<token *>(declaration->parameters.at(j)), args.at(j), false, false);
     }
     try {
         i->execute_block(declaration->body, env);
@@ -554,7 +556,7 @@ object *lns::function::call(vector<object *> &args) {
 }
 
 const string &lns::function::name() const {
-    return declaration->name.lexeme;
+    return declaration->name->lexeme;
 }
 
 string lns::function::str() const {

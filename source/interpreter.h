@@ -38,11 +38,11 @@ namespace lns {
         expr_visitor *dev;
 
 
-        void check_bool_operands(const token &op, object *left, object *right);
+        void check_bool_operands(const token *op, object *left, object *right);
 
-        void check_number_operands(const token &op, object *left, object *right);
+        void check_number_operands(const token *op, object *left, object *right);
 
-        void check_number_operand(const token &token, object *o);
+        void check_number_operand(const token *token, object *o);
 
 
     public:
@@ -81,11 +81,11 @@ namespace lns {
 
         object *visit_variable_expr(variable_expr *v) override; //
 
-        object *get_map_field(token &where, object *obj, object *key);
+        object *get_map_field(token *where, object *obj, object *key);
 
         object *visit_sub_script_expr(sub_script_expr *m) override; //
 
-        object *assign_map_field(const token &where, object *obj, const token_type op, number_o* key, object *value);
+        object *assign_map_field(const token *where, object *obj, const token_type op, number_o* key, object *value);
 
         object *visit_sub_script_assign_expr(sub_script_assign_expr *a) override;//
 
@@ -123,7 +123,7 @@ namespace lns {
 
         void interpret(vector<stmt *> &statements);
 
-        object *clone_or_keep(object *obj, const expr_type type, const token &where);
+        object *clone_or_keep(object *obj, const expr_type type, const token *where);
 
         void visit_exception_decl_stmt(exception_decl_stmt *e) override;
 
