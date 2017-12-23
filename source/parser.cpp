@@ -48,6 +48,9 @@ void parser::synchronize() {
             case WHILE:
             case RETURN:
             case CONTEXT:
+            case BEGIN:
+            case EXCEPTION:
+            case RAISE:
                 return;
             default:
                 break;
@@ -86,7 +89,7 @@ vector<stmt *> &parser::context_block() {
     vector<stmt *> &stmts = *new vector<stmt *>();
     while (!check(END) && !is_at_end()) {
         s = declaration();
-        if (s->type == CONTEXT_STMT_T || s->type == VAR_STMT_T || s->type == FUNCTION_STMT_T) {
+        if (s->type == CONTEXT_STMT_T || s->type == VAR_STMT_T || s->type == FUNCTION_STMT_T || s->type == EXCEPTION_DECL_STMT_T) {
             stmts.push_back(s);
             continue;
         }
@@ -157,14 +160,14 @@ stmt *parser::declaration() {
             is_global = previous().type == GLOBAL;
             is_final = previous().type == FINAL;
         }
+        if (match({EXCEPTION})){
+            if (is_final) if (!permissive) throw error(peek(),"keyword 'final' is not allowed for " "exception declaration" " (--permissive)");
+            return exception_(is_global);
+        }
         if (match({CONTEXT})) return context_declaration(is_global, is_final);
         if (match({VAR})) return var_declaration(is_global, is_final);
         if (match({FUNCTION})) {
-            if (is_final) {
-                if (!permissive)
-                    throw error(peek(),
-                                "functions are unchangeable by definition: keyword 'final' is redundant (--permissive)");
-            }
+            if (is_final) if (!permissive) throw error(peek(),"keyword 'final' is not allowed for " "functions" " (--permissive)");
             return function(is_global);
         }
         return statement();
@@ -196,7 +199,6 @@ stmt *parser::statement() {
     if (match({BREAK})) return break_statement();
     if (match({CONTINUE})) return continue_statement();
     if (match({RAISE})) return raise();
-    if (match({EXCEPTION})) return exception_();
     if (match({WHILE})) return while_statement();
     if (match({FOR})) return for_statement();
     if (match({FOREACH})) return foreach_statement();
@@ -208,7 +210,7 @@ stmt *parser::statement() {
 
 stmt *parser::raise() {
     token &raise = previous();
-    token &name = consume(IDENTIFIER, "expected exception name");
+    expr* name = expression(true);
     if (match({WITH})) {
         map<string, expr *> &v = *new map<string, expr *>();
         do {
@@ -217,9 +219,9 @@ stmt *parser::raise() {
             expr *val = expression(true);
             v[vname.lexeme] = val;
         } while (match({COMMA}));
-        return new raise_stmt(name.filename, name.line, raise, name, v);
+        return new raise_stmt(name->file, name->line, raise, name, v);
     }
-    return new raise_stmt(name.filename, name.line, raise, name, *new map<string, expr *>());
+    return new raise_stmt(name->file, name->line, raise, name, *new map<string, expr *>());
 }
 
 
@@ -595,7 +597,7 @@ void parser::ld_stmts(string &s) {
     }
 }
 
-stmt *parser::exception_() {
+stmt *parser::exception_(bool is_global) {
     token &name = consume(IDENTIFIER, "expected exception name");
     if (match({WITH})) {
         set<string> &tokens = *new set<string>();
@@ -604,9 +606,9 @@ stmt *parser::exception_() {
             tokens.insert(t.lexeme);
         } while (match({COMMA}));
 
-        return new exception_decl_stmt(name.filename, name.line, name, tokens);
+        return new exception_decl_stmt(name.filename, name.line, name, tokens,is_global);
     }
-    return new exception_decl_stmt(name.filename, name.line, name, *new set<string>());
+    return new exception_decl_stmt(name.filename, name.line, name, *new set<string>(), is_global);
 }
 
 stmt *parser::begin_handle_statement() {
@@ -616,8 +618,8 @@ stmt *parser::begin_handle_statement() {
     int last_line = 0;
     do {
         if (peek().type == END) break;
-        token &e_iden = consume(IDENTIFIER, "expected exception identifier");
-        token *name = new token(UNRECOGNIZED, string(), *new null_o(), e_iden.filename, e_iden.line);
+        expr *e_iden = expression(true);
+        token *name = new token(UNRECOGNIZED, string(), *new null_o(), e_iden->file, e_iden->line);
         if (match({BIND}))
             name = &consume(IDENTIFIER, "expected variable name after 'bind'");
         vector<stmt *>& hstmts = *new vector<stmt *>();

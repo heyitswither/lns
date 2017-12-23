@@ -44,10 +44,10 @@ public class generate {
                 "s_while    : expr& condition, stmt* body",
                 "s_for      : stmt* init, expr* condition, expr* increment, stmt* body",
                 "s_for_each : token& identifier, expr* container, stmt* body",
-                "exception_decl : token& name, set<string>& identifiers",
-                "raise      : token& where, token& name, map<string,expr*>& fields",
+                "exception_decl : token& name, set<string>& identifiers, bool is_global",
+                "raise      : token& where, expr* name, map<string,expr*>& fields",
                 "uses_native : token& where, string& lib_name, token& bind",
-                "handle     :  token& exception_name, token& bind, vector<stmt*>& block",
+                "handle     :  expr* exception_name, token& bind, vector<stmt*>& block",
                 "begin_handle : vector<stmt*>& body, vector<handle_stmt*> handles",
                 "null       : token& where"
         ), Arrays.asList("\"expr.h\"","<memory>"), "void");

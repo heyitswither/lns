@@ -12,7 +12,6 @@
 #include <cmath>
 #include <ctime>
 #include "exceptions.h"
-#include "exception_manager.h"
 #include <string>
 #include <chrono>
 #include <thread>
@@ -51,8 +50,6 @@ namespace lns {
 
         runtime_environment *globals = new runtime_environment();
         runtime_environment *environment = globals;
-        lns::exception_manager * exception_manager;
-
 
         void execute_block(vector<stmt *> stmts, runtime_environment *env);
 

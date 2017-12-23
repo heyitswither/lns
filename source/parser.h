@@ -125,7 +125,7 @@ namespace lns {
 
         stmt *foreach_statement();
 
-        stmt *exception_();
+        stmt *exception_(bool is_global);
 
         stmt *raise();
 

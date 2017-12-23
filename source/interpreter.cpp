@@ -412,7 +412,7 @@ void interpreter::visit_context_stmt(context_stmt *c) {
     environment->define(c->name, ctx, c->is_global, c->isfinal);
 }
 
-interpreter::interpreter() : stack_trace(*new vector<stack_call *>()) , exception_manager(new lns::exception_manager()) {
+interpreter::interpreter() : stack_trace(*new vector<stack_call *>()){
     dsv = new default_stmt_visitor();
     dev = new default_expr_visitor();
 }
@@ -477,7 +477,7 @@ object *interpreter::visit_array_expr(array_expr *a) {
 
 void interpreter::visit_exception_decl_stmt(exception_decl_stmt *e) {
     try{
-        exception_manager->define(new exception_definition(e->file,e->line,e->name.lexeme,e->identifiers));
+        environment->define(e->name,new exception_definition(e->file,e->line,e->name.lexeme,e->identifiers),true,e->is_global);
     }catch(exception_definition& ptr){
         string& s = *new string();
         s += "exception previously defined at ";
@@ -490,22 +490,22 @@ void interpreter::visit_exception_decl_stmt(exception_decl_stmt *e) {
 
 void interpreter::visit_raise_stmt(raise_stmt *r) {
     exception_definition* exc;
-    if((exc = exception_manager->get(r->name.lexeme)) == nullptr){
+    if((exc = dynamic_cast<exception_definition*>(evaluate(const_cast<expr *>(r->name)))) == nullptr){
         string &s = *new string();
-        s += "exception '" + r->name.lexeme + "' is undefined";
-        throw runtime_exception(r->name,s);
+        s += "expression is not an exception";
+        throw runtime_exception(r->where,s);
     }
     map<string,object*> fields = *new map<string,object*>();
     for(auto& pair : r->fields)
         if(exc->fields.find(pair.first) == exc->fields.end())
-            throw runtime_exception(r->name,STR(string("exception \"") + r->name.lexeme + "\" has no field named \"" + pair.first + "\""));
+            throw runtime_exception(r->where,STR(string("exception \"") + exc->name + "\" has no field named \"" + pair.first + "\""));
         else
             fields.insert(*new std::pair<string,object*>(pair.first,evaluate(pair.second)));
 
     for(auto& key : exc->fields)
         if(fields.find(key) == fields.end()) fields[key] = new null_o;
 
-    throw *new incode_exception(r->where,r->name.lexeme,fields);
+    throw *new incode_exception(r->where,exc->name,fields);
 }
 
 void interpreter::visit_handle_stmt(handle_stmt *h) {} //this should remain empty
@@ -515,13 +515,13 @@ void interpreter::visit_begin_handle_stmt(begin_handle_stmt *b) {
         execute_block(b->body,new runtime_environment(environment));
     }catch(incode_exception& e){
         bool found = false;
+        exception_definition *def;
         for(auto& handle : b->handles){
-            if(exception_manager->get(handle->exception_name.lexeme) == nullptr && !lns::permissive){
-                string &s = *new string();
-                s += "exception '" + handle->exception_name.lexeme + "' is undefined";
-                throw runtime_exception(handle->exception_name,s);
+            if((DCAST_ASN(def,exception_definition*,evaluate(const_cast<expr*>(handle->exception_name)))) == nullptr){
+                throw runtime_exception(handle->bind,
+                                        *new string("cannot handle a non-exception object"));
             }
-            if(handle->exception_name.lexeme == e.message) {
+            if(def->name == e.message) {
                 found = true;
                 for(int i = 0; i < e.calls_bypassed; i++)
                     stack_trace.pop_back();

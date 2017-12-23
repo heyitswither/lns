@@ -215,24 +215,25 @@ const stmt* body;
 
 class exception_decl_stmt : public stmt {
 public:
-exception_decl_stmt(const char* file,int line, token& name, set<string>& identifiers) : name(name), identifiers(identifiers), stmt(line, file, EXCEPTION_DECL_STMT_T) {}
+exception_decl_stmt(const char* file,int line, token& name, set<string>& identifiers, bool is_global) : name(name), identifiers(identifiers), is_global(is_global), stmt(line, file, EXCEPTION_DECL_STMT_T) {}
 void accept(stmt_visitor *v) override{
 v->visit_exception_decl_stmt(this);
 }
 const token& name;
 const set<string>& identifiers;
+const bool is_global;
 };
 
 
 
 class raise_stmt : public stmt {
 public:
-raise_stmt(const char* file,int line, token& where, token& name, map<string,expr*>& fields) : where(where), name(name), fields(fields), stmt(line, file, RAISE_STMT_T) {}
+raise_stmt(const char* file,int line, token& where, expr* name, map<string,expr*>& fields) : where(where), name(name), fields(fields), stmt(line, file, RAISE_STMT_T) {}
 void accept(stmt_visitor *v) override{
 v->visit_raise_stmt(this);
 }
 const token& where;
-const token& name;
+const expr* name;
 const map<string,expr*>& fields;
 };
 
@@ -253,11 +254,11 @@ const token& bind;
 
 class handle_stmt : public stmt {
 public:
-handle_stmt(const char* file,int line, token& exception_name, token& bind, vector<stmt*>& block) : exception_name(exception_name), bind(bind), block(block), stmt(line, file, HANDLE_STMT_T) {}
+handle_stmt(const char* file,int line, expr* exception_name, token& bind, vector<stmt*>& block) : exception_name(exception_name), bind(bind), block(block), stmt(line, file, HANDLE_STMT_T) {}
 void accept(stmt_visitor *v) override{
 v->visit_handle_stmt(this);
 }
-const token& exception_name;
+const expr* exception_name;
 const token& bind;
 const vector<stmt*>& block;
 };
