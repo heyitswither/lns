@@ -2,6 +2,8 @@
 // Created by lorenzo on 11/30/17.
 //
 #include "exceptions.h"
+
+#define CMD_USAGE "- lns [script] [options...]"
 using namespace std;
 const char *lns::createDescription(string s) {
     s.append("\n");
@@ -25,7 +27,7 @@ const char *lns::memory_leak_exception::what() const throw(){
 
 const char *lns::wrong_usage_exception::what() const throw(){
     return createDescription(
-            FATAL_ERROR_S ": wrong usage. Usage:\n        - lns [script] [-p|q-s|-S|--permissive|-t|-o]");
+            FATAL_ERROR_S ": wrong usage. Usage:\n        " CMD_USAGE);
 }
 
 lns::file_not_found_exception::file_not_found_exception(string f) : filename(f) {}
