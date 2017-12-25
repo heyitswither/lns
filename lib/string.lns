@@ -24,7 +24,7 @@ context string
     end
 
     function sub2(s,start,end_)
-        if not ((type(s) == STRING) and (type(start) == NUMBER) and (type(end_) == NUMBER)) then return null end
+        if not ((type(s) == String) and (type(start) == Number) and (type(end_) == Number)) then return null end
         var todo = String.length(s) - end_
         if todo < 0 then return null end
         var s_ = ""
@@ -32,5 +32,21 @@ context string
             s_ += s[i + index]
         end
         return s_
+    end
+
+    function format(base, format)
+        if type(format) != Array then return null end
+        if type(base) != String then return null end
+
+        var length = String.length(base)
+        var sub
+
+        for var i = 0, i < length, i++ do
+            if base[i] == "{" then
+
+            else
+
+            end
+        end
     end
 end

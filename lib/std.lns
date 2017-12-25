@@ -5,11 +5,10 @@ use natives "natives/std_type.so" bind type
 use natives "natives/std_exit.so" bind exitc
 use natives "natives/std_array.so" bind array
 
-
 global final var Number = "number"
 global final var String = "string"
 global final var Boolean = "boolean"
-global final var Map = "array"
+global final var Array = "array"
 global final var Callable = "callable"
 global final var Context = "context"
 

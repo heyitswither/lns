@@ -242,20 +242,20 @@ public:
 
 object* gen(){
     context* ctx = new context(nullptr);
-    ctx->define(S(log10),new log10_c, true);
-    ctx->define(S(log2),new log2_c, true);
-    ctx->define(S(ln),new ln_c, true);
-    ctx->define(S(sin),new sin_c, true);
-    ctx->define(S(cos),new cos_c, true);
-    ctx->define(S(tan),new tan_c, true);
-    ctx->define(S(asin),new asin_c, true);
-    ctx->define(S(acos),new acos_c, true);
-    ctx->define(S(atan),new atan_c, true);
-    ctx->define(S(sqrt),new sqrt_c, true);
-    ctx->define(S(cbrt),new cbrt_c, true);
-    ctx->define(S(ceil),new ceil_c, true);
-    ctx->define(S(floor),new floor_c, true);
-    ctx->define(S(parse),new parse_c, true);
+    ctx->define(S(log10),new log10_c, true, visibility::V_GLOBAL, __FILE__);
+    ctx->define(S(log2),new log2_c, true, visibility::V_GLOBAL, __FILE__);
+    ctx->define(S(ln),new ln_c, true, visibility::V_GLOBAL, __FILE__);
+    ctx->define(S(sin),new sin_c, true, visibility::V_GLOBAL, __FILE__);
+    ctx->define(S(cos),new cos_c, true, visibility::V_GLOBAL, __FILE__);
+    ctx->define(S(tan),new tan_c, true, visibility::V_GLOBAL, __FILE__);
+    ctx->define(S(asin),new asin_c, true, visibility::V_GLOBAL, __FILE__);
+    ctx->define(S(acos),new acos_c, true, visibility::V_GLOBAL, __FILE__);
+    ctx->define(S(atan),new atan_c, true, visibility::V_GLOBAL, __FILE__);
+    ctx->define(S(sqrt),new sqrt_c, true, visibility::V_GLOBAL, __FILE__);
+    ctx->define(S(cbrt),new cbrt_c, true, visibility::V_GLOBAL, __FILE__);
+    ctx->define(S(ceil),new ceil_c, true, visibility::V_GLOBAL, __FILE__);
+    ctx->define(S(floor),new floor_c, true, visibility::V_GLOBAL, __FILE__);
+    ctx->define(S(parse),new parse_c, true, visibility::V_GLOBAL, __FILE__);
     return ctx;
 }
 
