@@ -116,6 +116,9 @@ namespace lns {
         EXCEPTION_DEFINITION_T, CLASS_DEFINITION_T, OBJECT_T
     };
 
+    enum operator_location{
+        POSTFIX, PREFIX
+    };
 
     enum visibility{
         V_GLOBAL, V_LOCAL, V_UNSPECIFIED
@@ -186,6 +189,10 @@ namespace lns {
         virtual object *operator++(){ WRONG_OP_UN(++) };
 
         virtual object *operator--(){ WRONG_OP_UN(--) };
+
+        virtual object *operator++(int){ WRONG_OP_UN(++) };
+
+        virtual object *operator--(int){ WRONG_OP_UN(--) };
 
         virtual object *clone() const = 0;
     };
@@ -262,6 +269,10 @@ namespace lns {
         object *operator++() override;
 
         object *operator--() override;
+
+        object *operator++(int) override;
+
+        object *operator--(int) override;
 
         object *clone() const;
     };
