@@ -54,7 +54,7 @@ namespace lns {
 
         vector<stmt *> &block();
 
-        stmt *context_declaration(bool global, bool final);
+        stmt *context_declaration(visibility vis, bool final);
 
         bool check_file(const char *str);
 
@@ -64,7 +64,7 @@ namespace lns {
 
         int error(token *token, const char *message);
 
-        var_stmt *var_declaration(bool is_global, bool is_final);
+        var_stmt *var_declaration(visibility vis, bool is_final);
 
         stmt *statement();
 
@@ -82,7 +82,7 @@ namespace lns {
 
         stmt *expression_statement();
 
-        stmt *function(bool isglobal);
+        stmt *function(visibility vis);
 
         expr *assignment(bool nested);
 
@@ -125,11 +125,13 @@ namespace lns {
 
         stmt *foreach_statement();
 
-        stmt *exception_(bool is_global);
+        stmt *exception_(visibility vis);
 
         stmt *raise();
 
         stmt *begin_handle_statement();
+
+        pair<visibility, bool> get_access_specifiers();
     };
 
 

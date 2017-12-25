@@ -125,10 +125,10 @@ vector<stmt *> &parser::block() {
     return stmts;
 }
 
-stmt *parser::context_declaration(bool global, bool final) {
+stmt *parser::context_declaration(visibility vis, bool final) {
     token *name = consume(IDENTIFIER, "expected context name");
     vector<stmt *> &stmts = context_block();
-    return new context_stmt(name->filename, name->line, name, stmts, global, final);
+    return new context_stmt(name->filename, name->line, name, stmts, vis, final);
 }
 
 bool parser::check_file(const char *str) {
@@ -155,26 +155,25 @@ stmt *parser::declaration() {
             return nullptr;
         }
         use_allowed = false;
-        bool is_global = false, is_final = false;
-        while (match({GLOBAL, FINAL})) {
-            is_global = previous()->type == GLOBAL;
-            is_final = previous()->type == FINAL;
-        }
+        pair<visibility,bool> specs = get_access_specifiers();
+        bool is_final = specs.second;
+        visibility  vis = specs.first;
         if (match({EXCEPTION})) {
             if (is_final)
                 if (!permissive)
                     throw error(peek(),
                                 "keyword 'final' is not allowed for " "exception declaration" " (--permissive)");
-            return exception_(is_global);
+            return exception_(vis);
         }
-        if (match({CONTEXT})) return context_declaration(is_global, is_final);
-        if (match({VAR})) return var_declaration(is_global, is_final);
+        if (match({CONTEXT})) return context_declaration(vis, is_final);
+        if (match({VAR})) return var_declaration(vis, is_final);
         if (match({FUNCTION})) {
             if (is_final)
                 if (!permissive)
                     throw error(peek(), "keyword 'final' is not allowed for " "functions" " (--permissive)");
-            return function(is_global);
+            return function(vis);
         }
+        if(specs.first != V_UNSPECIFIED || specs.second) throw error(previous(),"invalid statement");
         return statement();
     } catch (int i) {
         synchronize();
@@ -187,7 +186,7 @@ int parser::error(token *token, const char *message) {
     return PARSE_ERROR;
 }
 
-var_stmt *parser::var_declaration(bool is_global, bool is_final) {
+var_stmt *parser::var_declaration(visibility  vis, bool is_final) {
     token *name = consume(IDENTIFIER, "expected identifier in variable declaration");
     expr *initializer = new null_expr(name->filename, name->line, name);
     if (match({EQUAL})) {
@@ -195,7 +194,7 @@ var_stmt *parser::var_declaration(bool is_global, bool is_final) {
         initializer = expression(true);
     }
     //consume(SEMICOLON, "expected ';' after variable declaration");
-    return new var_stmt(name->filename, name->line, name, *initializer, is_global, is_final);
+    return new var_stmt(name->filename, name->line, name, *initializer, vis, is_final);
 }
 
 stmt *parser::statement() {
@@ -300,7 +299,7 @@ stmt *parser::for_statement() {
     stmt *initializer = nullptr;
     if (!match({COMMA}))
         if (match({VAR}))
-            initializer = var_declaration(false, false);
+            initializer = var_declaration(V_UNSPECIFIED, false);
         else
             initializer = expression_statement();
     consume(COMMA, "expected ',' after for loop initializer");
@@ -333,7 +332,7 @@ stmt *parser::expression_statement() {
     return new expression_stmt(expr->file, expr->line, *expr);
 }
 
-stmt *parser::function(bool isglobal) {
+stmt *parser::function(visibility vis) {
     token *name = consume(IDENTIFIER, "expected function name");
     consume(LEFT_PAREN, "expected '(' after function name");
     vector<token *> &parameters = *new vector<token *>();
@@ -346,7 +345,7 @@ stmt *parser::function(bool isglobal) {
     consume(RIGHT_PAREN, "expected ')' after parameter list");
     try {
         vector<stmt *> &body = stmts_until({END});
-        return new function_stmt(name->filename, name->line, name, parameters, body, isglobal);
+        return new function_stmt(name->filename, name->line, name, parameters, body, vis);
     } catch (int) {
         int l = name->line;
         throw error(previous(), EXPTOCLOSE(function, l).c_str());
@@ -602,7 +601,7 @@ void parser::ld_stmts(string &s) {
     }
 }
 
-stmt *parser::exception_(bool is_global) {
+stmt *parser::exception_(visibility is_global) {
     token *name = consume(IDENTIFIER, "expected exception name");
     if (match({WITH})) {
         set<string> &tokens = *new set<string>();
@@ -635,6 +634,34 @@ stmt *parser::begin_handle_statement() {
     } while (match({HANDLE}) || check(END));
     consume(END, EXPTOCLOSE(handle, last_line).c_str());
     return new begin_handle_stmt(keyword->filename, keyword->line, stmts, handles);
+}
+
+pair<visibility, bool> parser::get_access_specifiers() {
+    visibility vis = V_UNSPECIFIED;
+    bool is_final = false;
+    while (match({GLOBAL, LOCAL ,FINAL})) {
+        if(previous()->type == FINAL)
+            if(is_final && !permissive)
+                throw error(previous(),"duplicate access specifier 'final'");
+            else
+                is_final = true;
+        else if(previous()->type == GLOBAL){
+            if(!permissive)
+                if(vis == V_LOCAL)
+                    throw error(previous(), "conflicting access specifiers 'global' and 'local'");
+                else if(vis == V_GLOBAL)
+                    throw error(previous(),"duplicate access specifier 'global'");
+            vis = V_GLOBAL;
+        } else{
+            if(!permissive)
+                if(vis == V_GLOBAL)
+                    throw error(previous(), "conflicting access specifiers 'global' and 'local'");
+                else if(vis == V_LOCAL)
+                    throw error(previous(),"duplicate access specifier 'local'");
+            vis = V_LOCAL;
+        }
+    }
+    return pair(vis,is_final);
 }
 
 
