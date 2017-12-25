@@ -1,0 +1,74 @@
+%YAML 1.2
+---
+file_extensions:
+  - lns
+scope: source.lns
+contexts:
+  main:
+    - match: '"'
+      scope: punctuation.definition.string.begin.lns
+      push: double_quoted_string
+
+    - match: '//|#'
+      scope: punctuation.definition.comment.lns
+      push: line_comment
+
+    - match: '/\*'
+      scope: punctuation.definition.comment.lns
+      push: block_comment
+
+    - match: '\b(class|for|function|return|super|this|while|natives|use|break|continue|context|end|begin|then|do|dpcheck|with|as|in|exception|raise|constructor)\b'
+      scope: keyword.control.lns
+
+    - match: '\b(if|else)\b'
+      scope: keyword.control.conditional
+
+    - match: '\bvar\b'
+      scope: storage.type
+
+    - match: '\b(global|final|local)\b'
+      scope: storage.type
+
+    - match: '\b(and|or|nor|xor|nand|not)\b'
+      scope: keyword.operator.word
+
+    - match: '\b(array\(\)|Number|String|Array|Boolean|Callable|Context|Class|Object|ExceptionDefinition|Exception)\b'
+      scope: variable.language
+
+    - match: '\b(-)?[0-9.]+\b'
+      scope: constant.numeric.lns
+
+    - match: '\b(true|false|null)\b'
+      scope: constant.language
+
+    - match: =|\+=|-=|\/=|\*=
+      scope: keyword.operator.assignment
+
+    - match: '\+|-|\*|\/|\^'
+      scope: keyword.operator.arithmetic
+
+  double_quoted_string:
+    - meta_scope: string.quoted.double.lns
+    - match: '\\.'
+      scope: constant.character.escape.lns
+    - match: '"'
+      scope: punctuation.definition.string.end.lns
+      pop: true
+
+  line_comment:
+    - meta_scope: comment.line.lns
+    - match: $
+      pop: true
+
+  block_comment:
+    - meta_scope: comment.block.lns
+    - match: '\*/'
+      pop: true
+  identifier:
+    - match: '\b\(.*?\)\b'
+      meta_content_scope: entity.name.function
+    - include: main
+  arg_list:
+    - match: '\)'
+      pop: true
+    - include: main

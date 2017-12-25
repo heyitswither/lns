@@ -1,0 +1,19 @@
+{
+	"working_dir": "$file_path",
+	"shell_cmd": "lns -f \"$file_name\"",
+	"file_regex": "in file (...*?):([0-9]*)",
+	"selector": "source.lns",
+	"shell": true,
+	"variants":
+	[
+		{
+			"name": "Permissive",
+			"shell_cmd": "lns -f --permissive \"$file_name\""
+		},
+
+		{
+			"name": "Syntax Check",
+			"shell_cmd": "lns -f --parse-only \"$file_name\""
+		}
+	]
+}
