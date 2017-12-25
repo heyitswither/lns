@@ -20,7 +20,7 @@ public class generate {
                 "call	   : expr* callee, token* paren, vector<expr*>& args",
                 "grouping  : expr* expression",
                 "literal   : object* value",
-                "unary     : token* op, expr* right",
+                "unary     : token* op, operator_location location, expr* right",
                 "variable  : token* name",
                 "sub_script : token* where, expr* name, expr* key",
                 "sub_script_assign : token* where, expr* name, token_type op, expr* key, expr* value",
