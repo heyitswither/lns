@@ -339,12 +339,19 @@ lns::runtime_environment::runtime_environment() : enclosing(nullptr), values(*ne
 lns::runtime_environment::runtime_environment(runtime_environment *enc) : enclosing(enc),
                                                                           values(*new std::map<std::string, variable>) {}
 
-object *runtime_environment::get(const token *name) {
+object *runtime_environment::get(const token *name, const char *accessing_file) {
     if (contains_key(name->lexeme)) {
         variable s = values[name->lexeme];
+        if(s.visibility == V_LOCAL){
+            if(strcmp(s.def_file,accessing_file) != 0){
+                string &s = *new string();
+                s += "variable " + name->lexeme + " is not visible in the current file";
+                throw runtime_exception(name, s);
+            }
+        }
         return s.value;
     }
-    if (enclosing != nullptr) return enclosing->get(name);
+    if (enclosing != nullptr) return enclosing->get(name, nullptr);
     if (permissive) { return lns::GET_DEFAULT_NULL(); }
     string &s = *new string();
     s += "'" + name->lexeme + "' is undefined";
@@ -352,19 +359,19 @@ object *runtime_environment::get(const token *name) {
 }
 
 
-void runtime_environment::define(const token *name, object *o, bool is_final, bool is_global) {
+void runtime_environment::define(const token *name, object *o, bool is_final, visibility vis, const char *def_file) {
     if (contains_key(name->lexeme)) {
         string &s = *new string();
         s += "variable " + name->lexeme + " is already defined";
         throw runtime_exception(name, s);
     }
 
-    if (is_global) {
+    if (vis == V_GLOBAL) {
         if (enclosing != nullptr) {
-            return enclosing->define(name, o, is_final, is_global);
+            return enclosing->define(name, o, is_final, vis,def_file);
         }
     }
-    define(name->lexeme,o,is_final);
+    define(name->lexeme,o,is_final,vis, def_file);
 }
 
 
@@ -372,9 +379,9 @@ object* lns::GET_DEFAULT_NULL() {
     return new null_o();
 }
 
-void runtime_environment::assign(const token *name, token_type op, object *obj) {
+void runtime_environment::assign(const token *name, token_type op, object *obj, const char *assigning_file) {
     if (contains_key(name->lexeme)) {
-        if (values[name->lexeme].isfinal) {
+        if (values[name->lexeme].is_final) {
             string &s = *new string();
             s += "variable " + name->lexeme + " is final";
             throw runtime_exception(name, s);
@@ -382,6 +389,13 @@ void runtime_environment::assign(const token *name, token_type op, object *obj) 
         //values[name.lexeme]->isfinal = false;
         try {
             variable v = values[name->lexeme];
+            if(v.visibility == V_LOCAL){
+                if(strcmp(v.def_file,assigning_file) != 0){
+                    string &s = *new string();
+                    s += "variable " + name->lexeme + " is not visible in the current file";
+                    throw runtime_exception(name, s);
+                }
+            }
             switch (op) {
                 case EQUAL:
                     values[name->lexeme].value = obj;
@@ -405,9 +419,9 @@ void runtime_environment::assign(const token *name, token_type op, object *obj) 
         return;
     }
     if (enclosing != nullptr) {
-        return enclosing->assign(name, op, obj);
+        return enclosing->assign(name, op, obj, nullptr);
     }
-    if (permissive) { return define(name, obj, false, false); }
+    if (permissive) { return define(name, obj, false, V_UNSPECIFIED,assigning_file); }
     string &s = *new string();
     s += "undefined variable '" + name->lexeme + "'";
     throw runtime_exception(name, s);
@@ -426,102 +440,8 @@ bool runtime_environment::is_valid_object_type(objtype objtype) {
     return false;
 }
 
-object *runtime_environment::assign_map_field(const token *name, const token_type op, number_o *key, object *value) {
-    if (contains_key(name->lexeme)) {
-        if (values[name->lexeme].isfinal) {
-            string &s = *new string();
-            s += "variable '" + name->lexeme + "' is final";
-            throw runtime_exception(name, s);
-        }
-        variable o = values[name->lexeme];
-        array_o *map;
-        if ((map = dynamic_cast<array_o *>(o.value)) == nullptr) {
-            string &s = *new string();
-            s += "variable '" + name->lexeme + "' is not a map";
-            throw runtime_exception(name, s);
-        }
-        try {
-            switch (op) {
-                case EQUAL:
-                    map->values[key->value] = value;
-                    break;
-                case PLUS_EQUALS:
-                    *(map->values[key->value]) += *value;
-                    break;
-                case MINUS_EQUALS:
-                    *(map->values[key->value]) -= *value;
-                    break;
-                case STAR_EQUALS:
-                    *(map->values[key->value]) *= *value;
-                    break;
-                case SLASH_EQUALS:
-                    *(map->values[key->value]) /= *value;
-                    break;
-            }
-            return map->values[key->value];
-        } catch (string &s) {
-            throw runtime_exception(name, s);
-        }
-    }
-    if (enclosing != nullptr) {
-        return enclosing->assign_map_field(name, op, key, value);
-    }
-    if (permissive) { return lns::GET_DEFAULT_NULL(); }
-    string &s = *new string();
-    s += "undefined variable '" + name->lexeme + "'";
-    throw runtime_exception(name, s);
-}
-
 bool runtime_environment::is_native(callable *ptr) {
     return natives.find(ptr) != natives.end();
-}
-
-object *runtime_environment::increment(const token *name) {
-    if (contains_key(name->lexeme)) {
-        variable s = values[name->lexeme];
-        if (s.isfinal) {
-            string &s = *new string();
-            s += "variable '" + name->lexeme + "' is final";
-            throw runtime_exception(name, s);
-        }
-        if (s.value->type != NUMBER_T) {
-            string &s = *new string();
-            s += "variable '" + name->lexeme + "' is not a number";
-            throw runtime_exception(name, s);
-        }
-        number_o *n = dynamic_cast<number_o *>(s.value);
-        ++n->value;
-        return n;
-    }
-    if (enclosing != nullptr) return enclosing->increment(name);
-    if (permissive) { return lns::GET_DEFAULT_NULL(); }
-    string &s = *new string();
-    s += "'" + name->lexeme + "' is undefined";
-    throw runtime_exception(name, s);
-}
-
-object *runtime_environment::decrement(const token *name) {
-    if (contains_key(name->lexeme)) {
-        variable s = values[name->lexeme];
-        if (s.isfinal) {
-            string &s = *new string();
-            s += "variable '" + name->lexeme + "' is final";
-            throw runtime_exception(name, s);
-        }
-        if (s.value->type != NUMBER_T) {
-            string &s = *new string();
-            s += "variable '" + name->lexeme + "' is not a number";
-            throw runtime_exception(name, s);
-        }
-        number_o *n = dynamic_cast<number_o *>(s.value);
-        --n->value;
-        return n;
-    }
-    if (enclosing != nullptr) return enclosing->increment(name);
-    if (lns::permissive) { return lns::GET_DEFAULT_NULL(); }
-    string &s = *new string();
-    s += "'" + name->lexeme + "' is undefined";
-    throw lns::runtime_exception(name, s);
 }
 
 void runtime_environment::reset() {
@@ -529,8 +449,8 @@ void runtime_environment::reset() {
     if (enclosing != nullptr) enclosing->reset();
 }
 
-void runtime_environment::define(const std::string &name, object *o, bool is_final) {
-    values.insert(std::pair<string, lns::variable>(name, *new variable(is_final, o)));
+void runtime_environment::define(const std::string &name, object *o, bool is_final,visibility vis, const char *def_file) {
+    values.insert(std::pair<string, lns::variable>(name, *new lns::variable(vis,is_final, o, def_file)));
 }
 
 void runtime_environment::add_natives(const std::set<callable *> &natives) {
@@ -545,14 +465,14 @@ bool runtime_environment::clear_var(const token *name) {
     return this->values.erase(name->lexeme) != 0;
 }
 
-variable::variable() : value(new null_o()), isfinal(false) {}
+variable::variable() : value(new null_o()), visibility(V_UNSPECIFIED), is_final(false), def_file("") {}
 
 const variable& variable::operator=(const variable &v) {
     this->value = v.value;
     return *this;
 }
 
-variable::variable(const bool isfinal, object *value) : isfinal(isfinal), value(value) {}
+variable::variable(lns::visibility visibility, bool is_final, object *value, const char *def_file) : visibility (visibility), value(value), is_final(is_final), def_file(def_file) {}
 
 
 lns::runtime_exception::runtime_exception(const lns::token *token, string &m) : native_throw(false),message(m), token(token) {}

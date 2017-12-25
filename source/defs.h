@@ -90,6 +90,7 @@ namespace lns {
         VAR,
         WHILE,
         GLOBAL,
+        LOCAL,
         FINAL,
         USE,
         BREAK,
@@ -109,10 +110,17 @@ namespace lns {
         UNRECOGNIZED,
         EOF_
     };
+
     enum objtype {
         NUMBER_T, STRING_T, BOOL_T, NULL_T, ARRAY_T, CALLABLE_T, NATIVE_CALLABLE_T, CONTEXT_T, EXCEPTION_T,
         EXCEPTION_DEFINITION_T, CLASS_DEFINITION_T, OBJECT_T
     };
+
+
+    enum visibility{
+        V_GLOBAL, V_LOCAL, V_UNSPECIFIED
+    };
+
     typedef objtype object_type;
 
 
@@ -122,7 +130,7 @@ namespace lns {
                                              "EQUAL", "EQUAL_EQUAL", "GREATER", "GREATER_EQUAL", "LESS", "LESS_EQUAL",
                                              "IDENTIFIER", "STRING", "NUMBER", "NATIVES", "AND", "CLASS", "ELSE", "FALSE",
                                              "FUNCTION", "FOR", "FOREACH", "IF", "NUL", "OR", "XOR", "NOR", "NAND", "NOT", "RETURN",
-                                             "SUPER", "THIS", "TRUE", "VAR", "WHILE", "GLOBAL", "FINAL", "USE", "BREAK",
+                                             "SUPER", "THIS", "TRUE", "VAR", "WHILE", "GLOBAL","LOCAL", "FINAL", "USE", "BREAK",
                                              "CONTINUE", "CONTEXT", "BEGIN", "THEN", "DO", "END",  "DPCHECK", "IN", "BIND", "EXCEPTION", "WITH", "RAISE","HANDLE", "UNRECOGNIZED",
                                              "EOF_"};
 
@@ -314,12 +322,14 @@ namespace lns {
 
     class variable {
     public:
-        const bool isfinal;
+        const bool is_final;
+        const visibility visibility;
+        const char *def_file;
         object *value;
 
         explicit variable();
 
-        variable(bool isfinal, object *value);
+        variable(lns::visibility visibility, bool is_final,object *value, const char *def_file);
 
         const variable& operator=(variable const &v);
     };
@@ -380,25 +390,19 @@ namespace lns {
 
         explicit runtime_environment(runtime_environment *enc);
 
-        object *get(const token *name);
+        object *get(const token *name, const char *accessing_file);
 
-        void define(const token *name, object *o, bool is_final, bool is_global);
+        void define(const token *name, object *o, bool is_final, visibility visibility, const char* def_file);
 
-        void define(const std::string &name, object *o, bool is_final);
+        void define(const std::string &name, object *o, bool is_final, visibility vis, const char *def_file);
 
-        void assign(const token *name,token_type op, object *obj);
+        void assign(const token *name, token_type op, object *obj, const char *assigning_file);
 
         bool is_valid_object_type(objtype objtype);
-
-        object *assign_map_field(const token *name,const token_type op,number_o *key, object *value);
 
         bool clear_var(const token *name);
 
         bool is_native(callable *ptr);
-
-        object *increment(const token *name);
-
-        object *decrement(const token *name);
 
         void reset();
 
