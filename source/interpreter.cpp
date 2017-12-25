@@ -187,9 +187,9 @@ object *interpreter::visit_unary_expr(unary_expr *u) {//
     try {
         switch (u->op->type) {
             case PLUS_PLUS:
-                return right->operator++();
+                return u->location == PREFIX ? ++(*right) : (*right)++;
             case MINUS_MINUS:
-                return right->operator--();
+                return u->location == PREFIX ? --(*right) : (*right)--;
             case NOT:
                 return new bool_o(is_bool_true_eq(!*right));
             case MINUS:
@@ -316,8 +316,6 @@ void interpreter::visit_expression_stmt(expression_stmt *e) {
         case CALL_EXPR_T:
         case NULL_EXPR_T:
         case SUB_SCRIPT_ASSIGN_EXPR_T:
-        case INCREMENT_EXPR_T:
-        case DECREMENT_EXPR_T:
         case MEMBER_ASSIGN_EXPR_T:
             return;
     }
@@ -444,8 +442,6 @@ void interpreter::interpret(vector<stmt *> &statements) {
 
 object *interpreter::clone_or_keep(object *obj, const expr_type type, const token *where) {
     switch(type){
-        case INCREMENT_EXPR_T:
-        case DECREMENT_EXPR_T:
         case BINARY_EXPR_T:
         case CALL_EXPR_T:
         case LITERAL_EXPR_T:
