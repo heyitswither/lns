@@ -15,41 +15,41 @@ public class generate {
         }
         String outputDir = args[0];
         defineAst(outputDir, "expr", Arrays.asList(
-                "increment : token& name, expr* value",
-                "decrement : token& name, expr* value",
-                "assign    : token& name, token_type op, expr* value",
-                "binary    : expr* left, token& op, expr* right",
-                "call	   : expr* callee, token& paren, vector<expr*>& args",
+                "increment : token* name, expr* value",
+                "decrement : token* name, expr* value",
+                "assign    : token* name, token_type op, expr* value",
+                "binary    : expr* left, token* op, expr* right",
+                "call	   : expr* callee, token* paren, vector<expr*>& args",
                 "grouping  : expr* expression",
                 "literal   : object* value",
-                "unary     : token& op, expr* right",
-                "variable  : token& name",
-                "sub_script : token& where, expr* name, expr* key",
-                "sub_script_assign : token& where, expr* name, token_type op, expr* key, expr* value",
-                "member : expr* container_name, token& member_identifier",
-                "member_assign : expr* container_name, token_type op, token& member_identifier, expr* value",
-                "array     : token& open_brace, vector<pair<expr*,expr*>>& pairs",
-                "null      : token& where"
+                "unary     : token* op, expr* right",
+                "variable  : token* name",
+                "sub_script : token* where, expr* name, expr* key",
+                "sub_script_assign : token* where, expr* name, token_type op, expr* key, expr* value",
+                "member : expr* container_name, token* member_identifier",
+                "member_assign : expr* container_name, token_type op, token* member_identifier, expr* value",
+                "array     : token* open_brace, vector<pair<expr*,expr*>>& pairs",
+                "null      : token* where"
         ), Arrays.asList("<utility>"), "object*");
         defineAst(outputDir, "stmt", Arrays.asList(
                 "block      : vector<stmt*>& statements",
                 "expression : expr& exprs",
-                "function   : token& name, vector<token>& parameters, vector<stmt*>& body, bool isglobal",
-                "context    : token& name, vector<stmt*> body, bool is_global, bool isfinal",
+                "function   : token* name, vector<token*>& parameters, vector<stmt*>& body, visibility visibility",
+                "context    : token* name, vector<stmt*> body, visibility visibility, bool isfinal",
                 "if         : expr& condition, stmt* thenBranch, stmt* elseBranch",
-                "return     : token& keyword, expr& value",
-                "break      : token& keyword",
-                "continue   : token& keyword",
-                "var        : token& name, expr& initializer, bool isglobal, bool isfinal",
+                "return     : token* keyword, expr& value",
+                "break      : token* keyword",
+                "continue   : token* keyword",
+                "var        : token* name, expr& initializer, visibility visibility, bool isfinal",
                 "s_while    : expr& condition, stmt* body",
                 "s_for      : stmt* init, expr* condition, expr* increment, stmt* body",
-                "s_for_each : token& identifier, expr* container, stmt* body",
-                "exception_decl : token& name, set<string>& identifiers, bool is_global",
-                "raise      : token& where, expr* name, map<string,expr*>& fields",
-                "uses_native : token& where, string& lib_name, token& bind",
-                "handle     :  expr* exception_name, token& bind, vector<stmt*>& block",
+                "s_for_each : token* identifier, expr* container, stmt* body",
+                "exception_decl : token* name, set<string>& identifiers, visibility visibility",
+                "raise      : token* where, expr* name, map<string,expr*>& fields",
+                "uses_native : token* where, string& lib_name, token* bind",
+                "handle     :  expr* exception_name, token* bind, vector<stmt*>& block",
                 "begin_handle : vector<stmt*>& body, vector<handle_stmt*> handles",
-                "null       : token& where"
+                "null       : token* where"
         ), Arrays.asList("\"expr.h\"","<memory>"), "void");
     }
 

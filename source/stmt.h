@@ -87,27 +87,27 @@ const expr& exprs;
 
 class function_stmt : public stmt {
 public:
-function_stmt(const char* file,int line, token* name, vector<token*>& parameters, vector<stmt*>& body, bool isglobal) : name(name), parameters(parameters), body(body), isglobal(isglobal), stmt(line, file, FUNCTION_STMT_T) {}
+function_stmt(const char* file,int line, token* name, vector<token*>& parameters, vector<stmt*>& body, visibility visibility) : name(name), parameters(parameters), body(body), visibility(visibility), stmt(line, file, FUNCTION_STMT_T) {}
 void accept(stmt_visitor *v) override{
 v->visit_function_stmt(this);
 }
 const token* name;
 const vector<token*>& parameters;
 const vector<stmt*>& body;
-const bool isglobal;
+const visibility visibility;
 };
 
 
 
 class context_stmt : public stmt {
 public:
-context_stmt(const char* file,int line, token* name, vector<stmt*> body, bool is_global, bool isfinal) : name(name), body(body), is_global(is_global), isfinal(isfinal), stmt(line, file, CONTEXT_STMT_T) {}
+context_stmt(const char* file,int line, token* name, vector<stmt*> body, visibility visibility, bool isfinal) : name(name), body(body), visibility(visibility), isfinal(isfinal), stmt(line, file, CONTEXT_STMT_T) {}
 void accept(stmt_visitor *v) override{
 v->visit_context_stmt(this);
 }
 const token* name;
 const vector<stmt*> body;
-const bool is_global;
+const visibility visibility;
 const bool isfinal;
 };
 
@@ -162,13 +162,13 @@ const token* keyword;
 
 class var_stmt : public stmt {
 public:
-var_stmt(const char* file,int line, token* name, expr& initializer, bool isglobal, bool isfinal) : name(name), initializer(initializer), isglobal(isglobal), isfinal(isfinal), stmt(line, file, VAR_STMT_T) {}
+var_stmt(const char* file,int line, token* name, expr& initializer, visibility visibility, bool isfinal) : name(name), initializer(initializer), visibility(visibility), isfinal(isfinal), stmt(line, file, VAR_STMT_T) {}
 void accept(stmt_visitor *v) override{
 v->visit_var_stmt(this);
 }
 const token* name;
 const expr& initializer;
-const bool isglobal;
+const visibility visibility;
 const bool isfinal;
 };
 
@@ -215,13 +215,13 @@ const stmt* body;
 
 class exception_decl_stmt : public stmt {
 public:
-exception_decl_stmt(const char* file,int line, token* name, set<string>& identifiers, bool is_global) : name(name), identifiers(identifiers), is_global(is_global), stmt(line, file, EXCEPTION_DECL_STMT_T) {}
+exception_decl_stmt(const char* file,int line, token* name, set<string>& identifiers, visibility visibility) : name(name), identifiers(identifiers), visibility(visibility), stmt(line, file, EXCEPTION_DECL_STMT_T) {}
 void accept(stmt_visitor *v) override{
 v->visit_exception_decl_stmt(this);
 }
 const token* name;
 const set<string>& identifiers;
-const bool is_global;
+const visibility visibility;
 };
 
 
