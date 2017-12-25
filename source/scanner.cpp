@@ -30,6 +30,7 @@ token_type lns::get_token_type(string &key) {
     if (key == "natives") return NATIVES;
     if (key == "use") return USE;
     if (key == "global") return GLOBAL;
+    if (key == "local") return LOCAL;
     if (key == "final") return FINAL;
     if (key == "break") return BREAK;
     if (key == "continue") return CONTINUE;
