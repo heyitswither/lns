@@ -13,5 +13,6 @@ namespace lns{
     extern bool parse_only;
     extern bool prompt;
     extern bool debugger_option;
+    extern bool no_format;
 }
 #endif //CPPLNS_OPTIONS_H

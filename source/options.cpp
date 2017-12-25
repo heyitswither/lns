@@ -12,3 +12,4 @@ bool lns::time_count = false;
 bool lns::parse_only = false;
 bool lns::prompt = false;
 bool lns::debugger_option = false;
+bool lns::no_format = false;
