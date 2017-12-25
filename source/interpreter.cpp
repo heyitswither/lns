@@ -83,14 +83,6 @@ object *interpreter::visit_member_assign_expr(member_assign_expr *c) {
     return value;
 }
 
-object *interpreter::visit_increment_expr(increment_expr *i) {
-    return environment->get(i->name,i->file)->operator++();
-}
-
-object *interpreter::visit_decrement_expr(decrement_expr *d) {
-    return environment->get(d->name,d->file)->operator++();
-}
-
 object *interpreter::visit_assign_expr(assign_expr *a) {
     object *value = evaluate(const_cast<expr *>(a->value));
     environment->assign(a->name, a->op, clone_or_keep(value, a->value->type, a->name), a->file);
@@ -194,6 +186,10 @@ object *interpreter::visit_unary_expr(unary_expr *u) {//
     object *right = evaluate(const_cast<expr *>(u->right));
     try {
         switch (u->op->type) {
+            case PLUS_PLUS:
+                return right->operator++();
+            case MINUS_MINUS:
+                return right->operator--();
             case NOT:
                 return new bool_o(is_bool_true_eq(!*right));
             case MINUS:

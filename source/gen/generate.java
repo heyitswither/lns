@@ -15,8 +15,6 @@ public class generate {
         }
         String outputDir = args[0];
         defineAst(outputDir, "expr", Arrays.asList(
-                "increment : token* name, expr* value",
-                "decrement : token* name, expr* value",
                 "assign    : token* name, token_type op, expr* value",
                 "binary    : expr* left, token* op, expr* right",
                 "call	   : expr* callee, token* paren, vector<expr*>& args",

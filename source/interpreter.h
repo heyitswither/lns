@@ -65,10 +65,6 @@ namespace lns {
 
         void visit_raise_stmt(raise_stmt *r) override;
 
-        object *visit_increment_expr(increment_expr *i) override;
-
-        object *visit_decrement_expr(decrement_expr *d) override;
-
         object *visit_assign_expr(assign_expr *a) override; //
 
         object *visit_binary_expr(binary_expr *b) override; //

@@ -11,7 +11,7 @@ using namespace lns;
 
 namespace lns{
 enum expr_type{
-INCREMENT_EXPR_T, DECREMENT_EXPR_T, ASSIGN_EXPR_T, BINARY_EXPR_T, CALL_EXPR_T, GROUPING_EXPR_T, LITERAL_EXPR_T, UNARY_EXPR_T, VARIABLE_EXPR_T, SUB_SCRIPT_EXPR_T, SUB_SCRIPT_ASSIGN_EXPR_T, MEMBER_EXPR_T, MEMBER_ASSIGN_EXPR_T, ARRAY_EXPR_T, NULL_EXPR_T, 
+ASSIGN_EXPR_T, BINARY_EXPR_T, CALL_EXPR_T, GROUPING_EXPR_T, LITERAL_EXPR_T, UNARY_EXPR_T, VARIABLE_EXPR_T, SUB_SCRIPT_EXPR_T, SUB_SCRIPT_ASSIGN_EXPR_T, MEMBER_EXPR_T, MEMBER_ASSIGN_EXPR_T, ARRAY_EXPR_T, NULL_EXPR_T, 
 };
 class expr_visitor;
 class expr{
@@ -22,8 +22,6 @@ virtual object* accept(expr_visitor* v) = 0;
 expr_type type;
  int line; const char* file;
 };
-class increment_expr;
-class decrement_expr;
 class assign_expr;
 class binary_expr;
 class call_expr;
@@ -39,8 +37,6 @@ class array_expr;
 class null_expr;
 class expr_visitor{
 public:
-virtual object* visit_increment_expr(increment_expr *i) = 0;
-virtual object* visit_decrement_expr(decrement_expr *d) = 0;
 virtual object* visit_assign_expr(assign_expr *a) = 0;
 virtual object* visit_binary_expr(binary_expr *b) = 0;
 virtual object* visit_call_expr(call_expr *c) = 0;
@@ -55,30 +51,6 @@ virtual object* visit_member_assign_expr(member_assign_expr *m) = 0;
 virtual object* visit_array_expr(array_expr *a) = 0;
 virtual object* visit_null_expr(null_expr *n) = 0;
 };
-
-class increment_expr : public expr {
-public:
-increment_expr(const char* file,int line, token* name, expr* value) : name(name), value(value), expr(line, file, INCREMENT_EXPR_T) {}
-object* accept(expr_visitor *v) override{
-return v->visit_increment_expr(this);
-}
-const token* name;
-const expr* value;
-};
-
-
-
-class decrement_expr : public expr {
-public:
-decrement_expr(const char* file,int line, token* name, expr* value) : name(name), value(value), expr(line, file, DECREMENT_EXPR_T) {}
-object* accept(expr_visitor *v) override{
-return v->visit_decrement_expr(this);
-}
-const token* name;
-const expr* value;
-};
-
-
 
 class assign_expr : public expr {
 public:
@@ -242,12 +214,6 @@ const token* where;
 
 class default_expr_visitor : public expr_visitor {
 public:
-virtual object* visit_increment_expr(increment_expr *i) override {
-std::cout << "increment_expr" << std::endl;
-}
-virtual object* visit_decrement_expr(decrement_expr *d) override {
-std::cout << "decrement_expr" << std::endl;
-}
 virtual object* visit_assign_expr(assign_expr *a) override {
 std::cout << "assign_expr" << std::endl;
 }

@@ -403,22 +403,8 @@ expr *parser::assignment(bool nested) {
         }
         throw error(op, "invalid assignment target");
     }
-    if (match({PLUS_PLUS})) {
-        token *pp = previous();
-        if ((var = dynamic_cast<variable_expr *>(expr)) != nullptr) {
-            const token *name = var->name;
-            return new increment_expr(name->filename, name->line, const_cast<token *>(name), expr);
-        }
-        error(pp, "invalid increment target");
-    }
-    if (match({MINUS_MINUS})) {
-        token *mm = previous();
-        if ((var = dynamic_cast<variable_expr *>(expr)) != nullptr) {
-            const token *name = var->name;
-            return new decrement_expr(name->filename, name->line, const_cast<token *>(name), expr);
-        }
-        error(mm, "Invalid decrement target");
-    }
+    if(match({PLUS_PLUS,MINUS_MINUS}))
+        return new unary_expr(expr->file,expr->line,previous(),expr);
     return expr;
 }
 
@@ -463,7 +449,7 @@ expr *parser::power(bool nested) {
 }
 
 expr *parser::unary(bool nested) {
-    if (match({NOT, MINUS})) {
+    if (match({PLUS_PLUS,MINUS_MINUS,NOT, MINUS})) {
         token *op = previous();
         expr *right = unary(true);
         return new unary_expr(op->filename, op->line, op, right);
