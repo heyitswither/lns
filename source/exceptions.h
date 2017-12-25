@@ -8,14 +8,23 @@
 #include <string>
 #include "defs.h"
 #include "cstring"
+#include "options.h"
+#include <initializer_list>
+#define FATAL_ERROR_UNFORMATTED   "Fatal error"
+#define PARSE_ERROR_UNFORMATTED   "Parse error"
+#define RUNTIME_ERROR_UNFORMATTED "Runtime error"
 
-#define FATAL_ERROR_S   "\n\033[1;31mFatal error\033[0m"
-#define PARSE_ERROR_S   "\n\033[1;31mParse error\033[0m"
-#define RUNTIME_ERROR_S "\n\033[1;31mRuntime error\033[0m"
+#define FATAL_ERROR_FORMATTED   "\033[1;31m" FATAL_ERROR_UNFORMATTED   "\033[0m"
+#define PARSE_ERROR_FORMATTED   "\033[1;31m" PARSE_ERROR_UNFORMATTED   "\033[0m"
+#define RUNTIME_ERROR_FORMATTED "\033[1;31m" RUNTIME_ERROR_UNFORMATTED "\033[0m"
+
+#define FATAL_ERROR_S   (lns::no_format ? FATAL_ERROR_UNFORMATTED : FATAL_ERROR_FORMATTED)
+#define PARSE_ERROR_S   (lns::no_format ? PARSE_ERROR_UNFORMATTED : PARSE_ERROR_FORMATTED)
+#define RUNTIME_ERROR_S (lns::no_format ? RUNTIME_ERROR_UNFORMATTED : RUNTIME_ERROR_FORMATTED)
 
 namespace lns {
 
-    const char *createDescription(std::string s);
+    const char *createDescription(std::initializer_list<std::string> ss);
 
     class unknown_option_exception : public std::exception {
         std::string option;
