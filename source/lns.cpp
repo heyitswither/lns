@@ -34,6 +34,8 @@ namespace lns{
             parse_only = true;
         }else if(o == "d" || o == "-debugger"){
             debugger_option = true;
+        }else if(o == "f" || o == "-no-format"){
+            no_format = true;
         }else{
             throw unknown_option_exception(o);
         }
