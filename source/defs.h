@@ -323,7 +323,7 @@ namespace lns {
     class variable {
     public:
         const bool is_final;
-        const visibility visibility;
+        const visibility visibility_;
         const char *def_file;
         object *value;
 

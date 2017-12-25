@@ -342,7 +342,7 @@ lns::runtime_environment::runtime_environment(runtime_environment *enc) : enclos
 object *runtime_environment::get(const token *name, const char *accessing_file) {
     if (contains_key(name->lexeme)) {
         variable s = values[name->lexeme];
-        if(s.visibility == V_LOCAL){
+        if(s.visibility_ == V_LOCAL){
             if(strcmp(s.def_file,accessing_file) != 0){
                 string &s = *new string();
                 s += "variable " + name->lexeme + " is not visible in the current file";
@@ -389,7 +389,7 @@ void runtime_environment::assign(const token *name, token_type op, object *obj, 
         //values[name.lexeme]->isfinal = false;
         try {
             variable v = values[name->lexeme];
-            if(v.visibility == V_LOCAL){
+            if(v.visibility_ == V_LOCAL){
                 if(strcmp(v.def_file,assigning_file) != 0){
                     string &s = *new string();
                     s += "variable " + name->lexeme + " is not visible in the current file";
@@ -465,14 +465,14 @@ bool runtime_environment::clear_var(const token *name) {
     return this->values.erase(name->lexeme) != 0;
 }
 
-variable::variable() : value(new null_o()), visibility(V_UNSPECIFIED), is_final(false), def_file("") {}
+variable::variable() : value(new null_o()), visibility_(V_UNSPECIFIED), is_final(false), def_file("") {}
 
 const variable& variable::operator=(const variable &v) {
     this->value = v.value;
     return *this;
 }
 
-variable::variable(lns::visibility visibility, bool is_final, object *value, const char *def_file) : visibility (visibility), value(value), is_final(is_final), def_file(def_file) {}
+variable::variable(lns::visibility visibility, bool is_final, object *value, const char *def_file) : visibility_ (visibility), value(value), is_final(is_final), def_file(def_file) {}
 
 
 lns::runtime_exception::runtime_exception(const lns::token *token, string &m) : native_throw(false),message(m), token(token) {}
