@@ -159,8 +159,8 @@ void lns::command_interpreter::continue_() {
 void lns::command_interpreter::interpret(string &input) {
     try {
         ss = stringstream(input);
-        string &command = advance();
-        if (command.empty()) throw command.c_str();
+        string command = advance();
+        if (command.empty()) throw command;
         else if (command == "load" || command == "l") load();
         else if (command == "run" || command == "r") run();
         else if (command == "breakpoint" || command == "b") breakpoint();
@@ -170,11 +170,11 @@ void lns::command_interpreter::interpret(string &input) {
         else if (command == "continue" || command == "c") continue_();
         else if (command == "help" || command == "h") help();
         else throw "";
-    } catch (const char *e) {
-        if (string(e).empty())
+    } catch (string& e) {
+        if (e.empty())
             cout << "Invalid command. Type 'help' for a list of commands." << endl;
         else
-            cout << "Wrong usage for command '" << e << "'. Usage:\n" << syntax(string(e)) << endl;
+            cout << "Wrong usage for command '" << e << "'. Usage:\n" << syntax(e) << endl;
     }
 }
 
