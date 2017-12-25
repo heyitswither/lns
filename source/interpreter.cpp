@@ -62,7 +62,7 @@ void interpreter::execute_block(vector<stmt *> stmts, runtime_environment *env) 
 object *interpreter::visit_member_expr(member_expr *c) {
     object *o = evaluate(const_cast<expr *>(c->container_name));
     if (o->type == CONTEXT_T) {
-        return DCAST(context*,o)->get(c->member_identifier);
+        return DCAST(context*, o)->get(c->member_identifier, c->file);
     }else if(o->type == EXCEPTION_T){
         auto DCAST_ASN(cast,incode_exception*,o);
         object* o2 = cast->get(const_cast<string&>(c->member_identifier->lexeme));
@@ -78,21 +78,22 @@ object *interpreter::visit_member_assign_expr(member_assign_expr *c) {
         throw runtime_exception(c->member_identifier, *new string("object is not a context"));
     }
     object *value = evaluate(const_cast<expr *>(c->value));
-    dynamic_cast<context *>(o)->assign(c->member_identifier, c->op, clone_or_keep(value,c->value->type,c->member_identifier));
+    dynamic_cast<context *>(o)->assign(c->member_identifier, c->op,
+                                       clone_or_keep(value, c->value->type, c->member_identifier), c->file);
     return value;
 }
 
 object *interpreter::visit_increment_expr(increment_expr *i) {
-    return environment->increment(i->name);
+    return environment->get(i->name,i->file)->operator++();
 }
 
 object *interpreter::visit_decrement_expr(decrement_expr *d) {
-    return environment->decrement(d->name);
+    return environment->get(d->name,d->file)->operator++();
 }
 
 object *interpreter::visit_assign_expr(assign_expr *a) {
     object *value = evaluate(const_cast<expr *>(a->value));
-    environment->assign(a->name, a->op, clone_or_keep(value,a->value->type,a->name));
+    environment->assign(a->name, a->op, clone_or_keep(value, a->value->type, a->name), a->file);
     return value;
 }
 
@@ -158,7 +159,6 @@ object *interpreter::visit_call_expr(call_expr *c) {
     int i = 0;
     for (; i < c->args.size(); i++) {
         args.push_back(evaluate(c->args[i]));
-        //if(stack_trace.size() < 0 || stack_trace.size() > 2) throw 'a';
     }
     if (args.size() != function->arity()) {
         string s = *new string();
@@ -168,6 +168,9 @@ object *interpreter::visit_call_expr(call_expr *c) {
     }
     stack_trace.push_back(
             new stack_call(c->paren->filename, c->paren->line, function->name(), globals->is_native(function)));
+    if(stack_trace.size() >= RECURSION_LIMIT){
+        throw runtime_exception(c->file,c->line,*new string("recursion limit exceeded"));
+    }
     object * p;
     try{
         p = function->call(args);
@@ -205,7 +208,7 @@ object *interpreter::visit_unary_expr(unary_expr *u) {//
 }
 
 object *interpreter::visit_variable_expr(variable_expr *v) {
-    return environment->get(v->name);
+    return environment->get(v->name, v->file);
 }
 
 object *interpreter::visit_sub_script_expr(sub_script_expr *m) {
@@ -288,9 +291,9 @@ void interpreter::visit_s_for_each_stmt(s_for_each_stmt *s) {
     object* container = evaluate(const_cast<expr *>(s->container));
     if(container->type == ARRAY_T){
         auto DCAST_ASN(array,array_o*,container);
-        environment->define(s->identifier,new null_o(),false,false);
+        environment->define(s->identifier,new null_o(),false,V_UNSPECIFIED,s->file);
         for(const auto &a : array->values){
-            environment->assign(s->identifier,token_type::EQUAL,a.second);
+            environment->assign(s->identifier, token_type::EQUAL, a.second, s->file);
             execute(const_cast<stmt *>(s->body));
         }
         environment->clear_var(s->identifier);
@@ -327,7 +330,7 @@ void interpreter::visit_expression_stmt(expression_stmt *e) {
 
 void interpreter::visit_function_stmt(function_stmt *f) {
     callable *func = new function(this, f);
-    environment->define(const_cast<token *>(f->name), func, true, f->isglobal);
+    environment->define(const_cast<token *>(f->name), func, true, f->visibility,f->file);
 }
 
 void interpreter::visit_if_stmt(if_stmt *i) {
@@ -357,11 +360,11 @@ void interpreter::visit_continue_stmt(continue_stmt *c) {
 }
 
 void interpreter::visit_var_stmt(var_stmt *v) {
-    if (v->initializer.type != NULL_STMT_T) {
+    if (v->initializer.type != NULL_EXPR_T) {
         object* val = evaluate(const_cast<expr *>(&v->initializer));
-        environment->define(const_cast<token *>(v->name), clone_or_keep(val,v->initializer.type,v->name), v->isfinal, v->isglobal);
+        environment->define(const_cast<token *>(v->name), clone_or_keep(val,v->initializer.type,v->name), v->isfinal, v->visibility,v->file);
     }else{
-        environment->define(const_cast<token *>(v->name), new null_o, v->isfinal, v->isglobal);
+        environment->define(const_cast<token *>(v->name), new null_o, v->isfinal, v->visibility,v->file);
     }
 }
 
@@ -386,7 +389,7 @@ void interpreter::visit_uses_native_stmt(uses_native_stmt *u) {
         supplier* suppl = (supplier*)dlsym(handler,"supplier");
         if(!suppl) throw dlerror();
         object *obj = suppl();
-        globals->define(u->bind,obj,true,true);
+        globals->define(u->bind,obj,true,V_GLOBAL,u->file);
         function_container* ptr;
         if(obj->type == NATIVE_CALLABLE_T)
             globals->add_native(DCAST(callable*,obj));
@@ -411,7 +414,7 @@ void interpreter::visit_context_stmt(context_stmt *c) {
         execute(s);
     }
     environment = previous;
-    environment->define(c->name, ctx, c->is_global, c->isfinal);
+    environment->define(c->name, ctx, c->isfinal,c->visibility, c->file);
 }
 
 interpreter::interpreter() : stack_trace(*new vector<stack_call *>()){
@@ -479,7 +482,7 @@ object *interpreter::visit_array_expr(array_expr *a) {
 
 void interpreter::visit_exception_decl_stmt(exception_decl_stmt *e) {
     try{
-        environment->define(e->name,new exception_definition(e->file,e->line,e->name->lexeme,e->identifiers),true,e->is_global);
+        environment->define(e->name,new exception_definition(e->file,e->line,e->name->lexeme,e->identifiers),true,e->visibility,e->file);
     }catch(exception_definition& ptr){
         string& s = *new string();
         s += "exception previously defined at ";
@@ -528,7 +531,7 @@ void interpreter::visit_begin_handle_stmt(begin_handle_stmt *b) {
                 for(int i = 0; i < e.calls_bypassed; i++)
                     stack_trace.pop_back();
                 runtime_environment* env = new runtime_environment(environment);
-                if(handle->bind->type != UNRECOGNIZED) env->define(handle->bind,&e,true,false);
+                if(handle->bind->type != UNRECOGNIZED) env->define(handle->bind,&e,true,V_UNSPECIFIED,b->file);
                 execute_block(handle->block,env);
                 break;
             }
@@ -542,10 +545,10 @@ const int lns::function::arity() const {
 }
 
 object *lns::function::call(vector<object *> &args) {
-    runtime_environment *env = new runtime_environment(retr_globals(i));
+    runtime_environment *env = new runtime_environment(i->environment);
     int j;
     for (j = 0; j < declaration->parameters.size(); j++) {
-        env->define(const_cast<token *>(declaration->parameters.at(j)), args.at(j), false, false);
+        env->define(const_cast<token *>(declaration->parameters.at(j)), args.at(j), false, V_UNSPECIFIED,declaration->file);
     }
     try {
         i->execute_block(declaration->body, env);
@@ -565,6 +568,3 @@ string lns::function::str() const {
 
 lns::function::function(interpreter *i, const lns::function_stmt *f) : i(i), declaration(f), callable(false) {}
 
-runtime_environment *lns::retr_globals(interpreter *i) {
-    return i->globals;
-}

@@ -16,9 +16,11 @@
 #include <chrono>
 #include <thread>
 
+
+#define RECURSION_LIMIT 1000
+
 namespace lns {
     class interpreter;
-    runtime_environment *retr_globals(interpreter *i);
 
     class interpreter : public expr_visitor, public stmt_visitor {
     public:
