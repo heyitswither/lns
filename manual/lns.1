@@ -10,25 +10,25 @@ is a simple and interactive scripting language implemented in C++. For informati
 .SH OPTIONS
 .TP
 .BR \-s ", " \-\-silent\-execution
-if a runtime error occurs during execution, silently terminates the program without reporting to stdout.
+if a runtime error occurs during execution, silently terminate the program without reporting to stdout.
 .TP
 .BR \-S ", " \-\-silent\-full
-if any error \-\-either parse or runtime\-\- occurs, silently terminates the program without reporting to stdout.
+if any error \-\-either parse or runtime\-\- occurs, silently terminate the program without reporting to stdout.
 .TP
 .BR \-\-permissive
-enables auto-correction of several errors that would normally cause the program to terminate.
+enable auto-correction of several errors that would normally cause the program to terminate.
 .TP
 .BR \-t ", " \-\-time\-info
-at the end of execution, shows information about the time elapsed after parsing and execution.
+at the end of execution, show information about the time elapsed after parsing and execution.
 .TP
 .BR \-o ", " \-\-parse\-only
-terminates the program after parsing the code.
+terminate the program after parsing the code.
 .TP
 .BR \-f ", " \-\-no\-format
-doesn't use special ANSI escape codes in error messages (for consoles that don't support ANSI).
+don't use special ANSI escape codes in error messages (for shells that don't support ANSI).
 .TP
 .BR \-d ", " \-\-debugger
-starts the program in debugger mode. See the \fBDebugger\fR section for info.
+start the program in debugger mode. See the \fBDebugger\fR section for info.
 .SH DEBUGGER
 The debugger mode allows the user to set breakpoints in the execution. When a break point gets hit, the program enters break mode and the debugger console starts up, which allows the user to check the program status, which includes watching variables and checking the call stack. To start the debugger, use the \fI-d\fR command line option.
 .TP
@@ -38,40 +38,40 @@ The debugger commands are the following:
 .TP
 .TP
 .BR load "|" l " ["\fIfile\fR "]:"
-loads and parses a script file.
+load and parse a script file.
 .TP
 .BR run "|" r ":"
-If a file has been loaded, runs the script with the current breakpoint settings.
+If a file has been loaded, run the script with the current breakpoint settings.
 .TP
 .BR breakpoint "|" b " " set " ["\fIfile\fR "] ["\fIline\fR "]:"
 add a breakpoint at a specified location.
 .TP
 .BR breakpoint "|" b " "  remove " ["\fIid\fR "]:"
-remove a the specified breakpoint.
+remove the specified breakpoint.
 .TP
 .BR breakpoint "|" b " "  list ":"
-lists the registered breakpoints.
+list the registered breakpoints.
 .TP
 .BR breakpoint "|" b " "  load " ["\fIfile\fR "]:"
-loads the breakpoints contained in the specified file (the break points need to be in the format in the format "\fIfilename\fR:\fIline\fR", one per line).
+load the breakpoints contained in the specified file (the break points need to be in the format in the format "\fIfilename\fR:\fIline\fR", one per line).
 .TP
 .BR watch "|" w " ["\fIexpression\fR "]:"
-evaluates the given expression and prints the result.
+evaluate the given expression and print the result.
 .TP
 .BR watch "|" w " "  add " ["\fIexpression\fR "]:"
-adds an expression to the watch list.
+add an expression to the watch list.
 .TP
 .BR watch "|" w " "  remove " ["\fIremove\fR "]:"
-removes the specified watch from the watch list.
+remove the specified watch from the watch list.
 .TP
 .BR watch "|" b " "  all ":"
-evaluates all the expressions in the watch list and shows their value.
+evaluate all the expressions in the watch list and show their value.
 .TP
 .BR step "|" s " (" \fIin\fR "|" \fIout\fR "|" \fIover\fR "):"
-steps onto the next statement to be executed (descending into a function call if necessary), out of the current scope or onto the next statement in the current scope.
+step onto the next statement to be executed (descending into a function call if necessary), out of the current scope or onto the next statement in the current scope.
 .TP
 .BR continue "|" c ":"
-resumes the execution.
+resume the execution.
 .TP
 .BR exit "|" e ":"
-exits the debugger.
+exit the debugger.
