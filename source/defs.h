@@ -147,8 +147,6 @@ namespace lns {
 
         virtual std::string str() const = 0;
 
-        //    return *new string("object::plain");
-        //};
         virtual bool operator==(const object &o) const { WRONG_OP(==) };
 
         virtual bool operator&&(const object &o) const { WRONG_OP(and) };
@@ -490,10 +488,6 @@ namespace lns {
     };
 
     const char *type_to_string(object_type t);
-
-    const inline bool ISFUNCTR(const object * o){
-        return dynamic_cast<const function_container*>(o) == nullptr;
-    }
 
     class exception_definition : public object{
     public:
