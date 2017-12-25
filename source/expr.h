@@ -115,11 +115,12 @@ const object* value;
 
 class unary_expr : public expr {
 public:
-unary_expr(const char* file,int line, token* op, expr* right) : op(op), right(right), expr(line, file, UNARY_EXPR_T) {}
+unary_expr(const char* file,int line, token* op, operator_location location, expr* right) : op(op), location(location), right(right), expr(line, file, UNARY_EXPR_T) {}
 object* accept(expr_visitor *v) override{
 return v->visit_unary_expr(this);
 }
 const token* op;
+const operator_location location;
 const expr* right;
 };
 

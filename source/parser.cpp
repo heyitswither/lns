@@ -404,7 +404,7 @@ expr *parser::assignment(bool nested) {
         throw error(op, "invalid assignment target");
     }
     if(match({PLUS_PLUS,MINUS_MINUS}))
-        return new unary_expr(expr->file,expr->line,previous(),expr);
+        return new unary_expr(expr->file,expr->line,previous(),operator_location ::POSTFIX,expr);
     return expr;
 }
 
@@ -452,7 +452,7 @@ expr *parser::unary(bool nested) {
     if (match({PLUS_PLUS,MINUS_MINUS,NOT, MINUS})) {
         token *op = previous();
         expr *right = unary(true);
-        return new unary_expr(op->filename, op->line, op, right);
+        return new unary_expr(op->filename, op->line, op,operator_location ::PREFIX, right);
     }
     return call(nested);
 }
