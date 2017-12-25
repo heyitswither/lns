@@ -75,3 +75,23 @@ resume the execution.
 .TP
 .BR exit "|" e ":"
 exit the debugger.
+.SH RETURN VALUES
+The program may return the following values:
+.TP
+.BR 0
+Execution terminated successfully.
+.TP
+.BR 1
+A fatal error has occurred (e.g. missing source file, unknown option).
+.TP
+.BR 2
+A parse error has occurred.
+.TP
+.BR 3
+A runtime error has occurred.
+.TP
+.BR 4
+Termination due to an unhandled exception.
+
+.TP
+\fBNote:\fR if the function exitc() is called from inside the code with a return value, that value has precedence over this convention.
