@@ -188,15 +188,20 @@ lns::object *lns::number_o::operator-() const {
 }
 
 lns::object *lns::number_o::operator++() {
-    ++this->value;
-    return new number_o(value - 1);
+    return new number_o(++this->value);
 }
 
 lns::object *lns::number_o::operator--() {
-    --this->value;
-    return new number_o(value + 1);
+    return new number_o(--this->value);
 }
 
+lns::object *lns::number_o::operator++(int) {
+    return new number_o(this->value++);
+}
+
+lns::object *lns::number_o::operator--(int) {
+    return new number_o(this->value++);
+}
 
 lns::bool_o::bool_o(bool value) : object(objtype::BOOL_T), value(value) {}
 
