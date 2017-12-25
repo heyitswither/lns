@@ -8,7 +8,7 @@ CHK(){
 cd "${0%/*}" #make sure we're in the right directory
 cd ..
 
-printf "Removing symbolic link (if present)..."
+sudo printf "Removing symbolic link (if present)..."
 sudo rm -f /usr/bin/lns
 printf " done\n"
 
