@@ -75,5 +75,5 @@ void errors::report(const char *type, const char *filename, int line, const char
     had_parse_error = true;
     if (lns::silent_full) return;
     cerr << type << " in file " << filename << ":" << line << (where == "" ? "" : ",") << where << ": " << message
-         << "." << endl;
+         << ".\n" << endl;
 }
