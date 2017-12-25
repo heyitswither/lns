@@ -11,7 +11,7 @@ const char *lns::createDescription(initializer_list<string> ss) {
         s.append(s1);
     }
     s.append("\n");
-    char *ret = (char *) malloc(s.size());
+    char *ret = (char *) malloc(sizeof(char) * s.size());
     strcpy(ret, s.c_str());
     return ret;
 }
