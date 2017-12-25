@@ -661,7 +661,7 @@ pair<visibility, bool> parser::get_access_specifiers() {
             vis = V_LOCAL;
         }
     }
-    return pair(vis,is_final);
+    return pair<lns::visibility,bool>(vis,is_final);
 }
 
 
