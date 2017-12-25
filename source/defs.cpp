@@ -308,7 +308,9 @@ const char *continue_signal::what() const throw(){
 }
 
 string context::str() const {
-    return *new string("<context>");
+    stringstream s;
+    s << "<context@" << static_cast<const void *>(this) << ">";
+    return s.str();
 }
 
 bool context::operator==(const object &o) const {
@@ -505,7 +507,7 @@ bool callable::operator==(const object &o) const {
 
 string callable::str() const {
     stringstream s;
-    s << "<function@" << static_cast<const void *>(this) << ", name: \"" << name() << "\">";
+    s << "<" << (this->type == NATIVE_CALLABLE_T ? "native_" : "") << "function@" << static_cast<const void *>(this) << ", name: \"" << name() << "\">";
     return s.str();
 }
 
