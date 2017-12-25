@@ -4,17 +4,18 @@
 
 #include "parser.h"
 #include "defs.h"
+#include <utility>
 #include "exceptions.h"
 #include "options.h"
 using namespace lns;
 using namespace std;
 
-lns::object::object() {}
+lns::object::object() : type(object_type::UNSPECIFIED){}
 
 lns::object::object(lns::objtype t) : type(t) {}
 
 
-lns::string_o::string_o(string value) : object(objtype::STRING_T), value(value) {}
+lns::string_o::string_o(string value) : object(objtype::STRING_T), value(std::move(value)) {}
 
 string lns::string_o::str() const {
     return value;
