@@ -8,7 +8,6 @@
 #define BP_DELIMITER string(":")
 #define MAX_BREAKPOINTS 128
 #define MAX_WATCHES 32
-#define CHK_EXEC(s) if(s != nullptr) s->accept(this);
 
 #include <string>
 #include <sstream>
@@ -50,8 +49,6 @@ namespace lns {
         void load(string &filename) override;
 
         void watch(string &expr) override;
-
-        void build_and_run();
 
         void run() override;
 

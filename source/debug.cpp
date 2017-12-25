@@ -269,24 +269,6 @@ void debug::watch(string &expr) {
         cout << "The debugger hasn't started yet. Use the command 'run' to start the debugger" << endl;
 }
 
-void debug::build_and_run() {
-    errors::had_parse_error = false;
-    string &source = open_file(filename);
-    scanner scn(file, source);
-    vector<token *> &tokens = scn.scan_tokens(true);
-    vector<stmt *> stmts;
-    if (errors::had_parse_error) throw parse_exception();
-    parser parser(tokens);
-    vector<stmt *> parsed = parser.parse(false);
-    if (errors::had_parse_error) throw parse_exception();
-    this->stmts.clear();
-    for (stmt *s : parsed) {
-        this->stmts.push_back(s);
-    }
-    cout << "Script parsed and ready to run." << endl;
-    ready = true;
-}
-
 void debug::run() {
     if (!ready) cout << "Load a script first. Use the command 'load' to open a file." << endl;
     else if (started) cout << "The script is already running." << endl;
