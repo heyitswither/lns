@@ -46,6 +46,7 @@ token_type lns::get_token_type(string &key) {
     if (key == "with") return WITH;
     if (key == "raise") return RAISE;
     if (key == "handle") return HANDLE;
+    if (key == "constructor") return CONSTRUCTOR;
     return UNRECOGNIZED;
 }
 
