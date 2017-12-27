@@ -47,6 +47,8 @@ public class generate {
                 "uses_native : token* where, string& lib_name, token* bind",
                 "handle     :  expr* exception_name, token* bind, vector<stmt*>& block",
                 "begin_handle : vector<stmt*>& body, vector<handle_stmt*> handles",
+                "constructor : token* keyword, vector<token*>& parameters, vector<stmt*>& body, visibility visibility",
+                "class_decl : token* name, vector<function_stmt*>& methods, vector<constructor_stmt*>& constructors, vector<var_stmt*> variables, visibility visibility",
                 "null       : token* where"
         ), Arrays.asList("\"expr.h\"","<memory>"), "void");
     }

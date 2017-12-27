@@ -12,7 +12,7 @@ using namespace lns;
 
 namespace lns{
 enum stmt_type{
-BLOCK_STMT_T, EXPRESSION_STMT_T, FUNCTION_STMT_T, CONTEXT_STMT_T, IF_STMT_T, RETURN_STMT_T, BREAK_STMT_T, CONTINUE_STMT_T, VAR_STMT_T, S_WHILE_STMT_T, S_FOR_STMT_T, S_FOR_EACH_STMT_T, EXCEPTION_DECL_STMT_T, RAISE_STMT_T, USES_NATIVE_STMT_T, HANDLE_STMT_T, BEGIN_HANDLE_STMT_T, NULL_STMT_T, 
+BLOCK_STMT_T, EXPRESSION_STMT_T, FUNCTION_STMT_T, CONTEXT_STMT_T, IF_STMT_T, RETURN_STMT_T, BREAK_STMT_T, CONTINUE_STMT_T, VAR_STMT_T, S_WHILE_STMT_T, S_FOR_STMT_T, S_FOR_EACH_STMT_T, EXCEPTION_DECL_STMT_T, RAISE_STMT_T, USES_NATIVE_STMT_T, HANDLE_STMT_T, BEGIN_HANDLE_STMT_T, CONSTRUCTOR_STMT_T, CLASS_DECL_STMT_T, NULL_STMT_T, 
 };
 class stmt_visitor;
 class stmt{
@@ -40,6 +40,8 @@ class raise_stmt;
 class uses_native_stmt;
 class handle_stmt;
 class begin_handle_stmt;
+class constructor_stmt;
+class class_decl_stmt;
 class null_stmt;
 class stmt_visitor{
 public:
@@ -60,6 +62,8 @@ virtual void visit_raise_stmt(raise_stmt *r) = 0;
 virtual void visit_uses_native_stmt(uses_native_stmt *u) = 0;
 virtual void visit_handle_stmt(handle_stmt *h) = 0;
 virtual void visit_begin_handle_stmt(begin_handle_stmt *b) = 0;
+virtual void visit_constructor_stmt(constructor_stmt *c) = 0;
+virtual void visit_class_decl_stmt(class_decl_stmt *c) = 0;
 virtual void visit_null_stmt(null_stmt *n) = 0;
 };
 
@@ -277,6 +281,35 @@ const vector<handle_stmt*> handles;
 
 
 
+class constructor_stmt : public stmt {
+public:
+constructor_stmt(const char* file,int line, token* keyword, vector<token*>& parameters, vector<stmt*>& body, visibility visibility) : keyword(keyword), parameters(parameters), body(body), visibility(visibility), stmt(line, file, CONSTRUCTOR_STMT_T) {}
+void accept(stmt_visitor *v) override{
+v->visit_constructor_stmt(this);
+}
+const token* keyword;
+const vector<token*>& parameters;
+const vector<stmt*>& body;
+const visibility visibility;
+};
+
+
+
+class class_decl_stmt : public stmt {
+public:
+class_decl_stmt(const char* file,int line, token* name, vector<function_stmt*>& methods, vector<constructor_stmt*>& constructors, vector<var_stmt*> variables, visibility visibility) : name(name), methods(methods), constructors(constructors), variables(variables), visibility(visibility), stmt(line, file, CLASS_DECL_STMT_T) {}
+void accept(stmt_visitor *v) override{
+v->visit_class_decl_stmt(this);
+}
+const token* name;
+const vector<function_stmt*>& methods;
+const vector<constructor_stmt*>& constructors;
+const vector<var_stmt*> variables;
+const visibility visibility;
+};
+
+
+
 class null_stmt : public stmt {
 public:
 explicit null_stmt(const char* file,int line, token* where) : where(where), stmt(line, file, NULL_STMT_T) {}
@@ -339,6 +372,12 @@ std::cout << "handle_stmt" << std::endl;
 }
 virtual void visit_begin_handle_stmt(begin_handle_stmt *b) override {
 std::cout << "begin_handle_stmt" << std::endl;
+}
+virtual void visit_constructor_stmt(constructor_stmt *c) override {
+std::cout << "constructor_stmt" << std::endl;
+}
+virtual void visit_class_decl_stmt(class_decl_stmt *c) override {
+std::cout << "class_decl_stmt" << std::endl;
 }
 virtual void visit_null_stmt(null_stmt *n) override {
 std::cout << "null_stmt" << std::endl;
