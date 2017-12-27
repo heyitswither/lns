@@ -107,6 +107,7 @@ namespace lns {
         WITH,
         RAISE,
         HANDLE,
+        CONSTRUCTOR,
         UNRECOGNIZED,
         EOF_
     };
@@ -134,7 +135,7 @@ namespace lns {
                                              "IDENTIFIER", "STRING", "NUMBER", "NATIVES", "AND", "CLASS", "ELSE", "FALSE",
                                              "FUNCTION", "FOR", "FOREACH", "IF", "NUL", "OR", "XOR", "NOR", "NAND", "NOT", "RETURN",
                                              "SUPER", "THIS", "TRUE", "VAR", "WHILE", "GLOBAL","LOCAL", "FINAL", "USE", "BREAK",
-                                             "CONTINUE", "CONTEXT", "BEGIN", "THEN", "DO", "END",  "DPCHECK", "IN", "BIND", "EXCEPTION", "WITH", "RAISE","HANDLE", "UNRECOGNIZED",
+                                             "CONTINUE", "CONTEXT", "BEGIN", "THEN", "DO", "END",  "DPCHECK", "IN", "BIND", "EXCEPTION", "WITH", "RAISE","HANDLE","CONSTRUCTOR", "UNRECOGNIZED",
                                              "EOF_"};
 
     const char* INVALID_OP(const char* OP, const lns::object_type t1, const lns::object_type* t2);
