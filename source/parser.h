@@ -82,7 +82,7 @@ namespace lns {
 
         stmt *expression_statement();
 
-        stmt *function(visibility vis);
+        function_stmt * function(visibility vis);
 
         expr *assignment(bool nested);
 
@@ -132,6 +132,10 @@ namespace lns {
         stmt *begin_handle_statement();
 
         pair<visibility, bool> get_access_specifiers();
+
+        stmt *class_(lns::visibility vis);
+
+        constructor_stmt *constructor(visibility visibility);
     };
 
 

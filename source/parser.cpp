@@ -170,15 +170,39 @@ stmt *parser::declaration() {
         if (match({FUNCTION})) {
             if (is_final)
                 if (!permissive)
-                    throw error(peek(), "keyword 'final' is not allowed for " "functions" " (--permissive)");
+                    throw error(peek(), "keyword 'final' is not allowed for " "\s" " (--permissive)");
             return function(vis);
         }
+        if(match({CLASS})){
+            if (is_final)
+                if (!permissive)
+                    throw error(peek(), "keyword 'final' is not allowed for " "classes" " (--permissive)");
+            return class_(vis);
+        }
+        if(match({CONSTRUCTOR})) throw error(previous(),"constructor outside of class");
         if(specs.first != V_UNSPECIFIED || specs.second) throw error(previous(),"invalid statement");
         return statement();
     } catch (int i) {
         synchronize();
         throw i;
     }
+}
+
+stmt *parser::class_(visibility vis) {
+    token* keyword = previous();
+    token* name = consume(IDENTIFIER,"expected class name");
+    vector<var_stmt*>& variables = *new vector<var_stmt*>();
+    vector<constructor_stmt*>& constructors = *new vector<constructor_stmt*>();
+    vector<function_stmt*>& methods = *new vector<function_stmt*>();
+    while(!(is_at_end() || peek()->type == END)){
+        auto specs = get_access_specifiers();
+        if(match({VAR})) variables.push_back(var_declaration(specs.first,specs.second));
+        else if(match({FUNCTION})) methods.push_back(function(specs.first));
+        else if(match({CONSTRUCTOR})) constructors.push_back(constructor(specs.first));
+        else throw error(peek(),"classes can only contain variables, methods and constructors");
+    }
+    consume(END,EXPTOCLOSE(class declaration,keyword->line).c_str());
+    return new class_decl_stmt(keyword->filename,keyword->line,name,methods,constructors,variables,vis);
 }
 
 int parser::error(token *token, const char *message) {
@@ -332,7 +356,7 @@ stmt *parser::expression_statement() {
     return new expression_stmt(expr->file, expr->line, *expr);
 }
 
-stmt *parser::function(visibility vis) {
+function_stmt * parser::function(visibility vis) {
     token *name = consume(IDENTIFIER, "expected function name");
     consume(LEFT_PAREN, "expected '(' after function name");
     vector<token *> &parameters = *new vector<token *>();
@@ -650,4 +674,22 @@ pair<visibility, bool> parser::get_access_specifiers() {
     return pair<lns::visibility,bool>(vis,is_final);
 }
 
-
+constructor_stmt *parser::constructor(visibility visibility) {
+    token *keyword = previous();
+    consume(LEFT_PAREN, "expected '(' after 'constructor'");
+    vector<token *> &parameters = *new vector<token *>();
+    if (!check(RIGHT_PAREN)) {
+        do {
+            token *t = consume(IDENTIFIER, "expected parameter name");
+            parameters.push_back(t);
+        } while (match({COMMA}));
+    }
+    consume(RIGHT_PAREN, "expected ')' after parameter list");
+    try {
+        vector<stmt *> &body = stmts_until({END});
+        return new constructor_stmt(keyword->filename, keyword->line, keyword, parameters, body, visibility);
+    } catch (int) {
+        int l = keyword->line;
+        throw error(previous(), EXPTOCLOSE(constructor, l).c_str());
+    }
+}
