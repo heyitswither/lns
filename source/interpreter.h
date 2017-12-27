@@ -114,6 +114,9 @@ namespace lns {
         void visit_null_stmt(null_stmt *n) override; //
 
         void visit_context_stmt(context_stmt *c) override;//
+        void visit_constructor_stmt(constructor_stmt *c) override;
+
+        void visit_class_decl_stmt(class_decl_stmt *c) override;
 
     public:
 
