@@ -532,6 +532,14 @@ void interpreter::visit_begin_handle_stmt(begin_handle_stmt *b) {
     }
 }
 
+void interpreter::visit_constructor_stmt(constructor_stmt *c) {
+
+}
+
+void interpreter::visit_class_decl_stmt(class_decl_stmt *c) {
+
+}
+
 const int lns::function::arity() const {
     return static_cast<int>(declaration->parameters.size());
 }
