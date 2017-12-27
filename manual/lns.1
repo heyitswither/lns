@@ -37,37 +37,37 @@ The debugger mode allows the user to set breakpoints in the execution. When a br
 The debugger commands are the following:
 .TP
 .TP
-.BR load "|" l " ["\fIfile\fR "]:"
+.BR load "|" l " "\fIfile\fR ":"
 load and parse a script file.
 .TP
 .BR run "|" r ":"
 If a file has been loaded, run the script with the current breakpoint settings.
 .TP
-.BR breakpoint "|" b " " set " ["\fIfile\fR "] ["\fIline\fR "]:"
+.BR breakpoint "|" b " " set " "\fIfile\fR " "\fIline\fR ":"
 add a breakpoint at a specified location.
 .TP
-.BR breakpoint "|" b " "  remove " ["\fIid\fR "]:"
+.BR breakpoint "|" b " "  remove " "\fIid\fR ":"
 remove the specified breakpoint.
 .TP
 .BR breakpoint "|" b " "  list ":"
 list the registered breakpoints.
 .TP
-.BR breakpoint "|" b " "  load " ["\fIfile\fR "]:"
+.BR breakpoint "|" b " "  load " "\fIfile\fR ":"
 load the breakpoints contained in the specified file (the break points need to be in the format in the format "\fIfilename\fR:\fIline\fR", one per line).
 .TP
-.BR watch "|" w " ["\fIexpression\fR "]:"
+.BR watch "|" w " "\fIexpression\fR ":"
 evaluate the given expression and print the result.
 .TP
-.BR watch "|" w " "  add " ["\fIexpression\fR "]:"
+.BR watch "|" w " "  add " "\fIexpression\fR ":"
 add an expression to the watch list.
 .TP
-.BR watch "|" w " "  remove " ["\fIremove\fR "]:"
+.BR watch "|" w " "  remove " "\fIid\fR ":"
 remove the specified watch from the watch list.
 .TP
 .BR watch "|" b " "  all ":"
 evaluate all the expressions in the watch list and show their value.
 .TP
-.BR step "|" s " (" \fIin\fR "|" \fIout\fR "|" \fIover\fR "):"
+.BR step "|" s " (" in "|" out "|" over "):"
 step onto the next statement to be executed (descending into a function call if necessary), out of the current scope or onto the next statement in the current scope.
 .TP
 .BR continue "|" c ":"
