@@ -206,7 +206,7 @@ void scanner::scan_token() {
         default:
             if (isdigit(c) != 0) {
                 number();
-            } else if (isalpha(c) != 0) {
+            } else if (isalpha(c) != 0 || c == '_') {
                 identifier();
             } else {
                 errors::parse_error(filename, line,
