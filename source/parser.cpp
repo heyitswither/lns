@@ -148,7 +148,7 @@ bool parser::dpcheck() {
 
 stmt *parser::declaration() {
     try {
-        if (match({USE})) return use(0);
+        if (match({USE})) return use();
         if (match({DPCHECK})) {
             if (dpcheck()) throw SIG_EXIT_PARSER;
             return nullptr;
