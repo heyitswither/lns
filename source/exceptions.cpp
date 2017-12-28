@@ -10,7 +10,6 @@ const char *lns::createDescription(initializer_list<string> ss) {
     for(auto &s1 : ss){
         s.append(s1);
     }
-    s.append("\n");
     char *ret = (char *) malloc(sizeof(char) * s.size());
     strcpy(ret, s.c_str());
     return ret;
@@ -38,7 +37,7 @@ const char *lns::wrong_usage_exception::what() const throw(){
 lns::file_not_found_exception::file_not_found_exception(string f) : filename(f) {}
 
 const char *lns::file_not_found_exception::what() const throw(){
-    return createDescription({"File ", filename," doesn't exist or is inaccessible."});
+    return createDescription({FATAL_ERROR_S,": file ", filename," doesn't exist or is inaccessible."});
 }
 
 const char *lns::invalid_operator_exception::what() const throw(){

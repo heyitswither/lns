@@ -29,7 +29,6 @@ void errors::runtime_error(lns::runtime_exception &error, std::vector<lns::stack
     cerr << ".\n";
     cerr << stringstack << endl;
     exit_status = DCAST_CHK(lns::incode_exception*,&error) ? UNHANDLED_EXCEPTION : RUNTIME_ERROR;
-    //printf("%s in file %s%s: %s.\n%s",RUNTIME_ERROR_S,error.token.filename,stringstack.empty() ? (":" + error.token.line) : "",error.what(),stringstack.c_str());
 }
 
 string &errors::gen_stack_trace_desc(lns::stack_call *first_call, std::vector<lns::stack_call *> &stack) {
@@ -39,7 +38,6 @@ string &errors::gen_stack_trace_desc(lns::stack_call *first_call, std::vector<ln
     const char *filename;
     int line;
     lns::stack_call *current = nullptr;
-    //cout << stack[2]->method << endl;
     while (!stack.empty()) {
         current = stack.back();
         method = current->method;
@@ -75,5 +73,5 @@ void errors::report(const char *type, const char *filename, int line, const char
     had_parse_error = true;
     if (lns::silent_full) return;
     cerr << type << " in file " << filename << ":" << line << (where == "" ? "" : ",") << where << ": " << message
-         << ".\n" << endl;
+         << "." << endl;
 }
