@@ -7,10 +7,13 @@
 #include "interpreter.h"
 #include "debug.h"
 #include <iomanip>
-
+#include "signals.h"
 
 #define INTERPRETER_VERSION "0.2"
 #define PROGRAM_START_SIGN "LNS v" INTERPRETER_VERSION ". All rights reserved.\n"
+
+void register_signal_handlers();
+
 using namespace std;
 using namespace errors;
 using namespace lns;
@@ -123,7 +126,16 @@ namespace lns{
         }
     }
 }
+
+
+void register_signal_handlers() {
+    signal(SIGINT,__signal_handler);
+    signal(SIGSEGV,__signal_handler);
+    signal(SIGABRT,__signal_handler);
+}
+
 int main(const int argc, const char* argv[]) {
+    register_signal_handlers();
     try{
         lns::inspect_args(argc - 1, argv);
         if(debugger_option){
