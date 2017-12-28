@@ -303,7 +303,7 @@ void interpreter::visit_expression_stmt(expression_stmt *e) {
 
 void interpreter::visit_function_stmt(function_stmt *f) {
     callable *func = new function(this, f);
-    environment->define(const_cast<token *>(f->name), func, true, f->visibility,f->file);
+    environment->define(const_cast<token *>(f->name), func, true, f->vis,f->file);
 }
 
 void interpreter::visit_if_stmt(if_stmt *i) {
@@ -335,9 +335,9 @@ void interpreter::visit_continue_stmt(continue_stmt *c) {
 void interpreter::visit_var_stmt(var_stmt *v) {
     if (v->initializer.type != NULL_EXPR_T) {
         object* val = evaluate(const_cast<expr *>(&v->initializer));
-        environment->define(const_cast<token *>(v->name), clone_or_keep(val,v->initializer.type,v->name), v->isfinal, v->visibility,v->file);
+        environment->define(const_cast<token *>(v->name), clone_or_keep(val,v->initializer.type,v->name), v->isfinal, v->vis,v->file);
     }else{
-        environment->define(const_cast<token *>(v->name), new null_o, v->isfinal, v->visibility,v->file);
+        environment->define(const_cast<token *>(v->name), new null_o, v->isfinal, v->vis,v->file);
     }
 }
 
@@ -384,7 +384,7 @@ void interpreter::visit_context_stmt(context_stmt *c) {
         execute(s);
     }
     environment = previous;
-    environment->define(c->name, ctx, c->isfinal,c->visibility, c->file);
+    environment->define(c->name, ctx, c->isfinal,c->vis, c->file);
 }
 
 interpreter::interpreter() : stack_trace(*new vector<stack_call *>()){
@@ -450,7 +450,7 @@ object *interpreter::visit_array_expr(array_expr *a) {
 
 void interpreter::visit_exception_decl_stmt(exception_decl_stmt *e) {
     try{
-        environment->define(e->name,new exception_definition(e->file,e->line,e->name->lexeme,e->identifiers),true,e->visibility,e->file);
+        environment->define(e->name,new exception_definition(e->file,e->line,e->name->lexeme,e->identifiers),true,e->vis,e->file);
     }catch(exception_definition& ptr){
         throw runtime_exception(e->name,EXCEPTION_PREVIOUSLY_DEFIDED(ptr.def_file,ptr.def_line));
     }

@@ -343,7 +343,7 @@ namespace lns {
 
         explicit variable();
 
-        variable(lns::visibility visibility, bool is_final,object *value, const char *def_file);
+        variable(lns::visibility vis, bool is_final,object *value, const char *def_file);
 
         const variable& operator=(variable const &v);
     };

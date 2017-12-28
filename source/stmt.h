@@ -162,8 +162,8 @@ namespace lns {
     class function_stmt : public stmt {
     public:
         function_stmt(const char *file, const int line, const token *name, const vector<token *> &parameters,
-                      const vector<stmt *> &body, const visibility visibility) : name(name), parameters(parameters),
-                                                                                 body(body), visibility(visibility),
+                      const vector<stmt *> &body, const visibility vis) : name(name), parameters(parameters),
+                                                                                 body(body), vis(vis),
                                                                                  stmt(line, file, FUNCTION_STMT_T) {}
 
         void accept(stmt_visitor *v) override {
@@ -173,14 +173,14 @@ namespace lns {
         const token *name;
         const vector<token *> &parameters;
         const vector<stmt *> &body;
-        const visibility visibility;
+        const visibility vis;
     };
 
 
     class context_stmt : public stmt {
     public:
         context_stmt(const char *file, const int line, const token *name, const vector<stmt *> body,
-                     const visibility visibility, const bool isfinal) : name(name), body(body), visibility(visibility),
+                     const visibility vis, const bool isfinal) : name(name), body(body), vis(vis),
                                                                         isfinal(isfinal),
                                                                         stmt(line, file, CONTEXT_STMT_T) {}
 
@@ -190,7 +190,7 @@ namespace lns {
 
         const token *name;
         const vector<stmt *> body;
-        const visibility visibility;
+        const visibility vis;
         const bool isfinal;
     };
 
@@ -256,8 +256,8 @@ namespace lns {
     class var_stmt : public stmt {
     public:
         var_stmt(const char *file, const int line, const token *name, const expr &initializer,
-                 const visibility visibility, const bool isfinal) : name(name), initializer(initializer),
-                                                                    visibility(visibility), isfinal(isfinal),
+                 const visibility vis, const bool isfinal) : name(name), initializer(initializer),
+                                                                    vis(vis), isfinal(isfinal),
                                                                     stmt(line, file, VAR_STMT_T) {}
 
         void accept(stmt_visitor *v) override {
@@ -266,7 +266,7 @@ namespace lns {
 
         const token *name;
         const expr &initializer;
-        const visibility visibility;
+        const visibility vis;
         const bool isfinal;
     };
 
@@ -323,7 +323,7 @@ namespace lns {
     class exception_decl_stmt : public stmt {
     public:
         exception_decl_stmt(const char *file, const int line, const token *name, const set<string> &identifiers,
-                            const visibility visibility) : name(name), identifiers(identifiers), visibility(visibility),
+                            const visibility vis) : name(name), identifiers(identifiers), vis(vis),
                                                            stmt(line, file, EXCEPTION_DECL_STMT_T) {}
 
         void accept(stmt_visitor *v) override {
@@ -332,7 +332,7 @@ namespace lns {
 
         const token *name;
         const set<string> &identifiers;
-        const visibility visibility;
+        const visibility vis;
     };
 
 
@@ -402,9 +402,9 @@ namespace lns {
     class constructor_stmt : public stmt {
     public:
         constructor_stmt(const char *file, const int line, const token *keyword, const vector<token *> &parameters,
-                         const vector<stmt *> &body, const visibility visibility) : keyword(keyword),
+                         const vector<stmt *> &body, const visibility vis) : keyword(keyword),
                                                                                     parameters(parameters), body(body),
-                                                                                    visibility(visibility),
+                                                                                    vis(vis),
                                                                                     stmt(line, file,
                                                                                          CONSTRUCTOR_STMT_T) {}
 
@@ -415,7 +415,7 @@ namespace lns {
         const token *keyword;
         const vector<token *> &parameters;
         const vector<stmt *> &body;
-        const visibility visibility;
+        const visibility vis;
     };
 
 
@@ -423,8 +423,8 @@ namespace lns {
     public:
         class_decl_stmt(const char *file, const int line, const token *name, const vector<function_stmt *> &methods,
                         const vector<constructor_stmt *> &constructors, const vector<var_stmt *> variables,
-                        const visibility visibility) : name(name), methods(methods), constructors(constructors),
-                                                       variables(variables), visibility(visibility),
+                        const visibility vis) : name(name), methods(methods), constructors(constructors),
+                                                       variables(variables), vis(vis),
                                                        stmt(line, file, CLASS_DECL_STMT_T) {}
 
         void accept(stmt_visitor *v) override {
@@ -435,7 +435,7 @@ namespace lns {
         const vector<function_stmt *> &methods;
         const vector<constructor_stmt *> &constructors;
         const vector<var_stmt *> variables;
-        const visibility visibility;
+        const visibility vis;
     };
 
 
