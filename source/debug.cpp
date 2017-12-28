@@ -12,10 +12,11 @@ breakpoint::breakpoint(const char *file, int line) : filename(file), line(line) 
 
 lns::watch::watch(string &text, expr *expr) : text(text), e(expr) {}
 
-lns::debugger::debugger(lns::debug *debug) : debug_env(debug),
-                                             expr_scanner(*new scanner("", *new string())),
+lns::debugger::debugger(lns::debug *debug) : expr_scanner(*new scanner("", *new string())),
                                              expr_parser(*new parser(*new vector<token *>())),
-                                             current_action(CONTINUE_A) {}
+                                             debug_env(debug),
+                                             current_action(CONTINUE_A),
+                                             depth(0){}
 
 bool lns::debugger::set_break_point(breakpoint *p, bool silent) {
     int i;
