@@ -27,7 +27,7 @@ void errors::runtime_error(lns::runtime_exception &error, std::vector<lns::stack
     cerr << ": ";
     cerr << error.what();
     cerr << ".\n";
-    cerr << stringstack << endl;
+    cerr << stringstack;
     exit_status = DCAST_CHK(lns::incode_exception*,&error) ? UNHANDLED_EXCEPTION : RUNTIME_ERROR;
 }
 
