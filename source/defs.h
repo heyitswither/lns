@@ -476,11 +476,11 @@ namespace lns {
 
     class runtime_exception : public std::exception {
     public:
-        std::string &message;
+        const char *message;
         bool native_throw;
         const lns::token *token;
-        runtime_exception(const char *filename, int line, std::string& message);
-        runtime_exception(const lns::token *token, std::string &m);
+        runtime_exception(const char *filename, int line, const char* message);
+        runtime_exception(const lns::token *token, const char *m);
 
         const char *what() const throw() override;
     };
