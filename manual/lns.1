@@ -92,6 +92,8 @@ A runtime error has occurred.
 .TP
 .BR 4
 Termination due to an unhandled exception.
-
+.TP
+.BR 128 " + " \fIi\fR
+Termination due to signal no. \fIi\fR.
 .TP
 \fBNote:\fR if the function exitc() is called from inside the code with a return value, that value has precedence over this convention.
