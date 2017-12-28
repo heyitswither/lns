@@ -359,7 +359,7 @@ object *runtime_environment::get(const token *name, const char *accessing_file) 
         }
         return s.value;
     }
-    if (enclosing != nullptr) return enclosing->get(name, nullptr);
+    if (enclosing != nullptr) return enclosing->get(name, accessing_file);
     if (permissive) { return lns::GET_DEFAULT_NULL(); }
     throw runtime_exception(name, VARIABLE_UNDEFINED(name->lexeme));
 }
