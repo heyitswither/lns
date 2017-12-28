@@ -7,7 +7,6 @@
 #include <exception>
 #include <string>
 #include "defs.h"
-#include "cstring"
 #include "options.h"
 #include <initializer_list>
 #define FATAL_ERROR_UNFORMATTED   "Fatal error"
@@ -23,8 +22,6 @@
 #define RUNTIME_ERROR_S (lns::no_format ? (RUNTIME_ERROR_UNFORMATTED) : (RUNTIME_ERROR_FORMATTED))
 
 namespace lns {
-
-    const char *createDescription(std::initializer_list<std::string> ss);
 
     class unknown_option_exception : public std::exception {
         std::string option;

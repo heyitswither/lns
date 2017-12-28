@@ -16,8 +16,8 @@
 
 /*  SCANNER ERRORS  */
 #define UNTERMINATED(what) "unterminated " what
-#define INVALID_ESCAPE_CHARACTER(c) createDescription({"Invalid escape character '", c, "'"})
-#define UNEXPECTED_CHARACTER(c) createDescription({"Unexpected character '", c, "'"})
+#define INVALID_ESCAPE_CHARACTER(c) lns::concat({"Invalid escape character '", c, "'"})
+#define UNEXPECTED_CHARACTER(c) lns::concat({"Unexpected character '", c, "'"})
 #define UNTERMINATED_BLOCK_COMMENT "unterminated block comment"
 
 /* PARSER ERRORS */
@@ -26,7 +26,7 @@
 #define EXPECTED_AFTER(what, after) "expected " what " after " after
 #define EXPECTED_IN(what,in) "expected " what " in " in
 #define CAN_ONLY_CONTAIN(a,b) a " can only contain " b
-#define EXPTOCLOSE(what, line) createDescription({"expected 'end' to close ", what ," (opened at line ", std::to_string(line), ")"})
+#define EXPTOCLOSE(what, line) lns::concat({"expected 'end' to close ", what ," (opened at line ", std::to_string(line), ")"})
 #define ACCESS_SPEC_NOT_ALLOWED(key,for_) "Access specifier '" key "' is not allowed for " for_ " (--permissive)"
 #define CONSTRUCTOR_OUTSIDE_OF_CLASS "constructor outside of class"
 #define INVALID_STATEMENT "invalid statement"

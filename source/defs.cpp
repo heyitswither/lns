@@ -606,3 +606,13 @@ bool exception_definition::operator==(const object &o) const {
 object *exception_definition::clone() const {
     return nullptr;
 }
+
+const char *lns::concat(initializer_list<string> ss) {
+    string s;
+    for(auto &s1 : ss){
+        s.append(s1);
+    }
+    char *ret = (char *) malloc(sizeof(char) * s.size());
+    strcpy(ret, s.c_str());
+    return ret;
+}

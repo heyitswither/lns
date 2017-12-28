@@ -14,6 +14,8 @@
 #include <vector>
 #include <set>
 #include <unordered_map>
+#include <exception>
+#include "cstring"
 
 
 #define NATIVE_RUNTIME_EXC(msg) throw runtime_exception(__FILE__,__LINE__,*new std::string(msg));
@@ -32,6 +34,7 @@
 #define CHARSTR(c) string(1,c)
 
 #define CODE_LEAK_ERROR (-250)
+
 
 
 namespace lns {
@@ -516,6 +519,8 @@ namespace lns {
 
         object *clone() const override;
     };
+
+    const char *concat(std::initializer_list<std::__cxx11::string> ss);
 
 }
 
