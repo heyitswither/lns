@@ -15,7 +15,8 @@
 #include <fstream>
 #include <climits>
 
-#define EXPTOCLOSE(what, line) (string("expected 'end' to close " #what " (opened at line ") + std::to_string(line) + string(")"))
+#define CHECK_ACCESS_SPEC_NOT_ALLOWED(condition,spec,for_) if(condition && !lns::permissive) throw error(previous(),ACCESS_SPEC_NOT_ALLOWED(spec,for_));
+
 #define SIG_EXIT_PARSER (4096)
 
 using namespace std;
@@ -99,8 +100,6 @@ namespace lns {
         expr *unary(bool nested);
 
         expr *call(bool nested);
-
-        expr *finish_call(expr *callee);
 
         expr *special_assignment(bool nested);
 
