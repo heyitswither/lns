@@ -111,15 +111,14 @@ object *interpreter::visit_binary_expr(binary_expr *b) {
                 return (*left - *right);
             case PLUS:
                 return (*left + *right);
-        }
-        if (type == SLASH) {
-            return (*left / *right);
-        }
-        if (type == STAR) {
-            return (*left * *right);
-        }
-        if (type == HAT) {
-            return (*left ^ *right);
+            case SLASH:
+                return (*left / *right);
+            case STAR:
+                return (*left * *right);
+            case HAT:
+                return (*left ^ *right);
+            default:
+                break;
         }
     } catch (const char* p) {
         throw runtime_exception(b->op, p);
@@ -176,6 +175,8 @@ object *interpreter::visit_unary_expr(unary_expr *u) {//
                 return new bool_o(is_bool_true_eq(!*right));
             case MINUS:
                 return (-*right);
+            default:
+                break;
         }
     } catch (const char *p) {
         throw runtime_exception(u->op, p);
@@ -235,6 +236,8 @@ object *interpreter::assign_map_field(const token *where, object *obj, const tok
                 break;
             case SLASH_EQUALS:
                 *(map->values[key->value]) /= *value;
+                break;
+            default:
                 break;
         }
         return map->values[key->value];
@@ -297,8 +300,9 @@ void interpreter::visit_expression_stmt(expression_stmt *e) {
         case SUB_SCRIPT_ASSIGN_EXPR_T:
         case MEMBER_ASSIGN_EXPR_T:
             return;
+        default:
+            cout << o->str() << endl;
     }
-    cout << o->str() << endl;
 }
 
 void interpreter::visit_function_stmt(function_stmt *f) {
@@ -427,6 +431,7 @@ object *interpreter::clone_or_keep(object *obj, const expr_type type, const toke
         case SUB_SCRIPT_ASSIGN_EXPR_T:
         case MEMBER_ASSIGN_EXPR_T:
             return obj;
+        default: break;
     }
     object* ret = obj->clone();
     if(ret == nullptr) throw runtime_exception(where,ILLEGAL_ASSIGNMENT);
