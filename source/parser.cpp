@@ -73,7 +73,9 @@ stmt *parser::use() {
     string &s = dynamic_cast<string_o *>(t->literal)->value;
     if (isnatives) {
         consume(BIND, EXPECTED_AFTER("'bind'","filename"));
-        return new uses_native_stmt(t->filename, t->line, t, s, consume(IDENTIFIER, EXPECTED_AFTER("identifier","'bind'")));
+        auto specs = get_access_specifiers();
+        CHECK_ACCESS_SPEC_NOT_ALLOWED(specs.second,"final","native bound")
+        return new uses_native_stmt(t->filename, t->line, t, s, consume(IDENTIFIER, EXPECTED_AFTER("identifier","'bind'")),specs.first);
     }
     ld_stmts(s);
     return nullptr;
@@ -146,7 +148,7 @@ bool parser::dpcheck() {
 
 stmt *parser::declaration() {
     try {
-        if (match({USE})) return use();
+        if (match({USE})) return use(0);
         if (match({DPCHECK})) {
             if (dpcheck()) throw SIG_EXIT_PARSER;
             return nullptr;

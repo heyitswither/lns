@@ -44,7 +44,7 @@ public class generate {
                 "s_for_each : token* identifier, expr* container, stmt* body",
                 "exception_decl : token* name, set<string>& identifiers, visibility vis",
                 "raise      : token* where, expr* name, map<string,expr*>& fields",
-                "uses_native : token* where, string& lib_name, token* bind",
+                "uses_native : token* where, string& lib_name, token* bind, visibility vis",
                 "handle     :  expr* exception_name, token* bind, vector<stmt*>& block",
                 "begin_handle : vector<stmt*>& body, vector<handle_stmt*> handles",
                 "constructor : token* keyword, vector<token*>& parameters, vector<stmt*>& body, visibility vis",

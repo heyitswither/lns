@@ -366,7 +366,7 @@ void interpreter::visit_uses_native_stmt(uses_native_stmt *u) {
         supplier* suppl = (supplier*)dlsym(handler,"supplier");
         if(!suppl) throw dlerror();
         object *obj = suppl();
-        globals->define(u->bind,obj,true,V_GLOBAL,u->file);
+        globals->define(u->bind,obj,true,u->vis,u->file);
         function_container* ptr;
         if(obj->type == NATIVE_CALLABLE_T)
             globals->add_native(DCAST(callable*,obj));
