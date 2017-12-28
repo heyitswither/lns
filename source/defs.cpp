@@ -470,7 +470,7 @@ const variable& variable::operator=(const variable &v) {
     return *this;
 }
 
-variable::variable(lns::visibility visibility, bool is_final, object *value, const char *def_file) : visibility_ (visibility), value(value), is_final(is_final), def_file(def_file) {}
+variable::variable(lns::visibility vis, bool is_final, object *value, const char *def_file) : visibility_ (vis), value(value), is_final(is_final), def_file(def_file) {}
 
 
 lns::runtime_exception::runtime_exception(const lns::token *token, const char *m) : native_throw(false),message(m), token(token) {}
@@ -571,7 +571,7 @@ const char *incode_exception::what() const throw() {
     s += "\"";
     if(this->fields.find("message") != this->fields.end()){
         s += " (message = \"";
-        s += fields["message"]->str();
+        s += fields.at("message")->str();
         s += "\")";
     }
     return s.c_str();
