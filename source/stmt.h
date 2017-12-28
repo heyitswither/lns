@@ -69,7 +69,7 @@ virtual void visit_null_stmt(null_stmt *n) = 0;
 
 class block_stmt : public stmt {
 public:
-explicit block_stmt(const char* file,int line, vector<stmt*>& statements) : statements(statements), stmt(line, file, BLOCK_STMT_T) {}
+explicit block_stmt(const char* file,const int line, const vector<stmt*>& statements) : statements(statements), stmt(line, file, BLOCK_STMT_T) {}
 void accept(stmt_visitor *v) override{
 v->visit_block_stmt(this);
 }
@@ -80,7 +80,7 @@ const vector<stmt*>& statements;
 
 class expression_stmt : public stmt {
 public:
-explicit expression_stmt(const char* file,int line, expr& exprs) : exprs(exprs), stmt(line, file, EXPRESSION_STMT_T) {}
+explicit expression_stmt(const char* file,const int line, const expr& exprs) : exprs(exprs), stmt(line, file, EXPRESSION_STMT_T) {}
 void accept(stmt_visitor *v) override{
 v->visit_expression_stmt(this);
 }
@@ -91,7 +91,7 @@ const expr& exprs;
 
 class function_stmt : public stmt {
 public:
-function_stmt(const char* file,int line, token* name, vector<token*>& parameters, vector<stmt*>& body, visibility visibility) : name(name), parameters(parameters), body(body), visibility(visibility), stmt(line, file, FUNCTION_STMT_T) {}
+function_stmt(const char* file,const int line, const token* name, const vector<token*>& parameters, const vector<stmt*>& body, const visibility visibility) : name(name), parameters(parameters), body(body), visibility(visibility), stmt(line, file, FUNCTION_STMT_T) {}
 void accept(stmt_visitor *v) override{
 v->visit_function_stmt(this);
 }
@@ -105,7 +105,7 @@ const visibility visibility;
 
 class context_stmt : public stmt {
 public:
-context_stmt(const char* file,int line, token* name, vector<stmt*> body, visibility visibility, bool isfinal) : name(name), body(body), visibility(visibility), isfinal(isfinal), stmt(line, file, CONTEXT_STMT_T) {}
+context_stmt(const char* file,const int line, const token* name, const vector<stmt*> body, const visibility visibility, const bool isfinal) : name(name), body(body), visibility(visibility), isfinal(isfinal), stmt(line, file, CONTEXT_STMT_T) {}
 void accept(stmt_visitor *v) override{
 v->visit_context_stmt(this);
 }
@@ -119,7 +119,7 @@ const bool isfinal;
 
 class if_stmt : public stmt {
 public:
-if_stmt(const char* file,int line, expr& condition, stmt* thenBranch, stmt* elseBranch) : condition(condition), thenBranch(thenBranch), elseBranch(elseBranch), stmt(line, file, IF_STMT_T) {}
+if_stmt(const char* file,const int line, const expr& condition, const stmt* thenBranch, const stmt* elseBranch) : condition(condition), thenBranch(thenBranch), elseBranch(elseBranch), stmt(line, file, IF_STMT_T) {}
 void accept(stmt_visitor *v) override{
 v->visit_if_stmt(this);
 }
@@ -132,7 +132,7 @@ const stmt* elseBranch;
 
 class return_stmt : public stmt {
 public:
-return_stmt(const char* file,int line, token* keyword, expr& value) : keyword(keyword), value(value), stmt(line, file, RETURN_STMT_T) {}
+return_stmt(const char* file,const int line, const token* keyword, const expr& value) : keyword(keyword), value(value), stmt(line, file, RETURN_STMT_T) {}
 void accept(stmt_visitor *v) override{
 v->visit_return_stmt(this);
 }
@@ -144,7 +144,7 @@ const expr& value;
 
 class break_stmt : public stmt {
 public:
-explicit break_stmt(const char* file,int line, token* keyword) : keyword(keyword), stmt(line, file, BREAK_STMT_T) {}
+explicit break_stmt(const char* file,const int line, const token* keyword) : keyword(keyword), stmt(line, file, BREAK_STMT_T) {}
 void accept(stmt_visitor *v) override{
 v->visit_break_stmt(this);
 }
@@ -155,7 +155,7 @@ const token* keyword;
 
 class continue_stmt : public stmt {
 public:
-explicit continue_stmt(const char* file,int line, token* keyword) : keyword(keyword), stmt(line, file, CONTINUE_STMT_T) {}
+explicit continue_stmt(const char* file,const int line, const token* keyword) : keyword(keyword), stmt(line, file, CONTINUE_STMT_T) {}
 void accept(stmt_visitor *v) override{
 v->visit_continue_stmt(this);
 }
@@ -166,7 +166,7 @@ const token* keyword;
 
 class var_stmt : public stmt {
 public:
-var_stmt(const char* file,int line, token* name, expr& initializer, visibility visibility, bool isfinal) : name(name), initializer(initializer), visibility(visibility), isfinal(isfinal), stmt(line, file, VAR_STMT_T) {}
+var_stmt(const char* file,const int line, const token* name, const expr& initializer, const visibility visibility, const bool isfinal) : name(name), initializer(initializer), visibility(visibility), isfinal(isfinal), stmt(line, file, VAR_STMT_T) {}
 void accept(stmt_visitor *v) override{
 v->visit_var_stmt(this);
 }
@@ -180,7 +180,7 @@ const bool isfinal;
 
 class s_while_stmt : public stmt {
 public:
-s_while_stmt(const char* file,int line, expr& condition, stmt* body) : condition(condition), body(body), stmt(line, file, S_WHILE_STMT_T) {}
+s_while_stmt(const char* file,const int line, const expr& condition, const stmt* body) : condition(condition), body(body), stmt(line, file, S_WHILE_STMT_T) {}
 void accept(stmt_visitor *v) override{
 v->visit_s_while_stmt(this);
 }
@@ -192,7 +192,7 @@ const stmt* body;
 
 class s_for_stmt : public stmt {
 public:
-s_for_stmt(const char* file,int line, stmt* init, expr* condition, expr* increment, stmt* body) : init(init), condition(condition), increment(increment), body(body), stmt(line, file, S_FOR_STMT_T) {}
+s_for_stmt(const char* file,const int line, const stmt* init, const expr* condition, const expr* increment, const stmt* body) : init(init), condition(condition), increment(increment), body(body), stmt(line, file, S_FOR_STMT_T) {}
 void accept(stmt_visitor *v) override{
 v->visit_s_for_stmt(this);
 }
@@ -206,7 +206,7 @@ const stmt* body;
 
 class s_for_each_stmt : public stmt {
 public:
-s_for_each_stmt(const char* file,int line, token* identifier, expr* container, stmt* body) : identifier(identifier), container(container), body(body), stmt(line, file, S_FOR_EACH_STMT_T) {}
+s_for_each_stmt(const char* file,const int line, const token* identifier, const expr* container, const stmt* body) : identifier(identifier), container(container), body(body), stmt(line, file, S_FOR_EACH_STMT_T) {}
 void accept(stmt_visitor *v) override{
 v->visit_s_for_each_stmt(this);
 }
@@ -219,7 +219,7 @@ const stmt* body;
 
 class exception_decl_stmt : public stmt {
 public:
-exception_decl_stmt(const char* file,int line, token* name, set<string>& identifiers, visibility visibility) : name(name), identifiers(identifiers), visibility(visibility), stmt(line, file, EXCEPTION_DECL_STMT_T) {}
+exception_decl_stmt(const char* file,const int line, const token* name, const set<string>& identifiers, const visibility visibility) : name(name), identifiers(identifiers), visibility(visibility), stmt(line, file, EXCEPTION_DECL_STMT_T) {}
 void accept(stmt_visitor *v) override{
 v->visit_exception_decl_stmt(this);
 }
@@ -232,7 +232,7 @@ const visibility visibility;
 
 class raise_stmt : public stmt {
 public:
-raise_stmt(const char* file,int line, token* where, expr* name, map<string,expr*>& fields) : where(where), name(name), fields(fields), stmt(line, file, RAISE_STMT_T) {}
+raise_stmt(const char* file,const int line, const token* where, const expr* name, const map<string,expr*>& fields) : where(where), name(name), fields(fields), stmt(line, file, RAISE_STMT_T) {}
 void accept(stmt_visitor *v) override{
 v->visit_raise_stmt(this);
 }
@@ -245,7 +245,7 @@ const map<string,expr*>& fields;
 
 class uses_native_stmt : public stmt {
 public:
-uses_native_stmt(const char* file,int line, token* where, string& lib_name, token* bind) : where(where), lib_name(lib_name), bind(bind), stmt(line, file, USES_NATIVE_STMT_T) {}
+uses_native_stmt(const char* file,const int line, const token* where, const string& lib_name, const token* bind) : where(where), lib_name(lib_name), bind(bind), stmt(line, file, USES_NATIVE_STMT_T) {}
 void accept(stmt_visitor *v) override{
 v->visit_uses_native_stmt(this);
 }
@@ -258,7 +258,7 @@ const token* bind;
 
 class handle_stmt : public stmt {
 public:
-handle_stmt(const char* file,int line, expr* exception_name, token* bind, vector<stmt*>& block) : exception_name(exception_name), bind(bind), block(block), stmt(line, file, HANDLE_STMT_T) {}
+handle_stmt(const char* file,const int line, const expr* exception_name, const token* bind, const vector<stmt*>& block) : exception_name(exception_name), bind(bind), block(block), stmt(line, file, HANDLE_STMT_T) {}
 void accept(stmt_visitor *v) override{
 v->visit_handle_stmt(this);
 }
@@ -271,7 +271,7 @@ const vector<stmt*>& block;
 
 class begin_handle_stmt : public stmt {
 public:
-begin_handle_stmt(const char* file,int line, vector<stmt*>& body, vector<handle_stmt*> handles) : body(body), handles(handles), stmt(line, file, BEGIN_HANDLE_STMT_T) {}
+begin_handle_stmt(const char* file,const int line, const vector<stmt*>& body, const vector<handle_stmt*> handles) : body(body), handles(handles), stmt(line, file, BEGIN_HANDLE_STMT_T) {}
 void accept(stmt_visitor *v) override{
 v->visit_begin_handle_stmt(this);
 }
@@ -283,7 +283,7 @@ const vector<handle_stmt*> handles;
 
 class constructor_stmt : public stmt {
 public:
-constructor_stmt(const char* file,int line, token* keyword, vector<token*>& parameters, vector<stmt*>& body, visibility visibility) : keyword(keyword), parameters(parameters), body(body), visibility(visibility), stmt(line, file, CONSTRUCTOR_STMT_T) {}
+constructor_stmt(const char* file,const int line, const token* keyword, const vector<token*>& parameters, const vector<stmt*>& body, const visibility visibility) : keyword(keyword), parameters(parameters), body(body), visibility(visibility), stmt(line, file, CONSTRUCTOR_STMT_T) {}
 void accept(stmt_visitor *v) override{
 v->visit_constructor_stmt(this);
 }
@@ -297,7 +297,7 @@ const visibility visibility;
 
 class class_decl_stmt : public stmt {
 public:
-class_decl_stmt(const char* file,int line, token* name, vector<function_stmt*>& methods, vector<constructor_stmt*>& constructors, vector<var_stmt*> variables, visibility visibility) : name(name), methods(methods), constructors(constructors), variables(variables), visibility(visibility), stmt(line, file, CLASS_DECL_STMT_T) {}
+class_decl_stmt(const char* file,const int line, const token* name, const vector<function_stmt*>& methods, const vector<constructor_stmt*>& constructors, const vector<var_stmt*> variables, const visibility visibility) : name(name), methods(methods), constructors(constructors), variables(variables), visibility(visibility), stmt(line, file, CLASS_DECL_STMT_T) {}
 void accept(stmt_visitor *v) override{
 v->visit_class_decl_stmt(this);
 }
@@ -312,7 +312,7 @@ const visibility visibility;
 
 class null_stmt : public stmt {
 public:
-explicit null_stmt(const char* file,int line, token* where) : where(where), stmt(line, file, NULL_STMT_T) {}
+explicit null_stmt(const char* file,const int line, const token* where) : where(where), stmt(line, file, NULL_STMT_T) {}
 void accept(stmt_visitor *v) override{
 v->visit_null_stmt(this);
 }

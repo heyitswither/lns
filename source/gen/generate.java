@@ -126,17 +126,35 @@ public class generate {
     public static void defineType(PrintWriter writer, String baseName, String className, String types, String vReturnType) {
         writer.println("\nclass " + className + "_" + baseName + " : public " + baseName + " {");
         writer.println("public:");
-        String[] fieldArray = types.split(", ");
+        String[] fieldArray = genFieldArray(types);
         writer.print(fieldArray.length == 1 ? "explicit " : "");
-        writer.println(className + "_" + baseName + "(const char* file,int line, " + types + ") : " + genFieldsAssign(fieldArray) + ", " + baseName + "(line, file, " + className.toUpperCase() + "_" + baseName.toUpperCase() + "_T" + ") {}");
+        writer.println(className + "_" + baseName + "(const char* file,const int line, " + concatTypes(fieldArray) + ") : " + genFieldsAssign(types.split(", ")) + ", " + baseName + "(line, file, " + className.toUpperCase() + "_" + baseName.toUpperCase() + "_T" + ") {}");
         writer.println(vReturnType + " accept(" + visitorName + " *v) override{");
         writer.println((vReturnType == "void" ? "" : "return ") +  "v->visit_" + className + "_" + baseName + "(this);");
         writer.println("}");
         for (String s : fieldArray) {
-            writer.println("const " + s + ";");
+            writer.println(s + ";");
         }
         writer.println("};");
         writer.println("\n");
+    }
+
+    public static String concatTypes(String[] fields){
+        String s = "";
+        for(String t : fields){
+            s += t + ", ";
+        }
+        return s.substring(0, s.length() - 2);
+    }
+
+
+    public static String[] genFieldArray(String types){
+        String[] nonConst = types.split(", ");
+        String[] fixed = new String[nonConst.length];
+        for(int i = 0; i < nonConst.length; i++){
+            fixed[i] = "const " + nonConst[i];
+        }
+        return fixed;
     }
 
     public static String genFieldsAssign(String[] fields) {
