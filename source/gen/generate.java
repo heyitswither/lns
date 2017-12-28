@@ -110,8 +110,9 @@ public class generate {
                 writer.println("public:");
                 for(String type : types){
                     String className = type.split(":")[0].trim() + "_" + baseName;
-                    writer.println("virtual " + vReturnType + " visit_" + className + "(" + className + " *" + className.charAt(0) + ") override {");
+                    writer.println(vReturnType + " visit_" + className + "(" + className + " *" + className.charAt(0) + ") override {");
                     writer.println("std::cout << \"" + className + "\" << std::endl;");
+                    if(vReturnType.endsWith("*")) writer.println("return nullptr;");
                     writer.println("}");
                 }
         writer.println("};");
