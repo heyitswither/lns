@@ -2,7 +2,7 @@
 // Created by lorenzo on 12/5/17.
 //
 #include "defs.h"
-#include <iostream>
+#include <cstdio>
 using namespace lns;
 class print_c : public callable{
 public:
@@ -15,7 +15,7 @@ public:
     }
 
     object *call(std::vector<object *> &args) override {
-        std::cout << args[0]->str();
+        printf(args[0]->str().c_str());
     }
 };
 
