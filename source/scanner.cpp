@@ -70,7 +70,6 @@ void scanner::reset(const char *filename, std::string &source) {
 }
 
 vector<token *> &scanner::scan_tokens(bool addEOF) {
-    //cout << source << endl;
     while (!is_at_end()) {
         start = current;
         scan_token();
@@ -105,7 +104,7 @@ void scanner::number() {
 }
 
 void scanner::identifier() {
-    while (isalnum(peek()) || peek() == '_' != 0) advance();
+    while (isalnum(peek()) || peek() == '_') advance();
     string text = source.substr(start, (current) - (start));
     token_type type = get_token_type(text);
     if (type == UNRECOGNIZED) type = IDENTIFIER;
@@ -121,7 +120,7 @@ void scanner::block_comment() {
     while (!is_at_end()) {
         if (advance() == '*') if (match('/')) return;
     }
-    errors::parse_error(filename, line, "unterminated block comment");
+    errors::parse_error(filename, line, UNTERMINATED_BLOCK_COMMENT);
 }
 
 void scanner::scan_token() {
@@ -211,14 +210,14 @@ void scanner::scan_token() {
                 identifier();
             } else {
                 errors::parse_error(filename, line,
-                                    (string("unexpected character '") + string(1, c) + string("'")).c_str());
+                                    (UNEXPECTED_CHARACTER(CHARSTR(c))));
             }
     }
 }
 
 void scanner::add_token(token_type type, object *f) {
     std::string text = source.substr(start, current - start);
-    token *t = new token(type, text.c_str(), f, filename, line);
+    token *t = new token(type, text, f, filename, line);
     tokens.push_back(t);
 }
 
@@ -275,11 +274,7 @@ void scanner::string_() {
                     s += '\"';
                     break;
                 default:
-                    string &error = *new string();
-                    error += "Invalid escape character: '";
-                    error += c;
-                    error += "'";
-                    errors::parse_error(filename, line, error.c_str());
+                    errors::parse_error(filename, line, INVALID_ESCAPE_CHARACTER(CHARSTR(c)));
                     break;
             }
             advance();
@@ -288,7 +283,7 @@ void scanner::string_() {
         }
     }
     if (is_at_end()) {
-        errors::parse_error(filename, line, "unterminated string");
+        errors::parse_error(filename, line, UNTERMINATED("string"));
         return;
     }
     advance();
