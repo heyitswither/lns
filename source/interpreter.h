@@ -40,13 +40,6 @@ namespace lns {
         expr_visitor *dev;
 
 
-        void check_bool_operands(const token *op, object *left, object *right);
-
-        void check_number_operands(const token *op, object *left, object *right);
-
-        void check_number_operand(const token *token, object *o);
-
-
     public:
         static bool is_bool_true_eq(object *o);
 

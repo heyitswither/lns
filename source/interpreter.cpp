@@ -20,21 +20,6 @@ object *interpreter::evaluate(expr *e) {
     return o == nullptr ? lns::GET_DEFAULT_NULL() : o;
 }
 
-void interpreter::check_bool_operands(const token *op, object *left, object *right) {
-    if (left->type == BOOL_T && right->type == BOOL_T) return;
-    throw runtime_exception(op, *new string("operands must be booleans"));
-}
-
-void interpreter::check_number_operands(const token *op, object *left, object *right) {
-    if (left->type == NUMBER_T && right->type == NUMBER_T) return;
-    throw runtime_exception(op, *new string("operands must be numbers"));
-}
-
-void interpreter::check_number_operand(const token *token, object *o) {
-    if (o->type == NUMBER_T)return;
-    throw runtime_exception(token, *new string("operand must be a number"));
-}
-
 bool interpreter::is_bool_true_eq(object *o) {
     if(!(o->type == BOOL_T)) return false;
     return DCAST(bool_o *,o)->value;
@@ -193,7 +178,6 @@ object *interpreter::visit_unary_expr(unary_expr *u) {//
             case NOT:
                 return new bool_o(is_bool_true_eq(!*right));
             case MINUS:
-                check_number_operand(u->op, right);
                 return (-*right);
         }
     } catch (const char *p) {
