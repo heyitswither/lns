@@ -51,16 +51,16 @@ object *interpreter::visit_member_expr(member_expr *c) {
     }else if(o->type == EXCEPTION_T){
         auto DCAST_ASN(cast,incode_exception*,o);
         object* o2 = cast->get(const_cast<string&>(c->member_identifier->lexeme));
-        if(o2 == nullptr) throw runtime_exception(c->member_identifier,STR(string("exception \"") + cast->message + "\" has no member named \"" + c->member_identifier->lexeme + "\""));
+        if(o2 == nullptr) throw runtime_exception(c->member_identifier,EXCEPTION_NO_MEMBER(cast->message,c->member_identifier->lexeme));
         return o2;
     }
-    throw runtime_exception(c->member_identifier, *new string("object is not a container"));
+    throw runtime_exception(c->member_identifier, OBJECT_NOT_CONTAINER);
 }
 
 object *interpreter::visit_member_assign_expr(member_assign_expr *c) {
     object *o = evaluate(const_cast<expr *>(c->container_name));
     if (o->type != CONTEXT_T) {
-        throw runtime_exception(c->member_identifier, *new string("object is not a context"));
+        throw runtime_exception(c->member_identifier, OBJECT_NOT_CONTEXT);
     }
     object *value = evaluate(const_cast<expr *>(c->value));
     dynamic_cast<context *>(o)->assign(c->member_identifier, c->op,
@@ -122,7 +122,7 @@ object *interpreter::visit_binary_expr(binary_expr *b) {
             return (*left ^ *right);
         }
     } catch (const char* p) {
-        throw runtime_exception(b->op, STR(p));
+        throw runtime_exception(b->op, p);
     }
     // unreachable
     return nullptr;
@@ -132,21 +132,18 @@ object *interpreter::visit_call_expr(call_expr *c) {
     object *callee = evaluate(const_cast<expr *>(c->callee));
     vector<object *> &args = *new vector<object *>();
     callable *function = dynamic_cast<callable *>(callee);
-    if (function == nullptr) throw runtime_exception(c->paren, *new string("target not a callable"));
+    if (function == nullptr) throw runtime_exception(c->paren, INVALID_CALL_TARGET);
     int i = 0;
     for (; i < c->args.size(); i++) {
         args.push_back(evaluate(c->args[i]));
     }
     if (args.size() != function->arity()) {
-        string s = *new string();
-        s += "expected " + to_string(function->arity()) + " argument" + (function->arity() == 1 ? "" : "s") +
-             " but got " + to_string(args.size());
-        throw runtime_exception(c->paren, *new string(s.c_str()));
+        throw runtime_exception(c->paren, WRONG_ARG_NR(function->arity(),args.size()));
     }
     stack_trace.push_back(
             new stack_call(c->paren->filename, c->paren->line, function->name(), globals->is_native(function)));
     if(stack_trace.size() >= RECURSION_LIMIT){
-        throw runtime_exception(c->file,c->line,*new string("recursion limit exceeded"));
+        throw runtime_exception(c->file,c->line,RECURSION_LIMIT_EXCEEDED);
     }
     object * p;
     try{
@@ -181,7 +178,7 @@ object *interpreter::visit_unary_expr(unary_expr *u) {//
                 return (-*right);
         }
     } catch (const char *p) {
-        throw runtime_exception(u->op, STR(p));
+        throw runtime_exception(u->op, p);
     }
     //unreachable
     return nullptr;
@@ -199,20 +196,18 @@ object *interpreter::visit_sub_script_expr(sub_script_expr *m) {
     } else if (eval->type == STRING_T) {
         string evstring = eval->str();
         if (key->type != NUMBER_T)
-            throw runtime_exception(m->where, *new string(
-                    "key for operator [] (string) must be an number"));
+            throw runtime_exception(m->where, KEY_MUST_BE_NUMBER);
         int i = static_cast<int>(dynamic_cast<number_o *>(key)->value);
         if (evstring.size() > i) return new string_o(*new string() + evstring.at(i));
         else return new null_o();
     } else {
-        throw runtime_exception(m->where,
-                                *new string("invalid operand for operator []: operand must be either string or map"));
+        throw runtime_exception(m->where, INVALID_OPERAND_FOR_SUBSCRIPT);
     }
 }
 
 object *lns::interpreter::get_map_field(token *where, object *obj, object *key) {
     auto DCAST_ASN(map,array_o*,obj);
-    if(key->type != NUMBER_T) throw runtime_exception(where, *new string("given key is not a number"));
+    if(key->type != NUMBER_T) throw runtime_exception(where, KEY_MUST_BE_NUMBER);
     auto DCAST_ASN(nr,number_o*,key);
     if (!map->contains_key(nr->value)) return new null_o();
     return map->values[nr->value];
@@ -221,7 +216,7 @@ object *lns::interpreter::get_map_field(token *where, object *obj, object *key) 
 object *interpreter::assign_map_field(const token *where, object *obj, const token_type op, number_o *key, object *v) {
     array_o *map;
     if ((map = dynamic_cast<array_o *>(obj)) == nullptr) {
-        throw runtime_exception(where, *new string("object is not an array"));
+        throw runtime_exception(where, OBJECT_NOT_AN_ARRAY);
     }
     try {
         object* value = clone_or_keep(v, static_cast<const expr_type>(op), where);
@@ -244,7 +239,7 @@ object *interpreter::assign_map_field(const token *where, object *obj, const tok
         }
         return map->values[key->value];
     } catch (string &s) {
-        throw runtime_exception(where, s);
+        throw runtime_exception(where, s.c_str());
     }
 }
 
@@ -255,7 +250,7 @@ object *interpreter::visit_sub_script_assign_expr(sub_script_assign_expr *a) {
     if(DCAST_ASNCHK(nr,number_o*,key))
         return assign_map_field(a->where, evaluate(const_cast<expr *>(a->name)), a->op, nr, value);
     else
-        throw runtime_exception(a->where,STR("given key is not a number"));
+        throw runtime_exception(a->where,KEY_MUST_BE_NUMBER);
 }
 
 object *interpreter::visit_null_expr(null_expr *n) {
@@ -278,7 +273,7 @@ void interpreter::visit_s_for_each_stmt(s_for_each_stmt *s) {
         }
         environment->clear_var(s->identifier);
     }else{
-        throw runtime_exception(s->identifier,STR("object is not an array"));
+        throw runtime_exception(s->identifier,OBJECT_NOT_AN_ARRAY);
     }
 }
 
@@ -374,10 +369,7 @@ void interpreter::visit_uses_native_stmt(uses_native_stmt *u) {
         else if(DCAST_ASNCHK(ptr,function_container*,obj))
             globals->add_natives(ptr->declare_natives());
     } catch (char *what) {
-        string &s = *new string();
-        s += "Couldn't load the dynamic library: ";
-        s += what;
-        throw runtime_exception(u->where,s);
+        throw runtime_exception(u->where,COULD_NOT_LOAD_DL(what));
     }
 
 }
@@ -412,13 +404,13 @@ void interpreter::interpret(vector<stmt *> &statements) {
     } catch (runtime_exception& e) {
         errors::runtime_error(e, stack_trace);
     } catch (return_signal &s) {
-        runtime_exception e(s.keyword, *new string("return statements can only be used inside of functions"));
+        runtime_exception e(s.keyword, CAN_ONLY_BE_USED_IN("return statements","functions"));
         errors::runtime_error(e, stack_trace);
     } catch (continue_signal &s) {
-        runtime_exception e(s.keyword, *new string("continue statements can only be used inside of loops"));
+        runtime_exception e(s.keyword, CAN_ONLY_BE_USED_IN("continue statements","loops"));
         errors::runtime_error(e, stack_trace);
     } catch (break_signal &s) {
-        runtime_exception e(s.keyword, *new string("break statements can only be used inside of loops"));
+        runtime_exception e(s.keyword, CAN_ONLY_BE_USED_IN("break statements","loops"));
         errors::runtime_error(e, stack_trace);
     }
     if(errors::had_runtime_error && !lns::prompt) std::exit(errors::exit_status);
@@ -437,7 +429,7 @@ object *interpreter::clone_or_keep(object *obj, const expr_type type, const toke
             return obj;
     }
     object* ret = obj->clone();
-    if(ret == nullptr) throw runtime_exception(where,*new string(obj->type == CONTEXT_T ? "illegal assignment: context" : "illegal assignment: callable"));
+    if(ret == nullptr) throw runtime_exception(where,ILLEGAL_ASSIGNMENT);
     return ret;
 }
 
@@ -450,7 +442,7 @@ object *interpreter::visit_array_expr(array_expr *a) {
             obj = evaluate(pair.second);
             array->values[key->value] = obj;
         }else{
-            throw runtime_exception(a->open_brace,*new string("in array literal: key does not evaluate to a number"));
+            throw runtime_exception(a->open_brace,KEY_MUST_BE_NUMBER);
         }
     }
     return array;
@@ -460,26 +452,19 @@ void interpreter::visit_exception_decl_stmt(exception_decl_stmt *e) {
     try{
         environment->define(e->name,new exception_definition(e->file,e->line,e->name->lexeme,e->identifiers),true,e->visibility,e->file);
     }catch(exception_definition& ptr){
-        string& s = *new string();
-        s += "exception previously defined at ";
-        s += ptr.def_file;
-        s += ":";
-        s += std::to_string(ptr.def_line);
-        throw runtime_exception(e->name,s);
+        throw runtime_exception(e->name,EXCEPTION_PREVIOUSLY_DEFIDED(ptr.def_file,ptr.def_line));
     }
 }
 
 void interpreter::visit_raise_stmt(raise_stmt *r) {
     exception_definition* exc;
     if((exc = dynamic_cast<exception_definition*>(evaluate(const_cast<expr *>(r->name)))) == nullptr){
-        string &s = *new string();
-        s += "expression is not an exception";
-        throw runtime_exception(r->where,s);
+        throw runtime_exception(r->where,RAISE_NOT_EXCEPTION);
     }
     map<string,object*> fields = *new map<string,object*>();
     for(auto& pair : r->fields)
         if(exc->fields.find(pair.first) == exc->fields.end())
-            throw runtime_exception(r->where,STR(string("exception \"") + exc->name + "\" has no field named \"" + pair.first + "\""));
+            throw runtime_exception(r->where,EXCEPTION_NO_MEMBER(exc->name,pair.first));
         else
             fields.insert(*new std::pair<string,object*>(pair.first,evaluate(pair.second)));
 
@@ -500,7 +485,7 @@ void interpreter::visit_begin_handle_stmt(begin_handle_stmt *b) {
         for(auto& handle : b->handles){
             if((DCAST_ASN(def,exception_definition*,evaluate(const_cast<expr*>(handle->exception_name)))) == nullptr){
                 throw runtime_exception(handle->bind,
-                                        *new string("cannot handle a non-exception object"));
+                                        HANDLE_NOT_EXCEPTION);
             }
             if(def->name == e.message) {
                 found = true;
