@@ -7,6 +7,8 @@
 #include <utility>
 #include "exceptions.h"
 #include "options.h"
+#include "error_message.h"
+
 using namespace lns;
 using namespace std;
 
@@ -352,26 +354,20 @@ object *runtime_environment::get(const token *name, const char *accessing_file) 
         variable s = values[name->lexeme];
         if(s.visibility_ == V_LOCAL){
             if(strcmp(s.def_file,accessing_file) != 0){
-                string &s = *new string();
-                s += "variable " + name->lexeme + " is not visible in the current file";
-                throw runtime_exception(name, s);
+                throw runtime_exception(name, VARIABLE_NOT_VISIBLE(name->lexeme));
             }
         }
         return s.value;
     }
     if (enclosing != nullptr) return enclosing->get(name, nullptr);
     if (permissive) { return lns::GET_DEFAULT_NULL(); }
-    string &s = *new string();
-    s += "'" + name->lexeme + "' is undefined";
-    throw runtime_exception(name, s);
+    throw runtime_exception(name, VARIABLE_UNDEFINED(name->lexeme));
 }
 
 
 void runtime_environment::define(const token *name, object *o, bool is_final, visibility vis, const char *def_file) {
     if (contains_key(name->lexeme)) {
-        string &s = *new string();
-        s += "variable " + name->lexeme + " is already defined";
-        throw runtime_exception(name, s);
+        throw runtime_exception(name, VARIABLE_ALREADY_DEFINED(name->lexeme));
     }
 
     if (vis == V_GLOBAL) {
@@ -390,18 +386,14 @@ object* lns::GET_DEFAULT_NULL() {
 void runtime_environment::assign(const token *name, token_type op, object *obj, const char *assigning_file) {
     if (contains_key(name->lexeme)) {
         if (values[name->lexeme].is_final) {
-            string &s = *new string();
-            s += "variable " + name->lexeme + " is final";
-            throw runtime_exception(name, s);
+            throw runtime_exception(name, VARIABLE_FINAL(name->lexeme));
         }
         //values[name.lexeme]->isfinal = false;
         try {
             variable v = values[name->lexeme];
             if(v.visibility_ == V_LOCAL){
                 if(strcmp(v.def_file,assigning_file) != 0){
-                    string &s = *new string();
-                    s += "variable " + name->lexeme + " is not visible in the current file";
-                    throw runtime_exception(name, s);
+                    throw runtime_exception(name, VARIABLE_NOT_VISIBLE(name->lexeme));
                 }
             }
             switch (op) {
@@ -422,7 +414,7 @@ void runtime_environment::assign(const token *name, token_type op, object *obj, 
                     break;
             }
         } catch (string &s) {
-            throw runtime_exception(name, s);
+            throw runtime_exception(name, s.c_str());
         }
         return;
     }
@@ -430,9 +422,7 @@ void runtime_environment::assign(const token *name, token_type op, object *obj, 
         return enclosing->assign(name, op, obj, nullptr);
     }
     if (permissive) { return define(name, obj, false, V_UNSPECIFIED,assigning_file); }
-    string &s = *new string();
-    s += "undefined variable '" + name->lexeme + "'";
-    throw runtime_exception(name, s);
+    throw runtime_exception(name, VARIABLE_UNDEFINED(name->lexeme));
 }
 
 bool runtime_environment::is_valid_object_type(objtype objtype) {
@@ -483,13 +473,13 @@ const variable& variable::operator=(const variable &v) {
 variable::variable(lns::visibility visibility, bool is_final, object *value, const char *def_file) : visibility_ (visibility), value(value), is_final(is_final), def_file(def_file) {}
 
 
-lns::runtime_exception::runtime_exception(const lns::token *token, string &m) : native_throw(false),message(m), token(token) {}
+lns::runtime_exception::runtime_exception(const lns::token *token, const char *m) : native_throw(false),message(m), token(token) {}
 
 const char *lns::runtime_exception::what() const throw(){
-    return message.c_str();
+    return message;
 }
 
-runtime_exception::runtime_exception(const char* filename, int line, string& message) : native_throw(true), message(message), token(new lns::token(UNRECOGNIZED,STR(""),new null_o(),filename,line)){}
+runtime_exception::runtime_exception(const char* filename, int line, const char *message) : native_throw(true), message(message), token(new lns::token(UNRECOGNIZED,STR(""),new null_o(),filename,line)){}
 const char *lns::best_file_path(const char *filename) {
     ifstream rel_file(filename);
     auto buf = (char*) malloc(1024 * sizeof(char));
@@ -553,8 +543,7 @@ const char *lns::type_to_string(object_type t) {
 function_container::function_container(objtype type) : object(type) {}
 
 incode_exception::incode_exception(const lns::token *token, const std::string &name,
-                                   const std::map<std::string, lns::object *> &fields) : lns::runtime_exception(token,
-                                                                                                                const_cast<string &>(name)), lns::object(EXCEPTION_T), fields(fields), calls_bypassed(0) {}
+                                   const std::map<std::string, lns::object *> &fields) : lns::runtime_exception(token, name.c_str()), lns::object(EXCEPTION_T), fields(fields), calls_bypassed(0) {}
 
 object *incode_exception::get(std::string &key) {
     if(fields.find(key) != fields.end()) return this->fields[key];
