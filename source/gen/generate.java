@@ -127,14 +127,14 @@ public class generate {
         writer.println("\nclass " + className + "_" + baseName + " : public " + baseName + " {");
         writer.println("public:");
         String[] fieldArray = genFieldArray(types);
-        writer.print(fieldArray.length == 1 ? "explicit " : "");
-        writer.println(className + "_" + baseName + "(const char* file,const int line, " + concatTypes(fieldArray) + ") : " + genFieldsAssign(types.split(", ")) + ", " + baseName + "(line, file, " + className.toUpperCase() + "_" + baseName.toUpperCase() + "_T" + ") {}");
-        writer.println(vReturnType + " accept(" + visitorName + " *v) override{");
-        writer.println((vReturnType == "void" ? "" : "return ") +  "v->visit_" + className + "_" + baseName + "(this);");
-        writer.println("}");
         for (String s : fieldArray) {
             writer.println(s + ";");
         }
+        writer.print(fieldArray.length == 1 ? "explicit " : "");
+        writer.println(className + "_" + baseName + "(const char* file,const int line, " + concatTypes(fieldArray) + ") : " + baseName + "(line, file, " + className.toUpperCase() + "_" + baseName.toUpperCase() + "_T" + "), " + genFieldsAssign(types.split(", ")) + " {}");
+        writer.println(vReturnType + " accept(" + visitorName + " *v) override{");
+        writer.println((vReturnType == "void" ? "" : "return ") +  "v->visit_" + className + "_" + baseName + "(this);");
+        writer.println("}");
         writer.println("};");
         writer.println("\n");
     }
