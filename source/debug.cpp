@@ -326,7 +326,6 @@ string &debug::open_file(const char *filename) {
 }
 
 void debug::loadcode(const char *filename) {
-    this->filename = filename;
     errors::had_parse_error = false;
     string &source = open_file(filename);
     code_scanner.reset(filename, source);
@@ -340,20 +339,17 @@ void debug::loadcode(const char *filename) {
     for (stmt *s : parsed) {
         this->stmts.push_back(s);
     }
-    this->source = source;
     cout << "Script parsed and ready to run." << endl;
     ready = true;
 }
 
 lns::debug::debug(char *source) : command(this),
-                                  visitor(new default_expr_visitor()),
                                   started(false),
                                   ready(false),
                                   file(source),
                                   stmts(*new vector<stmt *>()),
                                   code_scanner(*new scanner("", *new string())),
-                                  code_parser(*new parser(*new vector<token *>())),
-                                  source(*new string()) {
+                                  code_parser(*new parser(*new vector<token *>())) {
     lns::silent_full = false;
     lns::silent_execution = false;
     lns::parse_only = false;
