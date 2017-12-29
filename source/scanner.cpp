@@ -179,6 +179,8 @@ void scanner::scan_token() {
         case '>':
             add_token(match('=') ? GREATER_EQUAL : GREATER);
             break;
+        case '?':
+            add_token(QUESTION_MARK);
         case ' ':
         case '\r':
         case '\t':
