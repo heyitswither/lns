@@ -1,10 +1,22 @@
 dpcheck this
 
+/*All the mathematical functions are here*/
 use natives "natives/math_math.so" bind Math
 
+/*Constants*/
 final var PI     = 3.1415926535897932384
 final var PI_2   = 1.5707963267948966192
 final var E      = 2.7182818284590452354
 final var LOG2E  = 1.4426950408889634074
 final var LOG10E = 0.4342944819032518276
 final var SQRT_2 = 1.4142135623730950488
+
+/*converts degrees to radians*/
+global function radians(degrees)
+    return degrees * PI / 180
+end
+
+/*converts radians to degrees*/
+global function degrees(radians)
+    return 180 * radians / PI
+end
