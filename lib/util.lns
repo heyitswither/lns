@@ -1,0 +1,158 @@
+dpcheck this
+
+use "parsing" /*parseNumber()*/
+use "errors" /* exceptions, parameter check functions */
+/*If:
+    argument is an array: returns the number of elements in the array
+    argument is a string: returns the number of characters in the string
+  Any other case, raises a TypeException
+  */
+global function size(container)
+    if type(container) == String then
+        return __lcount_str(container)
+    else if type(container) == Array then
+        return __lcount_array(container)
+    else raise TypeException with message = "argument must be either string or array", given = type(container) end
+end
+
+/*If:
+    argument 'base' is a string: returns a substring of 'base', from index a (inclusive )to index b (exclusive).
+    argument 'base' is an array: returns a subarray of 'base', from index a (inclusive) to index b (exclusive).
+  If b is not specified, the substring or subarray will contain elements until the end of the base string/array.
+  */
+global function sub(base,a,b?)
+    /*Store the length in a variable, so we don't have to make a call more than once*/
+    var length = size(base)
+
+    /*Check arguments' types*/
+    if type(a) != Number then
+        raise TypeException with message = "2nd argument must be number", required = Number, given = type(a)
+    else if type(b) != Number then /*If b is not present or is not a number, make it equal to the size*/
+        b = size(base)
+    end
+
+    /*Check indexes, a needs to be positive and smaller than b*/
+    if a < 0 or a > b then
+        raise IndexException with message = "invalid index: a (" + a + ")", index = a
+    else if b > length then
+        raise IndexException with message = "invalid index: b (" + b + ")", index = b
+    end
+
+    /*Iterate from index a to index b, using different syntax for strings and arrays*/
+    if type(base) == String then
+        var ret = ""
+        for var i = a, i < b, i++ do
+            ret += base[i]
+        end
+        return ret
+    else
+        var ret = array()
+        var index = 0
+        for var i = a, i < b, ++i do
+            ret[index] = base[i]
+            ++index
+        end
+        return ret
+    end
+end
+
+/*Returns the index of the first occurrence of 'what' in the container, or -1 if it is not present*/
+function indexOf(base, what)
+    var t = type(base)
+    if t != String and t != Array then
+        raise TypeException with message = "first argument must be either a string or an array (given: " + t + ")", given = t
+    end
+
+    for var i = 0, i < size(base), i++ do
+        if base[i] == what then
+            return i
+        end
+    end
+
+    return -1
+end
+
+/*Returns the index of the last occurrence of 'what' in the container, or -1 if it is not present*/
+function lastIndexOf(base, what)
+    var t = type(base)
+    if t != String and t != Array then
+        raise TypeException with message = "first argument must be either a string or an array (given: " + t + ")", given = t
+    end
+
+    var last = -1
+
+    for var i = 0, i < size(base), i++ do
+        if base[i] == what then
+            last = i
+        end
+    end
+
+    return last
+end
+
+/*Formats the string and prints to the standard output*/
+global function printf(fmt, args?)
+    if args == null then
+        print(fmt)
+    else
+        print(format(fmt,args))
+    end
+end
+
+/*Formats the objects in args and inserts them in a new string, following the given format */
+global function format(format, args)
+    /*Check arguments*/
+    checkArgumentType(format, String)
+    checkArgumentType(args, Array)
+
+    var result = "" /*The string to be returned*/
+
+    var i = 0 /*The current index in the string*/
+
+    while format[i] != null do
+        if format[i] == "{" then
+            var k = ++i //temporary index
+
+            while format[k] != "}" do //until the closing brace is found...
+                k++ //consume characters...
+                if format[k] == null then // and raise and exception if we reached the end and no closing brace was found
+                    raise WrongFormatException with message = "unclosed format sequence (opening '}' at index = " + i + ")", index = i
+                end
+            end
+
+            var value = args[parseNumber(sub(format,i,k))] /*parse the substring and get the corresponding value in the array*/
+
+            result += value //append it to the final result
+
+            i = k //consume all the characters that have been used, including the braces {}
+
+        else //if it's not an opening brace, simply append the character to the final result
+            result += format[i]
+        end
+        i++
+    end
+
+    return result
+end
+
+
+
+/*local function to count elements in array*/
+local function __lcount_array(a)
+    var i = 0
+    foreach c in a do
+        ++i
+    end
+    return i
+end
+
+
+/*local function to count characters in string*/
+local function __lcount_str(s)
+    var i = 0
+    var char
+    while (char = s[i]) != null do
+        ++i
+    end
+    return i
+end
