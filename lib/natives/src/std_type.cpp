@@ -31,8 +31,21 @@ public:
             case NULL_T:
                 type->value = "null";
                 break;
+            case CONTEXT_T:
+                type->value = "context";
+                break;
             case CALLABLE_T:
+            case NATIVE_CALLABLE_T:
                 type->value = "callable";
+                break;
+            case EXCEPTION_DEFINITION_T:
+                type->value = "";
+                break;
+            case EXCEPTION_T:
+                type->value = "exception";
+                break;
+            case CLASS:
+                type->value = "class";
                 break;
         }
         return type;
