@@ -2,7 +2,7 @@ dpcheck this
 
 use natives "natives/std_print.so" bind print
 use natives "natives/std_type.so" bind type
-use natives "natives/std_exit.so" bind exitc
+use natives "natives/std_exit.so" bind local __exitcode
 use natives "natives/std_array.so" bind array
 
 global final var Number = "number"
@@ -12,12 +12,16 @@ global final var Array = "array"
 global final var Callable = "callable"
 global final var Context = "context"
 
-function println(s)
-    print("" + s + "\n")
+function println(s?)
+    if s == null then
+        print("\n")
+    else
+        print(s + "\n")
+    end
 end
 
-function exit()
-    exitc(0)
+function exit(b?)
+    __exitcode(b)
 end
 
 function stringify(obj)
