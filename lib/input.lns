@@ -1,15 +1,15 @@
 dpcheck this
 
-use "math"
+use "parsing"
 
 use natives "natives/input_read.so" bind read
 use natives "natives/input_readln.so" bind readln
 
-function readbool()
+function readBoolean()
     return read() == "true"
 end
 
-function readnr()
-    return Math.parse(read())
+function readNumber()
+    return parseNumber(read())
 end
 
