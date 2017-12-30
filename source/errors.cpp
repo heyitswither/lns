@@ -59,7 +59,7 @@ string &errors::gen_stack_trace_desc(lns::stack_call *first_call, std::vector<ln
         s += "       at token \"" + first_call->method + "\" (" + first_call->filename + ":" + to_string(first_call->line) + "), in\n";
 
     s += s2;
-    s = s.substr(0, s.size() - 4) + ".";
+    s = s.substr(0, s.size() - 4) + ".\n";
     return s;
 }
 
