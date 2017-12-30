@@ -550,6 +550,7 @@ namespace lns {
         const int optional() const;
     };
 
+    inline bool file_exists(const char* name);
 }
 
 #endif //CPPLNS_DEFS_H

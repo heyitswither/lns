@@ -5,6 +5,7 @@
 #include "parser.h"
 #include "defs.h"
 #include <utility>
+#include <sys/stat.h>
 #include "exceptions.h"
 #include "options.h"
 #include "error_message.h"
@@ -187,7 +188,7 @@ lns::object *lns::number_o::operator^(const lns::object &o) const {
 }
 
 lns::object *lns::number_o::operator-() const {
-    return new number_o(this->value);
+    return new number_o(-this->value);
 }
 
 lns::object *lns::number_o::operator++() {
@@ -413,8 +414,8 @@ void runtime_environment::assign(const token *name, token_type op, object *obj, 
                     *v.value /= *obj;
                     break;
             }
-        } catch (string &s) {
-            throw runtime_exception(name, s.c_str());
+        } catch (const char *s) {
+            throw runtime_exception(name, s);
         }
         return;
     }
@@ -481,17 +482,14 @@ const char *lns::runtime_exception::what() const throw(){
 
 runtime_exception::runtime_exception(const char* filename, int line, const char *message) : native_throw(true), message(message), token(new lns::token(UNRECOGNIZED,STR(""),new null_o(),filename,line)){}
 const char *lns::best_file_path(const char *filename) {
-    ifstream rel_file(filename);
+    if(file_exists(filename)) return filename;
     auto buf = (char*) malloc(1024 * sizeof(char));
-    if(rel_file.is_open()) return filename;
     *buf = '\0';
     strcat(buf,LNS_LIBRARY_LOCATION);
     strcat(buf,filename);
-    ifstream path_file(buf);
-    if(path_file.is_open()) return buf;
+    if(file_exists(buf)) return buf;
     strcat(buf,".lns");
-    ifstream path_file2(buf);
-    if(path_file2.is_open()) return buf;
+    if(file_exists(buf)) return buf;
     return filename;
 }
 
@@ -599,9 +597,14 @@ const char *lns::concat(initializer_list<string> ss) {
     for(auto &s1 : ss){
         s.append(s1);
     }
-    char *ret = (char *) malloc(sizeof(char) * s.size());
+    char *ret = (char *) malloc(sizeof(char) * s.size() + 1);
     strcpy(ret, s.c_str());
     return ret;
+}
+
+inline bool lns::file_exists(const char *name) {
+    ifstream f(name);
+    return f.good();
 }
 
 lns::parameter_declaration::parameter_declaration(std::vector<parameter>& parameters) : parameters(parameters){}
