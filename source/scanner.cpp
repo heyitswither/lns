@@ -117,8 +117,10 @@ void scanner::line_comment() {
 
 void scanner::block_comment() {
     advance();
+    char c;
     while (!is_at_end()) {
-        if (advance() == '*') if (match('/')) return;
+        c = advance();
+        if(c == '\n') ++line; else if (c == '*') if (match('/')) return;
     }
     errors::parse_error(filename, line, UNTERMINATED_BLOCK_COMMENT);
 }
