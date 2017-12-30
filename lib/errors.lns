@@ -1,0 +1,14 @@
+dpcheck this
+
+/*Standard exceptions*/
+global exception TypeException with message, required, given
+global exception IndexException with message, index
+global exception InputException with message, expected
+global exception WrongFormatException with message, index
+
+global function checkArgumentType(argument, t)
+    if type(argument) == t then
+        return
+    end
+    raise TypeException with message = "wrong argument (given: " + type(argument) + ", expected: " + t + ")", required = t, given = type(argument)
+end
