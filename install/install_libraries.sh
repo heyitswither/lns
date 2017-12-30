@@ -3,7 +3,7 @@
 CHK(){
     if [ $1 -ne 0 ]; then
         printf "\n"
-        echo "$2. Exiting." & exit
+        echo "$2. Exiting." & exit 1
     fi
 }
 
