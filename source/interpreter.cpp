@@ -303,9 +303,12 @@ void interpreter::visit_expression_stmt(expression_stmt *e) {
         case SUB_SCRIPT_ASSIGN_EXPR_T:
         case MEMBER_ASSIGN_EXPR_T:
             return;
-        default:
-            cout << o->str() << endl;
+        case UNARY_EXPR_T:
+            token_type op = DCAST(const unary_expr*,&e->exprs)->op->type;
+            if(op == PLUS_PLUS || op == MINUS_MINUS) return;
+
     }
+    cout << o->str() << endl;
 }
 
 void interpreter::visit_function_stmt(function_stmt *f) {
@@ -427,7 +430,6 @@ object *interpreter::clone_or_keep(object *obj, const expr_type type, const toke
     switch(type){
         case BINARY_EXPR_T:
         case CALL_EXPR_T:
-        case LITERAL_EXPR_T:
         case UNARY_EXPR_T:
         case NULL_EXPR_T:
         case ASSIGN_EXPR_T:
