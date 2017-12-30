@@ -72,7 +72,7 @@ namespace lns{
         parsing_time = high_resolution_clock::now();
         if(parse_only){
             if(time_count) cout << "\nParsing time: " << std::setprecision(5) << duration_cast<microseconds>(parsing_time - start_time).count()/1000 << "ms.\n";
-            return;
+            if(lns::prompt) return; else std::exit(errors::exit_status);
         }
         //cout << "Total statements: " << to_string(stmts.size()) << endl;
         if(had_parse_error) throw parse_exception();
