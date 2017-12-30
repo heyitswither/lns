@@ -40,6 +40,9 @@ cd install
 sudo bash ./install_libraries.sh
 
 cd ..
+
+sudo cp install/update_lns.sh /lns/
+
 printf "Installing manual entry..."
 sudo cp manual/lns.1 /usr/share/man/man1/
 printf " done\n"
