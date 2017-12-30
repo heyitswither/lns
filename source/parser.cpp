@@ -70,14 +70,14 @@ stmt *parser::use() {
     if (!use_allowed)use_not_allowed();
     if (match({NATIVES})) isnatives = true;
     token *t = consume(STRING, EXPECTED("filename"));
-    string &s = dynamic_cast<string_o *>(t->literal)->value;
+    string &s = *new string(t->literal->str());
     if (isnatives) {
         consume(BIND, EXPECTED_AFTER("'bind'","filename"));
         auto specs = get_access_specifiers();
         CHECK_ACCESS_SPEC_NOT_ALLOWED(specs.second,"final","native bound")
         return new uses_native_stmt(t->filename, t->line, t, s, consume(IDENTIFIER, EXPECTED_AFTER("identifier","'bind'")),specs.first);
     }
-    ld_stmts(s);
+    ld_stmts(s, t);
     return nullptr;
 }
 
@@ -409,8 +409,12 @@ expr *parser::assignment(bool nested) {
         }
         throw error(op, INVALID_ASSIGNMENT_TARGET);
     }
-    if(match({PLUS_PLUS,MINUS_MINUS}))
-        return new unary_expr(expr->file,expr->line,previous(),operator_location ::POSTFIX,expr);
+    if (check(PLUS_PLUS) || check(MINUS_MINUS)) {
+        if (peek()->line == expr->line) {
+            advance();
+            return new unary_expr(expr->file, expr->line, previous(), operator_location::POSTFIX, expr);
+        }
+    }
     return expr;
 }
 
@@ -518,7 +522,7 @@ parser::parser(vector<token *> &tokens) : tokens(tokens), start(0), current(0), 
 
 vector<stmt *> &parser::parse(bool ld_std) {
     stmt *s;
-    if (ld_std) ld_stmts(STR("std"));
+    if (ld_std) ld_stmts(STR("std"), peek());
     while (!is_at_end()) {
         try {
             s = declaration();
@@ -561,13 +565,14 @@ void parser::reset(vector<token *> tokens) {
     this->start = 0;
 }
 
-void parser::ld_stmts(string &s) {
+void parser::ld_stmts(string &s, lns::token *where) {
     const char *filename = best_file_path(s.c_str());
     ifstream file(filename);
     string source;
     stringstream ss;
     if (!file.is_open()) {
-        throw error(previous(), USE_FILE_NOT_FOUND);
+        if (lns::ignore_unresolved) return;
+        else throw error(where, USE_FILE_NOT_FOUND);
     }
     ss << file.rdbuf();
     source = ss.str();
