@@ -170,8 +170,8 @@ void lns::command_interpreter::interpret(string &input) {
         else if (command == "continue" || command == "c") continue_();
         else if (command == "help" || command == "h") help();
         else throw "";
-    } catch (string& e) {
-        if (e.empty())
+    } catch (const char *e) {
+        if (string(e).empty())
             cout << "Invalid command. Type 'help' for a list of commands." << endl;
         else
             cout << "Wrong usage for command '" << e << "'. Usage:\n" << syntax(e) << endl;
