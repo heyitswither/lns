@@ -23,8 +23,8 @@ namespace lns{
     static char * file = nullptr;
     static auto start_time = high_resolution_clock::now(),parsing_time = high_resolution_clock::now(),execution_time = high_resolution_clock::now();
     void option(string& o){
-        if(o == "p" || o == "-skip-preprocessing"){
-            direct_execution = true;
+        if(o == "i" || o == "-ignore-unresolved"){
+            ignore_unresolved = true;
         }else if(o == "s" || o == "-silent-execution"){
             silent_execution = true;
         }else if(o == "S" || o == "-silent-full"){
@@ -33,7 +33,7 @@ namespace lns{
             permissive = true;
         }else if(o == "t" || o == "-time-info"){
             time_count = true;
-        }else if(o == "o" || o == "-parse-only"){
+        }else if(o == "p" || o == "-parse-only"){
             parse_only = true;
         }else if(o == "d" || o == "-debugger"){
             debugger_option = true;

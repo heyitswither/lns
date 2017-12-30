@@ -5,7 +5,7 @@
 #ifndef CPPLNS_OPTIONS_H
 #define CPPLNS_OPTIONS_H
 namespace lns{
-    extern bool direct_execution;
+    extern bool ignore_unresolved;
     extern bool silent_full;
     extern bool silent_execution;
     extern bool permissive;

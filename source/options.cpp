@@ -4,7 +4,7 @@
 
 #include "options.h"
 
-bool lns::direct_execution = false;
+bool lns::ignore_unresolved = false;
 bool lns::silent_full = false;
 bool lns::silent_execution = false;
 bool lns::permissive = false;
