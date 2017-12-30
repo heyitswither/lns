@@ -10,6 +10,7 @@ CHK(){
 
 if [ $(which git | wc -l) -eq 0 ]; then
 	echo "Git is not installed. Install it by typing 'sudo apt-get install git'"
+	exit 1
 fi
 
 cd ~
