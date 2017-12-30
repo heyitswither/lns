@@ -5,13 +5,19 @@ use natives "natives/std_type.so" bind type
 use natives "natives/std_exit.so" bind local __exitcode
 use natives "natives/std_array.so" bind array
 
+/*Type constants definitions: values returned by native function type()*/
 global final var Number = "number"
 global final var String = "string"
 global final var Boolean = "boolean"
 global final var Array = "array"
 global final var Callable = "callable"
 global final var Context = "context"
+global final var Null = "null"
+global final var ExceptionDefinition = "exception_declaration"
+global final var Class = "class"
+global final var Exception = "exception"
 
+/*Prints the argument to stdout and appends a line feed*/
 function println(s?)
     if s == null then
         print("\n")
@@ -20,10 +26,12 @@ function println(s?)
     end
 end
 
+/*Exits the program with the specified exit code. If the argument is not given or is not a number, exit code will be 0*/
 function exit(b?)
     __exitcode(b)
 end
 
+/*Returns the string representation of the object*/
 function stringify(obj)
     return "" + obj
 end
