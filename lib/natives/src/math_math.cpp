@@ -7,12 +7,11 @@
 using namespace lns;
 using namespace std;
 
-class parse_c : public callable{
+class parse_c : public native_callable{
 public:
-    const int arity() const override {
-        return 1;
-    }
 
+    parse_c() : native_callable(1) {}
+    
     const std::string &name() const override {
         return S(parse);
     }
@@ -31,11 +30,9 @@ public:
 };
 
 
-class log10_c : public callable{
+class log10_c : public native_callable{
 public:
-    const int arity() const override {
-        return 1;
-    }
+    log10_c() : native_callable(1) {}
 
     const std::string &name() const override {
         return S(log10);
@@ -47,11 +44,9 @@ public:
         return new number_o(log10(nr->value));
     }
 };
-class log2_c : public callable{
+class log2_c : public native_callable{
 public:
-    const int arity() const override {
-        return 1;
-    }
+    log2_c() : native_callable(1) {}
 
     const std::string &name() const override {
         return S(log2);
@@ -63,11 +58,9 @@ public:
         return new number_o(log2(nr->value));
     }
 };
-class ln_c : public callable{
+class ln_c : public native_callable{
 public:
-    const int arity() const override {
-        return 1;
-    }
+    ln_c() : native_callable(1) {}
 
     const std::string &name() const override {
         return S(ln);
@@ -79,11 +72,9 @@ public:
         return new number_o(log(nr->value));
     }
 };
-class sin_c : public callable{
+class sin_c : public native_callable{
 public:
-    const int arity() const override {
-        return 1;
-    }
+    sin_c() : native_callable(1) {}
 
     const std::string &name() const override {
         return S(sin);
@@ -95,11 +86,9 @@ public:
         return new number_o(sin(nr->value));
     }
 };
-class cos_c : public callable{
+class cos_c : public native_callable{
 public:
-    const int arity() const override {
-        return 1;
-    }
+    cos_c() : native_callable(1) {}
 
     const std::string &name() const override {
         return S(cos);
@@ -111,11 +100,9 @@ public:
         return new number_o(cos(nr->value));
     }
 };
-class tan_c : public callable{
+class tan_c : public native_callable{
 public:
-    const int arity() const override {
-        return 1;
-    }
+    tan_c() : native_callable(1) {}
 
     const std::string &name() const override {
         return S(tan);
@@ -127,11 +114,9 @@ public:
         return new number_o(tan(nr->value));
     }
 };
-class asin_c : public callable{
+class asin_c : public native_callable{
 public:
-    const int arity() const override {
-        return 1;
-    }
+    asin_c() : native_callable(1) {}
 
     const std::string &name() const override {
         return S(asin);
@@ -143,11 +128,9 @@ public:
         return new number_o(asin(nr->value));
     }
 };
-class acos_c : public callable{
+class acos_c : public native_callable{
 public:
-    const int arity() const override {
-        return 1;
-    }
+    acos_c() : native_callable(1) {}
 
     const std::string &name() const override {
         return S(acos);
@@ -159,11 +142,9 @@ public:
         return new number_o(acos(nr->value));
     }
 };
-class atan_c : public callable{
+class atan_c : public native_callable{
 public:
-    const int arity() const override {
-        return 1;
-    }
+    atan_c() : native_callable(1) {}
 
     const std::string &name() const override {
         return S(atan);
@@ -175,11 +156,9 @@ public:
         return new number_o(atan(nr->value));
     }
 };
-class sqrt_c : public callable{
+class sqrt_c : public native_callable{
 public:
-    const int arity() const override {
-        return 1;
-    }
+    sqrt_c() : native_callable(1) {}
 
     const std::string &name() const override {
         return S(sqrt);
@@ -191,11 +170,9 @@ public:
         return new number_o(sqrt(nr->value));
     }
 };
-class cbrt_c : public callable{
+class cbrt_c : public native_callable{
 public:
-    const int arity() const override {
-        return 1;
-    }
+    cbrt_c() : native_callable(1) {}
 
     const std::string &name() const override {
         return S(cbrt);
@@ -207,11 +184,9 @@ public:
         return new number_o(cbrt(nr->value));
     }
 };
-class ceil_c : public callable{
+class ceil_c : public native_callable{
 public:
-    const int arity() const override {
-        return 1;
-    }
+    ceil_c() : native_callable(1) {}
 
     const std::string &name() const override {
         return S(ceil);
@@ -223,11 +198,9 @@ public:
         return new number_o(ceil(nr->value));
     }
 };
-class floor_c : public callable{
+class floor_c : public native_callable{
 public:
-    const int arity() const override {
-        return 1;
-    }
+    floor_c() : native_callable(1) {}
 
     const std::string &name() const override {
         return S(floor);

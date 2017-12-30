@@ -4,11 +4,9 @@
 
 #include "defs.h"
 using namespace lns;
-class array_c : public callable{
+class array_c : public native_callable{
 public:
-    const int arity() const override {
-        return 0;
-    }
+    array_c() : native_callable(0) {}
 
     const std::string &name() const override {
         return S(array);

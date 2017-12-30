@@ -3,11 +3,9 @@
 //
 #include "defs.h"
 using namespace lns;
-class exit_c : public callable{
+class exit_c : public native_callable{
 public:
-    const int arity() const override {
-        return 1;
-    }
+    exit_c() : native_callable(1) {}
 
     const std::string &name() const override {
         return S(exitc);

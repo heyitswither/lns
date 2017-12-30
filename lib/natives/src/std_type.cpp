@@ -4,11 +4,9 @@
 #include "defs.h"
 
 using namespace lns;
-class type_c : public callable{
+class type_c : public native_callable{
 public:
-    const int arity() const override {
-        return 1;
-    }
+    type_c() : native_callable(1) {}
 
     const std::string &name() const override {
         return S(type);

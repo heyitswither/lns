@@ -4,11 +4,9 @@
 #include "defs.h"
 #include <cstdio>
 using namespace lns;
-class print_c : public callable{
+class print_c : public native_callable{
 public:
-    const int arity() const override {
-        return 1;
-    }
+    print_c() : native_callable(1) {}
 
     const std::string &name() const override {
         return S(print);

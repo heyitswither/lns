@@ -8,11 +8,9 @@
 using namespace lns;
 using namespace std;
 
-class readln_c : public callable{
+class readln_c : public native_callable{
 public:
-    const int arity() const override {
-        return 0;
-    }
+    readln_c() : native_callable(0) {}
 
     const std::string &name() const override {
         return S(readln);
