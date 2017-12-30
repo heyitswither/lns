@@ -32,7 +32,7 @@ public class generate {
         defineAst(outputDir, "stmt", Arrays.asList(
                 "block      : vector<stmt*>& statements",
                 "expression : expr& exprs",
-                "function   : token* name, vector<token*>& parameters, vector<stmt*>& body, visibility vis",
+                "function   : token* name, parameter_declaration& parameters, vector<stmt*>& body, visibility vis",
                 "context    : token* name, vector<stmt*> body, visibility vis, bool isfinal",
                 "if         : expr& condition, stmt* thenBranch, stmt* elseBranch",
                 "return     : token* keyword, expr& value",

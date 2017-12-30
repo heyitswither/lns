@@ -348,17 +348,11 @@ stmt *parser::expression_statement() {
 function_stmt * parser::function(visibility vis) {
     token *name = consume(IDENTIFIER, EXPECTED("function name"));
     consume(LEFT_PAREN, EXPECTED_AFTER("'('","function name"));
-    vector<token *> &parameters = *new vector<token *>();
-    if (!check(RIGHT_PAREN)) {
-        do {
-            token *t = consume(IDENTIFIER, EXPECTED("parameter name"));
-            parameters.push_back(t);
-        } while (match({COMMA}));
-    }
+    parameter_declaration& params = parameters();
     consume(RIGHT_PAREN, EXPECTED_AFTER("')'","parameter list"));
     try {
         vector<stmt *> &body = stmts_until({END});
-        return new function_stmt(name->filename, name->line, name, parameters, body, vis);
+        return new function_stmt(name->filename, name->line, name, params, body, vis);
     } catch (int) {
         int l = name->line;
         throw error(previous(), EXPTOCLOSE("function", l));
@@ -668,4 +662,20 @@ constructor_stmt *parser::constructor(visibility visibility) {
         int l = keyword->line;
         throw error(previous(), EXPTOCLOSE("constructor", l));
     }
+}
+
+parameter_declaration &parser::parameters() {
+    parameter_declaration& decl = *new parameter_declaration();
+    bool found_optional = false;
+    if (!check(RIGHT_PAREN)) {
+        do {
+            token *t = consume(IDENTIFIER, EXPECTED("parameter name"));
+            if(match({QUESTION_MARK}))
+                found_optional = true;
+            else
+                if(found_optional) throw error(previous(),NON_OPTIONAL_NOT_ALLOWED);
+            decl.parameters.push_back(*new parameter(t->lexeme,found_optional));
+        } while (match({COMMA}));
+    }
+    return decl;
 }

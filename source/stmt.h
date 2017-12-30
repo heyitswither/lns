@@ -92,10 +92,10 @@ v->visit_expression_stmt(this);
 class function_stmt : public stmt {
 public:
 const token* name;
-const vector<token*>& parameters;
+const parameter_declaration& parameters;
 const vector<stmt*>& body;
 const visibility vis;
-function_stmt(const char* file,const int line, const token* name, const vector<token*>& parameters, const vector<stmt*>& body, const visibility vis) : stmt(line, file, FUNCTION_STMT_T), name(name), parameters(parameters), body(body), vis(vis) {}
+function_stmt(const char* file,const int line, const token* name, const parameter_declaration& parameters, const vector<stmt*>& body, const visibility vis) : stmt(line, file, FUNCTION_STMT_T), name(name), parameters(parameters), body(body), vis(vis) {}
 void accept(stmt_visitor *v) override{
 v->visit_function_stmt(this);
 }

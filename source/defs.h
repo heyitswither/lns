@@ -36,8 +36,8 @@
 #define CODE_LEAK_ERROR (-250)
 
 
-
 namespace lns {
+    class parameter_declaration;
 
     const char* best_file_path(const char* filename);
     enum token_type {
@@ -366,9 +366,9 @@ namespace lns {
 
     class callable : public object{
     public:
-        callable();
-        explicit callable(bool native);
-        virtual const int arity() const = 0;
+        callable() = delete;
+        callable(bool is_native);
+        virtual const parameter_declaration& arity() const = 0;
         virtual const std::string& name() const = 0;
         virtual object *call(std::vector<object *> &args) = 0;
         bool operator==(const object &o) const override;
@@ -381,6 +381,14 @@ namespace lns {
     public:
         explicit function_container(objtype type);
         virtual std::set<callable*>& declare_natives() const = 0;
+    };
+
+    class native_callable : public callable{
+    private:
+        parameter_declaration& parameters;
+    public:
+        native_callable(int arity);
+        const parameter_declaration& arity() const;
     };
 
     class stack_call {
@@ -522,6 +530,25 @@ namespace lns {
     };
 
     const char *concat(std::initializer_list<std::__cxx11::string> ss);
+
+
+    class parameter{
+    public:
+        std::string& name;
+        bool nullable;
+        parameter(std::string& name, bool nullable);
+    };
+
+    class parameter_declaration{
+    public:
+        parameter_declaration(int i);
+
+        std::vector<parameter>& parameters;
+        parameter_declaration();
+        explicit parameter_declaration(std::vector<parameter>& parameters);
+        const int required() const;
+        const int optional() const;
+    };
 
 }
 

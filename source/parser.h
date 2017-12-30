@@ -135,6 +135,8 @@ namespace lns {
         stmt *class_(lns::visibility vis);
 
         constructor_stmt *constructor(visibility visibility);
+
+        parameter_declaration &parameters();
     };
 
 

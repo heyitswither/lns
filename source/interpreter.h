@@ -128,7 +128,7 @@ namespace lns {
         interpreter* i;
     public:
         const std::string & name()const;
-        const int arity() const;
+        const parameter_declaration& arity() const;
         object* call(std::vector<object *> &args);
         explicit function(interpreter* i, const lns::function_stmt *f);
 

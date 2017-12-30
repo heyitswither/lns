@@ -29,6 +29,7 @@
 #define USE_FILE_NOT_FOUND "use: file was not found or is inaccessible"
 #define DUPLICATE_ACCESS_SPEC(spec) "duplicate access specifier: '" spec "'"
 #define CONFILICTING_SPECS(a,b) "conflicting access specifiers '" a "' and '" b "'"
+#define NON_OPTIONAL_NOT_ALLOWED "required parameters must be before the optional ones"
 
 /* INTERPRETER ERRORS */
 #define EXCEPTION_NO_MEMBER(name,member) lns::concat({"exception \"",name,"\" has no member named \"", member, "\""})
@@ -36,6 +37,7 @@
 #define OBJECT_NOT_CONTEXT "object is not a context"
 #define INVALID_CALL_TARGET "invalid call target"
 #define WRONG_ARG_NR(exp,got) lns::concat({"expected ", std::to_string(exp), " argument", exp == 1 ? "" : "s", " but got ", std::to_string(got)})
+#define WRONG_ARG_NR_BETWEEN(exp1,exp2,got) lns::concat({"expected between ", std::to_string(exp1), " and ",std::to_string(exp2), " arguments but got ", std::to_string(got)})
 #define RECURSION_LIMIT_EXCEEDED "recursion limit exceeded"
 #define KEY_MUST_BE_NUMBER "key for operator [] must be a number"
 #define INVALID_OPERAND_FOR_SUBSCRIPT "invalid operand for operator []: operand must be either string or map"

@@ -495,7 +495,7 @@ const char *lns::best_file_path(const char *filename) {
     return filename;
 }
 
-callable::callable(bool native) : object(native ? objtype::NATIVE_CALLABLE_T : objtype ::CALLABLE_T) {}
+callable::callable(bool is_native) : object(is_native ? NATIVE_CALLABLE_T : CALLABLE_T) {}
 
 bool callable::operator==(const object &o) const {
     return false;
@@ -507,8 +507,6 @@ string callable::str() const {
     return s.str();
 }
 
-
-callable::callable() : object(NATIVE_CALLABLE_T) {}
 
 const char* lns::INVALID_OP(const char* OP, const lns::object_type t1, const lns::object_type* t2){
     auto * buf = (char*)malloc(sizeof(char) * 64);
@@ -604,4 +602,34 @@ const char *lns::concat(initializer_list<string> ss) {
     char *ret = (char *) malloc(sizeof(char) * s.size());
     strcpy(ret, s.c_str());
     return ret;
+}
+
+lns::parameter_declaration::parameter_declaration(std::vector<parameter>& parameters) : parameters(parameters){}
+
+lns::parameter_declaration::parameter_declaration() : parameters(*new std::vector<lns::parameter>()){}
+
+const int lns::parameter_declaration::required() const{
+    int required = 0;
+    for(auto& item : parameters) {
+        if(item.nullable) break;
+        ++required;
+    }
+    return required;
+}
+
+const int lns::parameter_declaration::optional() const{
+    return parameters.size() - required();
+}
+
+parameter_declaration::parameter_declaration(int nr) : parameter_declaration(){
+    for(int i = 0; i < nr; i++)
+        parameters.push_back(*new parameter(*new string(std::to_string(i)),false));
+}
+
+parameter::parameter(string& name, bool nullable) : name(name), nullable(nullable) {}
+
+native_callable::native_callable(int arity) : callable(true), parameters(*new parameter_declaration(arity)){}
+
+const parameter_declaration &native_callable::arity() const {
+    return parameters;
 }

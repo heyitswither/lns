@@ -136,8 +136,11 @@ object *interpreter::visit_call_expr(call_expr *c) {
     for (; i < c->args.size(); i++) {
         args.push_back(evaluate(c->args[i]));
     }
-    if (args.size() != function->arity()) {
-        throw runtime_exception(c->paren, WRONG_ARG_NR(function->arity(),args.size()));
+    int total = function->arity().parameters.size();
+    int optional = function->arity().optional();
+    int required = total - optional;
+    if (args.size() < required || args.size() > total) {
+        throw runtime_exception(c->paren, total == required ? WRONG_ARG_NR(required,args.size()) : WRONG_ARG_NR_BETWEEN(required, total,args.size()));
     }
     stack_trace.push_back(
             new stack_call(c->paren->filename, c->paren->line, function->name(), globals->is_native(function)));
@@ -514,15 +517,17 @@ void interpreter::visit_class_decl_stmt(class_decl_stmt *c) {
 
 }
 
-const int lns::function::arity() const {
-    return static_cast<int>(declaration->parameters.size());
+const parameter_declaration& lns::function::arity() const {
+    return declaration->parameters;
 }
 
 object *lns::function::call(vector<object *> &args) {
     runtime_environment *env = new runtime_environment(i->environment);
     int j;
-    for (j = 0; j < declaration->parameters.size(); j++) {
-        env->define(const_cast<token *>(declaration->parameters.at(j)), args.at(j), false, V_UNSPECIFIED,declaration->file);
+    object* o;
+    for (j = 0; j < declaration->parameters.parameters.size(); j++) {
+        o = j < args.size() ? args.at(j) : static_cast<object *>(new lns::null_o);
+        env->define(declaration->parameters.parameters.at(j).name, o, false, V_UNSPECIFIED,declaration->file);
     }
     try {
         i->execute_block(declaration->body, env);
