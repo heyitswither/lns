@@ -71,6 +71,7 @@ void errors::fatal_error(exception &e, int code) {
 
 void errors::report(const char *type, const char *filename, int line, const char *where, const char *message) {
     had_parse_error = true;
+    errors::exit_status = PARSE_ERROR;
     if (lns::silent_full) return;
     cerr << type << " in file " << filename << ":" << line << (where == "" ? "" : ",") << where << ": " << message
          << "." << endl;
