@@ -1,0 +1,14 @@
+dpcheck this
+
+use natives "natives/parsing_parsenr.so" bind local __nparse
+use "errors" /* exceptions, parameter check functions */
+
+/*Parses a number from the given string or raises an exception if the parsing failed*/
+global function parseNumber(input)
+    checkArgumentType(input,String)
+    var result = __nparse(input)
+    if result == null then //native function returned null, input couldn't be parsed to a number
+        raise InputException with message = "'" + input + "': not a number", expected = Number
+    end
+    return result
+end
