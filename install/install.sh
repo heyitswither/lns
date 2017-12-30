@@ -33,47 +33,13 @@ printf " done\n"
 
 printf "Creating link to executable in /usr/bin..."
 sudo ln -s /lns/lns /usr/bin/
-cp source/defs.h lib/natives/src/
 CHK $? "Unable to create link to executable"
 printf " done\n"
 
-cd lib/natives/
-printf "Removed any previously compiled .so files..."
-for f in *.so
-do
-    if [ $f = "*.so" ]; then
-        break
-    fi
-    rm -f $f
-done
-printf " done\n"
+cd install
+sudo bash ./install_libraries.sh
 
-cd src
-
-echo "Compiling native libraries..."
-for f in *.cpp
-do
-    printf "Compiling $f..."
-    fname=${f%.*}
-    sudo g++ -w -Wl,--no-as-needed -ldl -fPIC -shared $f -o lib.so
-    CHK $? "Compilation of file $f failed"
-    mv lib.so ../$fname.so
-    printf " done.\n"
-done
-
-cd ../../..
-
-sudo rm lib/natives/src/defs.h
-
-printf "Moving libraries..."
-sudo cp -r lib /lns/
-CHK $? "Unable to move libraries"
-printf " done\n"
-
-printf "Removing sources from installation directory..."
-sudo rm -r /lns/lib/natives/src
-printf " done\n"
-
+cd ..
 printf "Installing manual entry..."
 sudo cp manual/lns.1 /usr/share/man/man1/
 printf " done\n"
