@@ -146,7 +146,6 @@ int main(const int argc, const char* argv[]) {
         } else if (lns::update_option) {
             return update();
         }else if(lns::file == nullptr){
-            check_update();
             lns::run_prompt();
         }else{
             lns::run_file(lns::file);

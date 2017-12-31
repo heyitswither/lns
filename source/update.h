@@ -9,8 +9,8 @@
 #include "errors.h"
 #include <cstdlib>
 #include <iostream>
-
+#include <string>
 signed char update();
 
-void check_update();
+int check_update();
 #endif //CPPLNS_UPDATE_H
