@@ -43,8 +43,6 @@ cd ..
 
 sudo cp scripts/update_lns.sh /lns/
 
-sudo cp revision /lns
-
 printf "Installing manual entry..."
 sudo cp manual/lns.1 /usr/share/man/man1/
 printf " done\n"
