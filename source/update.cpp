@@ -14,7 +14,7 @@ signed char update() {
 
 void check_update() {
     if (!system(nullptr)) return;
-    std::string s("bash /lns/check_version.sh ");
+    std::string s("bash /lns/check_revision.sh ");
     s += std::to_string(REVISION_NUMBER);
     system(s.c_str());
 }
