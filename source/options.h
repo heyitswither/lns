@@ -14,5 +14,6 @@ namespace lns{
     extern bool prompt;
     extern bool debugger_option;
     extern bool no_format;
+    extern bool update_option;
 }
 #endif //CPPLNS_OPTIONS_H

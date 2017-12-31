@@ -8,6 +8,7 @@
 #include "debug.h"
 #include <iomanip>
 #include "signals.h"
+#include "update.h"
 
 #define INTERPRETER_VERSION "0.2"
 #define PROGRAM_START_SIGN "LNS v" INTERPRETER_VERSION ". All rights reserved.\n"
@@ -39,6 +40,8 @@ namespace lns{
             debugger_option = true;
         }else if(o == "f" || o == "-no-format"){
             no_format = true;
+        } else if (o == "u" || o == "-update") {
+            update_option = true;
         }else{
             throw unknown_option_exception(o);
         }
@@ -138,9 +141,11 @@ int main(const int argc, const char* argv[]) {
     register_signal_handlers();
     try{
         lns::inspect_args(argc - 1, argv);
-        if(debugger_option){
-            debug* d = new debug(file);
-            d->start();
+        if (lns::debugger_option) {
+            debug d(file);
+            d.start();
+        } else if (lns::update_option) {
+            return update();
         }else if(lns::file == nullptr){
             lns::run_prompt();
         }else{
@@ -153,4 +158,3 @@ int main(const int argc, const char* argv[]) {
     }
     return EXIT_SUCCESS;
 }
-
