@@ -413,6 +413,8 @@ namespace lns {
     public:
         explicit runtime_environment();
 
+        //virtual ~runtime_environment();
+
         explicit runtime_environment(runtime_environment *enc);
 
         object *get(const token *name, const char *accessing_file);

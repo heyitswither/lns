@@ -3,7 +3,6 @@
 //
 #include "interpreter.h"
 #include "errors.h"
-#include "options.h"
 #include <dlfcn.h>
 
 using namespace lns;
@@ -34,14 +33,11 @@ void interpreter::execute_block(vector<stmt *> stmts, runtime_environment *env) 
         for (i = 0; i < stmts.size(); ++i) {
             execute(stmts[i]);
         }
-        delete (env);
         this->environment = previous;
     } catch (return_signal &s) {
-        delete (env);
         this->environment = previous;
         throw s;
     }
-    //delete env;
 }
 
 object *interpreter::visit_member_expr(member_expr *c) {
@@ -263,9 +259,10 @@ object *interpreter::visit_null_expr(null_expr *n) {
     return lns::GET_DEFAULT_NULL();
 }
 
+
 void interpreter::visit_block_stmt(block_stmt *b) {
-    runtime_environment *env = new runtime_environment(environment);
-    execute_block(b->statements, env);
+    shared_ptr<runtime_environment> env = make_shared<runtime_environment>(this->environment);
+    execute_block(b->statements, env.get());
 }
 
 void interpreter::visit_s_for_each_stmt(s_for_each_stmt *s) {
@@ -488,7 +485,7 @@ void interpreter::visit_handle_stmt(handle_stmt *h) {} //this should remain empt
 
 void interpreter::visit_begin_handle_stmt(begin_handle_stmt *b) {
     try{
-        execute_block(b->body,new runtime_environment(environment));
+        execute_block(b->body, make_shared<runtime_environment>(environment).get());
     }catch(incode_exception& e){
         bool found = false;
         exception_definition *def;
@@ -501,7 +498,7 @@ void interpreter::visit_begin_handle_stmt(begin_handle_stmt *b) {
                 found = true;
                 for(int i = 0; i < e.calls_bypassed; i++)
                     stack_trace.pop_back();
-                runtime_environment* env = new runtime_environment(environment);
+                runtime_environment *env = make_shared<runtime_environment>(environment).get();
                 if(handle->bind->type != UNRECOGNIZED) env->define(handle->bind,&e,true,V_UNSPECIFIED,b->file);
                 execute_block(handle->block,env);
                 break;
@@ -524,7 +521,7 @@ const parameter_declaration& lns::function::arity() const {
 }
 
 object *lns::function::call(vector<object *> &args) {
-    runtime_environment *env = new runtime_environment(i->environment);
+    shared_ptr<runtime_environment> env = make_shared<runtime_environment>(i->environment);
     int j;
     object* o;
     for (j = 0; j < declaration->parameters.parameters.size(); j++) {
@@ -532,7 +529,7 @@ object *lns::function::call(vector<object *> &args) {
         env->define(declaration->parameters.parameters.at(j).name, o, false, V_UNSPECIFIED,declaration->file);
     }
     try {
-        i->execute_block(declaration->body, env);
+        i->execute_block(declaration->body, env.get());
     } catch (return_signal &r) {
         return r.value;
     }

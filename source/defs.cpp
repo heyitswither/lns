@@ -3,11 +3,7 @@
 //
 
 #include "parser.h"
-#include "defs.h"
-#include <utility>
-#include <sys/stat.h>
 #include "exceptions.h"
-#include "options.h"
 #include "error_message.h"
 
 using namespace lns;
@@ -345,10 +341,10 @@ bool lns::runtime_environment::contains_key(const std::string name) {
     return values.find(name) != values.end();
 }
 
-lns::runtime_environment::runtime_environment() : enclosing(nullptr), values(*new std::map<std::string, variable>()) {}
+lns::runtime_environment::runtime_environment() : enclosing(nullptr), values(std::map<std::string, variable>()) {}
 
 lns::runtime_environment::runtime_environment(runtime_environment *enc) : enclosing(enc),
-                                                                          values(*new std::map<std::string, variable>) {}
+                                                                          values(std::map<std::string, variable>()) {}
 
 object *runtime_environment::get(const token *name, const char *accessing_file) {
     if (contains_key(name->lexeme)) {
@@ -463,6 +459,8 @@ void runtime_environment::add_native(callable *ptr) {
 bool runtime_environment::clear_var(const token *name) {
     return this->values.erase(name->lexeme) != 0;
 }
+
+//runtime_environment::~runtime_environment() {}
 
 variable::variable() : value(new null_o()), visibility_(V_UNSPECIFIED), is_final(false), def_file("") {}
 
