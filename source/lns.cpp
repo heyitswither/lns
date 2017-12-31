@@ -74,7 +74,7 @@ namespace lns{
     void run(const char* filename,string& source, interpreter * i, bool load_std){
         scanner scn (filename,source);
         vector<token*> tokens = scn.scan_tokens(true);
-        vector<stmt*> stmts;
+        vector<shared_ptr<stmt>> stmts;
         if(had_parse_error) throw parse_exception();
         start_time = high_resolution_clock::now();
         parser parser(tokens);

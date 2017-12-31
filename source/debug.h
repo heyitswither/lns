@@ -38,7 +38,7 @@ namespace lns {
     class debug : command_handler {
     private:
         /*The statements to be executed*/
-        vector<stmt *> stmts;
+        vector<shared_ptr<stmt>> stmts;
         /*The scanner*/
         scanner code_scanner;
         /*The parser*/

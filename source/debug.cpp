@@ -191,7 +191,7 @@ expr *debugger::parse_expression(string &expression) {
         throw 1;
     }
     expr_parser.reset(expr_scanner.scan_tokens(true));
-    e = expr_parser.logical(true);
+    e = expr_parser.logical(true).get();
     if (errors::had_parse_error) {
         errors::had_parse_error = false;
         lns::silent_full = false;
@@ -330,13 +330,12 @@ void debug::loadcode(const char *filename) {
     string &source = open_file(filename);
     code_scanner.reset(filename, source);
     vector<token *> &tokens = code_scanner.scan_tokens(true);
-    vector<stmt *> stmts;
     if (errors::had_parse_error) throw parse_exception();
     code_parser.reset(tokens);
-    vector<stmt *> parsed = code_parser.parse(true);
+    vector<shared_ptr<stmt>> parsed = code_parser.parse(true);
     if (errors::had_parse_error) throw parse_exception();
     this->stmts.clear();
-    for (stmt *s : parsed) {
+    for (auto &s : parsed) {
         this->stmts.push_back(s);
     }
     cout << "Script parsed and ready to run." << endl;
@@ -347,7 +346,6 @@ lns::debug::debug(char *source) : command(this),
                                   started(false),
                                   ready(false),
                                   file(source),
-                                  stmts(*new vector<stmt *>()),
                                   code_scanner(*new scanner("", *new string())),
                                   code_parser(*new parser(*new vector<token *>())) {
     lns::silent_full = false;

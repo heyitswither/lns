@@ -46,7 +46,7 @@ namespace lns {
         runtime_environment *globals = new runtime_environment();
         runtime_environment *environment = globals;
 
-        void execute_block(vector<stmt *> stmts, runtime_environment *env);
+        void execute_block(vector<shared_ptr<stmt>> stmts, runtime_environment *env);
 
         object *visit_member_expr(member_expr *c) override;
 
@@ -115,7 +115,7 @@ namespace lns {
 
         interpreter();
 
-        void interpret(vector<stmt *> &statements);
+        void interpret(vector<shared_ptr<stmt>> &statements);
 
         object *clone_or_keep(object *obj, const expr_type type, const token *where);
 

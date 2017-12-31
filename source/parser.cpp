@@ -65,28 +65,28 @@ void parser::use_not_allowed() {
     throw error(previous(), USE_NOT_ALLOWED);
 }
 
-stmt *parser::use() {
+shared_ptr<stmt> parser::use() {
     bool isnatives = false;
     if (!use_allowed)use_not_allowed();
     if (match({NATIVES})) isnatives = true;
     token *t = consume(STRING, EXPECTED("filename"));
-    string &s = *new string(t->literal->str());
+    string s = t->literal->str();
     if (isnatives) {
         consume(BIND, EXPECTED_AFTER("'bind'","filename"));
         auto specs = get_access_specifiers();
         CHECK_ACCESS_SPEC_NOT_ALLOWED(specs.second,"final","native bound")
-        return new uses_native_stmt(t->filename, t->line, t, s, consume(IDENTIFIER, EXPECTED_AFTER("identifier","'bind'")),specs.first);
+        return make_shared<uses_native_stmt>(t->filename, t->line, t, s,
+                                             consume(IDENTIFIER, EXPECTED_AFTER("identifier", "'bind'")), specs.first);
     }
     ld_stmts(s, t);
     return nullptr;
 }
 
-vector<stmt *> &parser::context_block() {
+vector<shared_ptr<stmt>> parser::context_block() {
     int line = previous()->line;
-    stmt *s;
-    vector<stmt *> &stmts = *new vector<stmt *>();
+    vector<shared_ptr<stmt>> stmts;
     while (!check(END) && !is_at_end()) {
-        s = declaration();
+        shared_ptr<stmt> s = declaration();
         if (s->type == CONTEXT_STMT_T || s->type == VAR_STMT_T || s->type == FUNCTION_STMT_T ||
             s->type == EXCEPTION_DECL_STMT_T) {
             stmts.push_back(s);
@@ -98,8 +98,8 @@ vector<stmt *> &parser::context_block() {
     return stmts;
 }
 
-vector<stmt *> &parser::stmts_until(initializer_list<token_type> list) {
-    vector<stmt *> &stmts = *new vector<stmt *>();
+vector<shared_ptr<stmt>> parser::stmts_until(initializer_list<token_type> list) {
+    vector<shared_ptr<stmt>> stmts;
     bool should_break = false;
     while (!is_at_end()) {
         for (token_type t : list)
@@ -114,20 +114,10 @@ vector<stmt *> &parser::stmts_until(initializer_list<token_type> list) {
     return stmts;
 }
 
-vector<stmt *> &parser::block() {
-    int line = previous()->line;
-    vector<stmt *> &stmts = *new vector<stmt *>();
-    while (!check(END) && !is_at_end()) {
-        stmts.push_back(declaration());
-    }
-    consume(END, EXPTOCLOSE("block", line));
-    return stmts;
-}
-
-stmt *parser::context_declaration(visibility vis, bool final) {
+shared_ptr<stmt> parser::context_declaration(visibility vis, bool final) {
     token *name = consume(IDENTIFIER, EXPECTED("context name"));
-    vector<stmt *> &stmts = context_block();
-    return new context_stmt(name->filename, name->line, name, stmts, vis, final);
+    vector<shared_ptr<stmt>> stmts = context_block();
+    return make_shared<context_stmt>(name->filename, name->line, name, stmts, vis, final);
 }
 
 bool parser::check_file(const char *str) {
@@ -146,7 +136,7 @@ bool parser::dpcheck() {
     } else throw error(previous(), EXPECTED_AFTER("string or 'this'","dpcheck"));
 }
 
-stmt *parser::declaration() {
+shared_ptr<stmt> parser::declaration() {
     try {
         if (match({USE})) return use();
         if (match({DPCHECK})) {
@@ -180,12 +170,12 @@ stmt *parser::declaration() {
     }
 }
 
-stmt *parser::class_(visibility vis) {
+shared_ptr<stmt> parser::class_(visibility vis) {
     token* keyword = previous();
     token* name = consume(IDENTIFIER,EXPECTED("class name"));
-    vector<var_stmt*>& variables = *new vector<var_stmt*>();
-    vector<constructor_stmt*>& constructors = *new vector<constructor_stmt*>();
-    vector<function_stmt*>& methods = *new vector<function_stmt*>();
+    vector<shared_ptr<var_stmt>> variables;
+    vector<shared_ptr<constructor_stmt>> constructors;
+    vector<shared_ptr<function_stmt>> methods;
     while(!(is_at_end() || peek()->type == END)){
         auto specs = get_access_specifiers();
         if(match({VAR})) variables.push_back(var_declaration(specs.first,specs.second));
@@ -194,7 +184,7 @@ stmt *parser::class_(visibility vis) {
         else throw error(peek(),CAN_ONLY_CONTAIN("classes","variables, methods and constructors"));
     }
     consume(END,EXPTOCLOSE("class declaration",keyword->line));
-    return new class_decl_stmt(keyword->filename,keyword->line,name,methods,constructors,variables,vis);
+    return make_shared<class_decl_stmt>(keyword->filename, keyword->line, name, methods, constructors, variables, vis);
 }
 
 int parser::error(token *token, const char *message) {
@@ -202,18 +192,16 @@ int parser::error(token *token, const char *message) {
     return PARSE_ERROR;
 }
 
-var_stmt *parser::var_declaration(visibility  vis, bool is_final) {
+shared_ptr<var_stmt> parser::var_declaration(visibility vis, bool is_final) {
     token *name = consume(IDENTIFIER, EXPECTED_IN("identifier","variable declaration"));
-    expr *initializer = new null_expr(name->filename, name->line, name);
+    shared_ptr<expr> initializer = make_shared<null_expr>(name->filename, name->line, name);
     if (match({EQUAL})) {
-        delete initializer;
-        initializer = expression(true);
+        return make_shared<var_stmt>(name->filename, name->line, name, expression(true), vis, is_final);
     }
-    //consume(SEMICOLON, "expected ';' after variable declaration");
-    return new var_stmt(name->filename, name->line, name, *initializer, vis, is_final);
+    return make_shared<var_stmt>(name->filename, name->line, name, initializer, vis, is_final);
 }
 
-stmt *parser::statement() {
+shared_ptr<stmt> parser::statement() {
     if (match({IF})) return if_statement();
     if (match({RETURN})) return return_statement();
     if (match({BREAK})) return break_statement();
@@ -228,150 +216,159 @@ stmt *parser::statement() {
     return expression_statement();
 }
 
-stmt *parser::raise() {
+shared_ptr<stmt> parser::raise() {
     token *raise = previous();
-    expr *name = expression(true);
+    shared_ptr<expr> name = expression(true);
     if (match({WITH})) {
-        map<string, expr *> &v = *new map<string, expr *>();
+        map<string, shared_ptr<expr>> v;
         do {
             token *vname = consume(IDENTIFIER, EXPECTED("exception field identifier"));
             consume(EQUAL, EXPECTED_AFTER("'='","exception field identifier"));
-            expr *val = expression(true);
+            shared_ptr<expr> val = expression(true);
             v[vname->lexeme] = val;
         } while (match({COMMA}));
-        return new raise_stmt(name->file, name->line, raise, name, v);
+        return make_shared<raise_stmt>(name->file, name->line, raise, name, v);
     }
-    return new raise_stmt(name->file, name->line, raise, name, *new map<string, expr *>());
+    return make_shared<raise_stmt>(name->file, name->line, raise, name, map<string, shared_ptr<expr>>());
 }
 
 
-stmt *parser::return_statement() {
+shared_ptr<stmt> parser::return_statement() {
     token *keyword = previous();
-    expr *value = new null_expr(keyword->filename, keyword->line, previous());
+    shared_ptr<expr> value = make_shared<null_expr>(keyword->filename, keyword->line, previous());
     if (!is_at_end())
         if (peek()->line == keyword->line)
-            value = expression(true);
-    return new return_stmt(keyword->filename, keyword->line, keyword, *value);
+            return make_shared<return_stmt>(keyword->filename, keyword->line, keyword, expression(true));
+    return make_shared<return_stmt>(keyword->filename, keyword->line, keyword, value);
 }
 
-stmt *parser::break_statement() {
+shared_ptr<stmt> parser::break_statement() {
     token *t = previous();
-    return new break_stmt(t->filename, t->line, t);
+    return make_shared<break_stmt>(t->filename, t->line, t);
 }
 
-stmt *parser::continue_statement() {
+shared_ptr<stmt> parser::continue_statement() {
     token *t = previous();
-    return new continue_stmt(t->filename, t->line, t);
+    return make_shared<continue_stmt>(t->filename, t->line, t);
 }
 
-stmt *parser::if_statement() {
+shared_ptr<stmt> parser::if_statement() {
     token *keyword = previous();
-    expr *condition = expression(true);
+    shared_ptr<expr> condition = expression(true);
     consume(THEN, EXPECTED_AFTER("'then'","if condition"));
-    stmt *then_branch;
+    shared_ptr<stmt> then_branch;
     try {
-        then_branch = new block_stmt(condition->file, condition->line, stmts_until({ELSE, END}));
+        then_branch = make_shared<block_stmt>(condition->file, condition->line, stmts_until({ELSE, END}));
     } catch (int) {
         throw error(previous(), EXPTOCLOSE("if statement", keyword->line));
     }
-    stmt *else_branch = new null_stmt(keyword->filename, keyword->line, keyword);
+    shared_ptr<stmt> else_branch = make_shared<null_stmt>(keyword->filename, keyword->line, keyword);
     token *closing = previous();
     if (closing->type == ELSE)
         if (match({IF})) else_branch = if_statement();
         else
-            try { else_branch = new block_stmt(previous()->filename, previous()->line, stmts_until({END})); } catch (
-                    int) { throw error(previous(), EXPTOCLOSE("else statement", closing->line)); }
-    return new if_stmt(keyword->filename, keyword->line, *condition, then_branch, else_branch);
+            try {
+                return make_shared<if_stmt>(keyword->filename, keyword->line, condition, then_branch,
+                                            make_shared<block_stmt>(previous()->filename, previous()->line,
+                                                                    stmts_until({END})));
+            } catch (int) {
+                throw error(previous(), EXPTOCLOSE("else statement", closing->line));
+            }
+    return make_shared<if_stmt>(keyword->filename, keyword->line, condition, then_branch, else_branch);
 }
 
-stmt *parser::while_statement() {
-    expr *condition = expression(true);
+shared_ptr<stmt> parser::while_statement() {
+    shared_ptr<expr> condition = expression(true);
     token *d = consume(DO, EXPECTED_AFTER("'do'","loop condition"));
-    stmt *body;
     try {
-        body = new block_stmt(d->filename, d->line, stmts_until({END}));
+        return make_shared<s_while_stmt>(condition->file, condition->line, condition,
+                                         make_shared<block_stmt>(d->filename, d->line, stmts_until({END})));
     } catch (int) {
         throw error(previous(), EXPTOCLOSE("if statement", d->line));
     }
-    return new s_while_stmt(condition->file, condition->line, *condition, body);
 }
 
 
-stmt *parser::foreach_statement() {
+shared_ptr<stmt> parser::foreach_statement() {
     token *init = consume(IDENTIFIER, EXPECTED_AFTER("identifier","'foreach'"));
     consume(IN, EXPECTED_AFTER("'in'","identifier"));
-    expr *container = expression(true);
+    shared_ptr<expr> container = expression(true);
     token *p = consume(DO, EXPECTED("'do'"));
     try {
-        return new s_for_each_stmt(p->filename, p->line, init, container,
-                                   new block_stmt(p->filename, p->line, stmts_until({END})));
+        return make_shared<s_for_each_stmt>(p->filename, p->line, init, container,
+                                            make_shared<block_stmt>(p->filename, p->line, stmts_until({END})));
     } catch (int) {
         throw error(previous(), EXPTOCLOSE("foreach statement", p->line));
     }
 }
 
-stmt *parser::for_statement() {
-    stmt *initializer = nullptr;
-    if (!match({COMMA}))
-        if (match({VAR}))
-            initializer = var_declaration(V_UNSPECIFIED, false);
-        else
-            initializer = expression_statement();
-    consume(COMMA, EXPECTED_AFTER("','","for loop initializer"));
-    expr *condition = nullptr;
-    if (!check({COMMA})) {
-        condition = expression(true);
-    }
+shared_ptr<stmt> parser::for_statement() {
+    shared_ptr<stmt> initializer = for_statement_init(previous());
+    token *t = consume(COMMA, EXPECTED_AFTER("','", "for loop initializer"));
+    shared_ptr<expr> condition = for_statement_condition(t);
     consume(COMMA, EXPECTED_AFTER("','","loop condition"));
-    expr *increment = nullptr;
-    if (!check(DO)) {
-        increment = expression(true);
-    }
+    shared_ptr<expr> increment = for_statement_increment(t);
     token *p = consume(DO, EXPECTED_AFTER("'do'","for loop increment"));
-    stmt *body;
     try {
-        body = new block_stmt(p->filename, p->line, stmts_until({END}));
+        return make_shared<s_for_stmt>(t->filename, t->line, initializer, condition, increment,
+                                       make_shared<block_stmt>(p->filename, p->line, stmts_until({END})));
     } catch (int) {
         throw error(previous(), EXPTOCLOSE("for statement", p->line));
     }
-    s_for_stmt *s = new s_for_stmt(condition == nullptr ? p->filename : condition->file,
-                                   condition == nullptr ? p->line : condition->line, initializer, condition, increment,
-                                   body);
-    return s;
 }
 
-stmt *parser::expression_statement() {
-    expr *expr = expression(false);
-    return new expression_stmt(expr->file, expr->line, *expr);
+shared_ptr<expr> parser::for_statement_increment(lns::token *where) {
+    if (!check(DO))
+        return expression(true);
+    return make_shared<null_expr>(where->filename, where->line, where);
 }
 
-function_stmt * parser::function(visibility vis) {
+shared_ptr<expr> parser::for_statement_condition(lns::token *where) {
+    if (!check({COMMA}))
+        return expression(true);
+    return make_shared<null_expr>(where->filename, where->line, where);
+}
+
+
+shared_ptr<stmt> parser::for_statement_init(lns::token *where) {
+    if (!match({COMMA}))
+        if (match({VAR}))
+            return var_declaration(V_UNSPECIFIED, false);
+        else
+            return expression_statement();
+    return make_shared<null_stmt>(where->filename, where->line, where);
+}
+
+shared_ptr<stmt> parser::expression_statement() {
+    shared_ptr<expr> expr = expression(false);
+    return make_shared<expression_stmt>(expr->file, expr->line, expr);
+}
+
+shared_ptr<function_stmt> parser::function(visibility vis) {
     token *name = consume(IDENTIFIER, EXPECTED("function name"));
     consume(LEFT_PAREN, EXPECTED_AFTER("'('","function name"));
-    parameter_declaration& params = parameters();
+    parameter_declaration params = parameters();
     consume(RIGHT_PAREN, EXPECTED_AFTER("')'","parameter list"));
     try {
-        vector<stmt *> &body = stmts_until({END});
-        return new function_stmt(name->filename, name->line, name, params, body, vis);
+        vector<shared_ptr<stmt>> body = stmts_until({END});
+        return make_shared<function_stmt>(name->filename, name->line, name, params, body, vis);
     } catch (int) {
-        int l = name->line;
-        throw error(previous(), EXPTOCLOSE("function", l));
+        throw error(previous(), EXPTOCLOSE("function", name->line));
     }
 }
 
-expr *parser::array() {
+shared_ptr<expr> parser::array() {
     token *opening = previous();
-    vector<pair<expr *, expr *>> &pairs = *new vector<pair<expr *, expr *>>();
+    vector<pair<shared_ptr<expr>, shared_ptr<expr>>> pairs;
     int i = 0;
-    expr *e1, *e2;
     while (!is_at_end()) {
-        e1 = expression(true);
+        shared_ptr<expr> e1 = expression(true);
         if (match({COLON})) {
-            e2 = expression(true);
-            pairs.push_back(*new pair<expr *, expr *>(e1, e2));
+            shared_ptr<expr> e2 = expression(true);
+            pairs.emplace_back(pair<shared_ptr<expr>, shared_ptr<expr>>(e1, e2));
         } else {
-            e2 = new literal_expr(e1->file, e1->line, new number_o(i));
-            pairs.push_back(*new pair<expr *, expr *>(e2, e1));
+            shared_ptr<expr> e2 = make_shared<literal_expr>(e1->file, e1->line, new number_o(i));
+            pairs.emplace_back(pair<shared_ptr<expr>, shared_ptr<expr>>(e2, e1));
         }
         ++i;
         if (is_at_end()) break;
@@ -383,93 +380,94 @@ expr *parser::array() {
             throw error(peek(), EXPECTED_AFTER("',' or '}'","array expression"));
     }
     consume(RIGHT_BRACE, EXPTOCLOSE("array literal", opening->line));
-    return new array_expr(opening->filename, opening->line, opening, pairs);
+    return make_shared<array_expr>(opening->filename, opening->line, opening, pairs);
 }
 
-expr *parser::assignment(bool nested) {
-    variable_expr *var;
-    sub_script_expr *map;
-    member_expr *context;
-    expr *expr = logical(nested), *value, *key;
+shared_ptr<expr> parser::assignment(bool nested) {
+    shared_ptr<expr> expr_ = logical(nested), value;
     if (match({EQUAL, PLUS_EQUALS, MINUS_EQUALS, STAR_EQUALS, SLASH_EQUALS})) {
         token *op = previous();
         value = assignment(true);
-        if ((var = dynamic_cast<variable_expr *>(expr)) != nullptr) {
+        if (expr_.get()->type == VARIABLE_EXPR_T) {
+            auto DCAST_ASN(var, variable_expr*, expr_.get());
             token *name = const_cast<token *>(var->name);
-            return new assign_expr(var->file, var->line, name, op->type, value);
+            return make_shared<assign_expr>(var->file, var->line, name, op->type, value);
         }
-        if ((map = dynamic_cast<sub_script_expr *>(expr)) != nullptr) {
-            return new sub_script_assign_expr(map->file, map->line, const_cast<token *>(map->where), map->name, op->type,
-                                              map->key, value);
+        if (expr_.get()->type == SUB_SCRIPT_EXPR_T) {
+            auto DCAST_ASN(array, sub_script_expr*, expr_.get());
+            return make_shared<sub_script_assign_expr>(array->file, array->line, const_cast<token *>(array->where),
+                                                       array->name, op->type,
+                                                       array->key, value);
         }
-        if ((context = dynamic_cast<member_expr *>(expr)) != nullptr) {
-            return new member_assign_expr(context->file, context->line,
-                                          context->container_name, op->type,
-                                          const_cast<token *>(context->member_identifier), value);
+        if (expr_.get()->type == MEMBER_EXPR_T) {
+            auto DCAST_ASN(container, member_assign_expr*, expr_.get());
+            return make_shared<member_assign_expr>(container->file, container->line,
+                                                   container->container_name, op->type,
+                                                   const_cast<token *>(container->member_identifier), value);
         }
         throw error(op, INVALID_ASSIGNMENT_TARGET);
     }
     if (check(PLUS_PLUS) || check(MINUS_MINUS)) {
-        if (peek()->line == expr->line) {
+        if (peek()->line == expr_->line) {
             advance();
-            return new unary_expr(expr->file, expr->line, previous(), operator_location::POSTFIX, expr);
+            return make_shared<unary_expr>(expr_->file, expr_->line, previous(), operator_location::POSTFIX, expr_);
         }
     }
-    return expr;
+    return expr_;
 }
 
-expr *parser::comparison(bool nested) {
-    expr *expr = addition(nested), *right;
+shared_ptr<expr> parser::comparison(bool nested) {
+    shared_ptr<expr> expr_ = addition(nested), right;
     while (match({BANG_EQUAL, EQUAL_EQUAL, GREATER, GREATER_EQUAL, LESS, LESS_EQUAL})) {
         token *op = previous();
         right = addition(true);
-        expr = new binary_expr(op->filename, op->line, expr, op, right);
+        expr_ = make_shared<binary_expr>(op->filename, op->line, expr_, op, right);
     }
-    return expr;
+    return expr_;
 }
 
-expr *parser::addition(bool nested) {
-    expr *expr = multiplication(nested), *right;
+shared_ptr<expr> parser::addition(bool nested) {
+    shared_ptr<expr> expr = multiplication(nested), right;
     while (match({MINUS, PLUS})) {
         token *op = previous();
         right = multiplication(true);
-        expr = new binary_expr(op->filename, op->line, expr, op, right);
+        expr = make_shared<binary_expr>(op->filename, op->line, expr, op, right);
     }
     return expr;
 }
 
-expr *parser::multiplication(bool nested) {
-    expr *expr = power(nested), *right;
+shared_ptr<expr> parser::multiplication(bool nested) {
+    shared_ptr<expr> expr_ = power(nested), right;
     while (match({SLASH, STAR})) {
         token *op = previous();
         right = power(true);
-        expr = new binary_expr(op->filename, op->line, expr, op, right);
+        expr_ = make_shared<binary_expr>(op->filename, op->line, expr_, op, right);
     }
-    return expr;
+    return expr_;
 }
 
-expr *parser::power(bool nested) {
-    expr *expr = unary(nested), *right;
+shared_ptr<expr> parser::power(bool nested) {
+    shared_ptr<expr> expr = unary(nested), right;
     while (match({HAT})) {
         token *op = previous();
         right = unary(true);
-        expr = new binary_expr(op->filename, op->line, expr, op, right);
+        expr = make_shared<binary_expr>(op->filename, op->line, expr, op, right);
     }
     return expr;
 }
 
-expr *parser::unary(bool nested) {
+shared_ptr<expr> parser::unary(bool nested) {
     if (match({PLUS_PLUS,MINUS_MINUS,NOT, MINUS})) {
         token *op = previous();
-        expr *right = unary(true);
-        return new unary_expr(op->filename, op->line, op,operator_location ::PREFIX, right);
+        shared_ptr<expr> right = unary(true);
+        return make_shared<unary_expr>(op->filename, op->line, op, operator_location::PREFIX, right);
     }
     return call(nested);
 }
 
-expr *parser::call(bool nested) {
-    vector<expr *> &args = *new vector<expr *>();
-    expr *expr = special_assignment(nested), *keyexpr;
+shared_ptr<expr> parser::call(bool nested) {
+    vector<shared_ptr<expr>> args;
+    shared_ptr<expr> expr = special_assignment(nested), *keyexpr;
     token *identifier = previous();
     while (true)
         if (match({LEFT_PAREN})) {
@@ -479,55 +477,52 @@ expr *parser::call(bool nested) {
                 } while (match({COMMA}));
             }
             token *paren = consume(RIGHT_PAREN, EXPECTED_AFTER("')'","arguments"));
-            expr = new call_expr(paren->filename, paren->line, expr, paren, args);
+            expr = make_shared<call_expr>(paren->filename, paren->line, expr, paren, args);
         } else break;
     return expr;
 }
 
-expr *parser::special_assignment(bool nested) {
-    expr *expr = primary(nested), *key;
+shared_ptr<expr> parser::special_assignment(bool nested) {
+    shared_ptr<expr> expr = primary(nested), key;
     while (match({DOT, LEFT_SQR})) {
         token *op = previous();
         if (op->type == DOT) {
             token *fname = consume(IDENTIFIER, EXPECTED("field name"));
-            expr = new member_expr(expr->file, expr->line, expr, fname);
+            expr = make_shared<member_expr>(expr->file, expr->line, expr, fname);
         } else {
             key = expression(true);
             consume(RIGHT_SQR, EXPECTED_AFTER("closing ']'","key expression"));
-            expr = new sub_script_expr(expr->file, expr->line, op, expr, key);
+            expr = make_shared<sub_script_expr>(expr->file, expr->line, op, expr, key);
         }
     }
     return expr;
 }
 
-expr *parser::primary(bool nested) {
-    if (match({FALSE})) return new literal_expr(previous()->filename, previous()->line, new bool_o(false));
-    if (match({TRUE})) return new literal_expr(previous()->filename, previous()->line, new bool_o(true));
-    if (match({NUL})) return new literal_expr(previous()->filename, previous()->line, new null_o());
-    if (match({NUMBER, STRING})) return new literal_expr(previous()->filename, previous()->line, previous()->literal);
+shared_ptr<expr> parser::primary(bool nested) {
+    if (match({FALSE})) return make_shared<literal_expr>(previous()->filename, previous()->line, new bool_o(false));
+    if (match({TRUE})) return make_shared<literal_expr>(previous()->filename, previous()->line, new bool_o(true));
+    if (match({NUL})) return make_shared<literal_expr>(previous()->filename, previous()->line, new null_o());
+    if (match({NUMBER, STRING}))
+        return make_shared<literal_expr>(previous()->filename, previous()->line, previous()->literal);
     if (match({IDENTIFIER})) {
         token *identifier = previous();
-        return new variable_expr(identifier->filename, identifier->line, identifier);
+        return make_shared<variable_expr>(identifier->filename, identifier->line, identifier);
     }
     if (match({LEFT_PAREN})) {
-        expr *expr = expression(true);
+        shared_ptr<expr> expr = expression(true);
         consume(RIGHT_PAREN, MISSING_CLOSING("')'"));
-        return new grouping_expr(expr->file, expr->line, expr);
+        return make_shared<grouping_expr>(expr->file, expr->line, expr);
     }
     throw error(peek(), nested ? EXPECTED("expression") : INVALID_STATEMENT);
 }
 
-parser::parser(vector<token *> &tokens) : tokens(tokens), start(0), current(0), use_allowed(true),
-                                          statements(*new vector<stmt *>()) {}
+parser::parser(vector<token *> tokens) : tokens(tokens), start(0), current(0), use_allowed(true) {}
 
-vector<stmt *> &parser::parse(bool ld_std) {
-    stmt *s;
+vector<shared_ptr<stmt>> parser::parse(bool ld_std) {
     if (ld_std) ld_stmts(STR("std"), peek());
     while (!is_at_end()) {
         try {
-            s = declaration();
-            if (s == nullptr) continue;
-            statements.push_back(s);
+            statements.push_back(declaration());
         } catch (int i) {
             if (i == SIG_EXIT_PARSER) return statements;
             continue;
@@ -537,17 +532,17 @@ vector<stmt *> &parser::parse(bool ld_std) {
     return statements;
 }
 
-expr *parser::expression(bool nested) {
+shared_ptr<expr> parser::expression(bool nested) {
     if (match({LEFT_BRACE})) return array();
     return assignment(nested);
 }
 
-expr *parser::logical(bool nested) {
-    expr *expr = comparison(nested), *right;
+shared_ptr<expr> parser::logical(bool nested) {
+    shared_ptr<expr> expr = comparison(nested), right;
     while (match({AND, OR, NOR, XOR, NAND})) {
         token *op = previous();
         right = comparison(true);
-        expr = new binary_expr(op->filename, op->line, expr, op, right);
+        expr = make_shared<binary_expr>(op->filename, op->line, expr, op, right);
     }
     return expr;
 }
@@ -565,7 +560,7 @@ void parser::reset(vector<token *> tokens) {
     this->start = 0;
 }
 
-void parser::ld_stmts(string &s, lns::token *where) {
+void parser::ld_stmts(string s, lns::token *where) {
     const char *filename = best_file_path(s.c_str());
     ifstream file(filename);
     string source;
@@ -576,49 +571,49 @@ void parser::ld_stmts(string &s, lns::token *where) {
     }
     ss << file.rdbuf();
     source = ss.str();
-    scanner scanner = *new lns::scanner(filename, source);
+    scanner scanner(filename, source);
     vector<token *> &tkns = scanner.scan_tokens(true);
     parser p(tkns);
-    vector<stmt *> &toadd = p.parse(false);
+    vector<shared_ptr<stmt>> toadd = p.parse(false);
     int i = 0;
     for (; i < toadd.size(); i++) {
         statements.push_back(toadd[i]);
     }
 }
 
-stmt *parser::exception_(visibility is_global) {
+shared_ptr<stmt> parser::exception_(visibility is_global) {
     token *name = consume(IDENTIFIER, EXPECTED("exception name"));
     if (match({WITH})) {
-        set<string> &tokens = *new set<string>();
+        set<string> tokens;
         do {
             token *t = consume(IDENTIFIER, EXPECTED("identifier list"));
             tokens.insert(t->lexeme);
         } while (match({COMMA}));
 
-        return new exception_decl_stmt(name->filename, name->line, name, tokens, is_global);
+        return make_shared<exception_decl_stmt>(name->filename, name->line, name, tokens, is_global);
     }
-    return new exception_decl_stmt(name->filename, name->line, name, *new set<string>(), is_global);
+    return make_shared<exception_decl_stmt>(name->filename, name->line, name, set<string>(), is_global);
 }
 
-stmt *parser::begin_handle_statement() {
+shared_ptr<stmt> parser::begin_handle_statement() {
     token *keyword = previous();
-    vector<stmt *> &stmts = stmts_until({HANDLE});
-    vector<handle_stmt *> handles = *new vector<handle_stmt *>();
+    vector<shared_ptr<stmt>> stmts = stmts_until({HANDLE});
+    vector<shared_ptr<handle_stmt>> handles;
     int last_line = 0;
     do {
         if (peek()->type == END) break;
-        expr *e_iden = expression(true);
+        shared_ptr<expr> e_iden = expression(true);
         token *name = new token(UNRECOGNIZED, string(), new null_o(), e_iden->file, e_iden->line);
         if (match({BIND}))
             name = consume(IDENTIFIER, EXPECTED_AFTER("variable name","'bind'"));
-        vector<stmt *> &hstmts = *new vector<stmt *>();
+        vector<shared_ptr<stmt>> hstmts;
         while (!(check(HANDLE) || check(END))) {
             hstmts.push_back(declaration());
         }
-        handles.push_back(new handle_stmt(name->filename, name->line, e_iden, name, hstmts));
+        handles.push_back(make_shared<handle_stmt>(name->filename, name->line, e_iden, name, hstmts));
     } while (match({HANDLE}) || check(END));
     consume(END, EXPTOCLOSE("handle", last_line));
-    return new begin_handle_stmt(keyword->filename, keyword->line, stmts, handles);
+    return make_shared<begin_handle_stmt>(keyword->filename, keyword->line, stmts, handles);
 }
 
 pair<visibility, bool> parser::get_access_specifiers() {
@@ -649,10 +644,10 @@ pair<visibility, bool> parser::get_access_specifiers() {
     return pair<lns::visibility,bool>(vis,is_final);
 }
 
-constructor_stmt *parser::constructor(visibility visibility) {
+shared_ptr<constructor_stmt> parser::constructor(visibility visibility) {
     token *keyword = previous();
     consume(LEFT_PAREN, EXPECTED_AFTER("'('","'constructor'"));
-    vector<token *> &parameters = *new vector<token *>();
+    vector<token *> parameters;
     if (!check(RIGHT_PAREN)) {
         do {
             token *t = consume(IDENTIFIER, EXPECTED("parameter name"));
@@ -661,16 +656,16 @@ constructor_stmt *parser::constructor(visibility visibility) {
     }
     consume(RIGHT_PAREN, EXPECTED_AFTER("')'","parameter list"));
     try {
-        vector<stmt *> &body = stmts_until({END});
-        return new constructor_stmt(keyword->filename, keyword->line, keyword, parameters, body, visibility);
+        vector<shared_ptr<stmt>> body = stmts_until({END});
+        return make_shared<constructor_stmt>(keyword->filename, keyword->line, keyword, parameters, body, visibility);
     } catch (int) {
         int l = keyword->line;
         throw error(previous(), EXPTOCLOSE("constructor", l));
     }
 }
 
-parameter_declaration &parser::parameters() {
-    parameter_declaration& decl = *new parameter_declaration();
+parameter_declaration parser::parameters() {
+    parameter_declaration decl;
     bool found_optional = false;
     if (!check(RIGHT_PAREN)) {
         do {

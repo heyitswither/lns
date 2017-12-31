@@ -5,6 +5,7 @@
 #include <string>
 #include <iostream>
 #include <utility>
+#include <memory>
 using namespace std;
 using namespace lns;
 
@@ -56,8 +57,10 @@ class assign_expr : public expr {
 public:
 const token* name;
 const token_type op;
-const expr* value;
-assign_expr(const char* file,const int line, const token* name, const token_type op, const expr* value) : expr(line, file, ASSIGN_EXPR_T), name(name), op(op), value(value) {}
+    const shared_ptr<expr> value;
+
+    assign_expr(const char *file, const int line, const token *name, const token_type op, const shared_ptr<expr> value)
+            : expr(line, file, ASSIGN_EXPR_T), name(name), op(op), value(value) {}
 object* accept(expr_visitor *v) override{
 return v->visit_assign_expr(this);
 }
@@ -67,10 +70,12 @@ return v->visit_assign_expr(this);
 
 class binary_expr : public expr {
 public:
-const expr* left;
+    const shared_ptr<expr> left;
 const token* op;
-const expr* right;
-binary_expr(const char* file,const int line, const expr* left, const token* op, const expr* right) : expr(line, file, BINARY_EXPR_T), left(left), op(op), right(right) {}
+    const shared_ptr<expr> right;
+
+    binary_expr(const char *file, const int line, const shared_ptr<expr> left, const token *op,
+                const shared_ptr<expr> right) : expr(line, file, BINARY_EXPR_T), left(left), op(op), right(right) {}
 object* accept(expr_visitor *v) override{
 return v->visit_binary_expr(this);
 }
@@ -80,10 +85,13 @@ return v->visit_binary_expr(this);
 
 class call_expr : public expr {
 public:
-const expr* callee;
+    const shared_ptr<expr> callee;
 const token* paren;
-const vector<expr*>& args;
-call_expr(const char* file,const int line, const expr* callee, const token* paren, const vector<expr*>& args) : expr(line, file, CALL_EXPR_T), callee(callee), paren(paren), args(args) {}
+    const vector<shared_ptr<expr>> args;
+
+    call_expr(const char *file, const int line, const shared_ptr<expr> callee, const token *paren,
+              const vector<shared_ptr<expr>> args) : expr(line, file, CALL_EXPR_T), callee(callee), paren(paren),
+                                                     args(args) {}
 object* accept(expr_visitor *v) override{
 return v->visit_call_expr(this);
 }
@@ -93,8 +101,12 @@ return v->visit_call_expr(this);
 
 class grouping_expr : public expr {
 public:
-const expr* expression;
-explicit grouping_expr(const char* file,const int line, const expr* expression) : expr(line, file, GROUPING_EXPR_T), expression(expression) {}
+    const shared_ptr<expr> expression;
+
+    explicit grouping_expr(const char *file, const int line, const shared_ptr<expr> expression) : expr(line, file,
+                                                                                                       GROUPING_EXPR_T),
+                                                                                                  expression(
+                                                                                                          expression) {}
 object* accept(expr_visitor *v) override{
 return v->visit_grouping_expr(this);
 }
@@ -117,8 +129,11 @@ class unary_expr : public expr {
 public:
 const token* op;
 const operator_location location;
-const expr* right;
-unary_expr(const char* file,const int line, const token* op, const operator_location location, const expr* right) : expr(line, file, UNARY_EXPR_T), op(op), location(location), right(right) {}
+    const shared_ptr<expr> right;
+
+    unary_expr(const char *file, const int line, const token *op, const operator_location location,
+               const shared_ptr<expr> right) : expr(line, file, UNARY_EXPR_T), op(op), location(location),
+                                               right(right) {}
 object* accept(expr_visitor *v) override{
 return v->visit_unary_expr(this);
 }
@@ -140,9 +155,12 @@ return v->visit_variable_expr(this);
 class sub_script_expr : public expr {
 public:
 const token* where;
-const expr* name;
-const expr* key;
-sub_script_expr(const char* file,const int line, const token* where, const expr* name, const expr* key) : expr(line, file, SUB_SCRIPT_EXPR_T), where(where), name(name), key(key) {}
+    const shared_ptr<expr> name;
+    const shared_ptr<expr> key;
+
+    sub_script_expr(const char *file, const int line, const token *where, const shared_ptr<expr> name,
+                    const shared_ptr<expr> key) : expr(line, file, SUB_SCRIPT_EXPR_T), where(where), name(name),
+                                                  key(key) {}
 object* accept(expr_visitor *v) override{
 return v->visit_sub_script_expr(this);
 }
@@ -153,11 +171,20 @@ return v->visit_sub_script_expr(this);
 class sub_script_assign_expr : public expr {
 public:
 const token* where;
-const expr* name;
+    const shared_ptr<expr> name;
 const token_type op;
-const expr* key;
-const expr* value;
-sub_script_assign_expr(const char* file,const int line, const token* where, const expr* name, const token_type op, const expr* key, const expr* value) : expr(line, file, SUB_SCRIPT_ASSIGN_EXPR_T), where(where), name(name), op(op), key(key), value(value) {}
+    const shared_ptr<expr> key;
+    const shared_ptr<expr> value;
+
+    sub_script_assign_expr(const char *file, const int line, const token *where, const shared_ptr<expr> name,
+                           const token_type op, const shared_ptr<expr> key, const shared_ptr<expr> value) : expr(line,
+                                                                                                                 file,
+                                                                                                                 SUB_SCRIPT_ASSIGN_EXPR_T),
+                                                                                                            where(where),
+                                                                                                            name(name),
+                                                                                                            op(op),
+                                                                                                            key(key),
+                                                                                                            value(value) {}
 object* accept(expr_visitor *v) override{
 return v->visit_sub_script_assign_expr(this);
 }
@@ -167,9 +194,11 @@ return v->visit_sub_script_assign_expr(this);
 
 class member_expr : public expr {
 public:
-const expr* container_name;
+    const shared_ptr<expr> container_name;
 const token* member_identifier;
-member_expr(const char* file,const int line, const expr* container_name, const token* member_identifier) : expr(line, file, MEMBER_EXPR_T), container_name(container_name), member_identifier(member_identifier) {}
+
+    member_expr(const char *file, const int line, const shared_ptr<expr> container_name, const token *member_identifier)
+            : expr(line, file, MEMBER_EXPR_T), container_name(container_name), member_identifier(member_identifier) {}
 object* accept(expr_visitor *v) override{
 return v->visit_member_expr(this);
 }
@@ -179,11 +208,17 @@ return v->visit_member_expr(this);
 
 class member_assign_expr : public expr {
 public:
-const expr* container_name;
+    const shared_ptr<expr> container_name;
 const token_type op;
 const token* member_identifier;
-const expr* value;
-member_assign_expr(const char* file,const int line, const expr* container_name, const token_type op, const token* member_identifier, const expr* value) : expr(line, file, MEMBER_ASSIGN_EXPR_T), container_name(container_name), op(op), member_identifier(member_identifier), value(value) {}
+    const shared_ptr<expr> value;
+
+    member_assign_expr(const char *file, const int line, const shared_ptr<expr> container_name, const token_type op,
+                       const token *member_identifier, const shared_ptr<expr> value) : expr(line, file,
+                                                                                            MEMBER_ASSIGN_EXPR_T),
+                                                                                       container_name(container_name),
+                                                                                       op(op), member_identifier(
+                    member_identifier), value(value) {}
 object* accept(expr_visitor *v) override{
 return v->visit_member_assign_expr(this);
 }
@@ -194,8 +229,11 @@ return v->visit_member_assign_expr(this);
 class array_expr : public expr {
 public:
 const token* open_brace;
-const vector<pair<expr*,expr*>>& pairs;
-array_expr(const char* file,const int line, const token* open_brace, const vector<pair<expr*,expr*>>& pairs) : expr(line, file, ARRAY_EXPR_T), open_brace(open_brace), pairs(pairs) {}
+    const vector<pair<shared_ptr<expr>, shared_ptr<expr>>> &pairs;
+
+    array_expr(const char *file, const int line, const token *open_brace,
+               const vector<pair<shared_ptr<expr>, shared_ptr<expr>>> &pairs) : expr(line, file, ARRAY_EXPR_T),
+                                                                                open_brace(open_brace), pairs(pairs) {}
 object* accept(expr_visitor *v) override{
 return v->visit_array_expr(this);
 }

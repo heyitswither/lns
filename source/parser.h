@@ -28,8 +28,8 @@ namespace lns {
         int start;
         int current;
         bool use_allowed = true;
-        vector<token *> &tokens;
-        vector<stmt *> &statements;
+        vector<token *> tokens;
+        vector<shared_ptr<stmt> > statements;
 
         bool match(initializer_list<token_type> types);
 
@@ -47,96 +47,100 @@ namespace lns {
 
         void use_not_allowed();
 
-        stmt *use();
+        shared_ptr<stmt> use();
 
-        vector<stmt *> &context_block();
+        vector<shared_ptr<stmt> > context_block();
 
-        vector<stmt *> &stmts_until(initializer_list<token_type> list);
+        vector<shared_ptr<stmt> > stmts_until(initializer_list<token_type> list);
 
-        vector<stmt *> &block();
-
-        stmt *context_declaration(visibility vis, bool final);
+        shared_ptr<stmt> context_declaration(visibility vis, bool final);
 
         bool check_file(const char *str);
 
         bool dpcheck();
 
-        stmt *declaration();
+        shared_ptr<stmt> declaration();
 
         int error(token *token, const char *message);
 
-        var_stmt *var_declaration(visibility vis, bool is_final);
+        shared_ptr<var_stmt> var_declaration(visibility vis, bool is_final);
 
-        stmt *statement();
+        shared_ptr<stmt> statement();
 
-        stmt *return_statement();
+        shared_ptr<stmt> return_statement();
 
-        stmt *break_statement();
+        shared_ptr<stmt> break_statement();
 
-        stmt *continue_statement();
+        shared_ptr<stmt> continue_statement();
 
-        stmt *if_statement();
+        shared_ptr<stmt> if_statement();
 
-        stmt *while_statement();
+        shared_ptr<stmt> while_statement();
 
-        stmt *for_statement();
+        shared_ptr<stmt> for_statement();
 
-        stmt *expression_statement();
+        shared_ptr<stmt> expression_statement();
 
-        function_stmt * function(visibility vis);
+        shared_ptr<function_stmt> function(visibility vis);
 
-        expr *assignment(bool nested);
+        shared_ptr<expr> assignment(bool nested);
 
-        expr *array();
+        shared_ptr<expr> array();
 
-        expr *comparison(bool nested);
+        shared_ptr<expr> comparison(bool nested);
 
-        expr *addition(bool nested);
+        shared_ptr<expr> addition(bool nested);
 
-        expr *multiplication(bool nested);
+        shared_ptr<expr> multiplication(bool nested);
 
-        expr *power(bool nested);
+        shared_ptr<expr> power(bool nested);
 
-        expr *unary(bool nested);
+        shared_ptr<expr> unary(bool nested);
 
-        expr *call(bool nested);
+        shared_ptr<expr> call(bool nested);
 
-        expr *special_assignment(bool nested);
+        shared_ptr<expr> special_assignment(bool nested);
 
-        expr *primary(bool nested);
+        shared_ptr<expr> primary(bool nested);
 
     public:
-        explicit parser(vector<token *> &tokens);
+        explicit parser(vector<token *> tokens);
 
         parser() = delete;
 
-        vector<stmt *> &parse(bool ld_std);
+        vector<shared_ptr<stmt> > parse(bool ld_std);
 
-        expr *expression(bool nested);
+        shared_ptr<expr> expression(bool nested);
 
-        expr *logical(bool nested);
+        shared_ptr<expr> logical(bool nested);
 
         bool is_at_end();
 
         void reset(vector<token *> tokens);
 
-        void ld_stmts(string&,token*);
+        void ld_stmts(string, token *);
 
-        stmt *foreach_statement();
+        shared_ptr<stmt> foreach_statement();
 
-        stmt *exception_(visibility vis);
+        shared_ptr<stmt> exception_(visibility vis);
 
-        stmt *raise();
+        shared_ptr<stmt> raise();
 
-        stmt *begin_handle_statement();
+        shared_ptr<stmt> begin_handle_statement();
 
         pair<visibility, bool> get_access_specifiers();
 
-        stmt *class_(lns::visibility vis);
+        shared_ptr<stmt> class_(lns::visibility vis);
 
-        constructor_stmt *constructor(visibility visibility);
+        shared_ptr<constructor_stmt> constructor(visibility visibility);
 
-        parameter_declaration &parameters();
+        parameter_declaration parameters();
+
+        shared_ptr<stmt> for_statement_init(token *where);
+
+        shared_ptr<expr> for_statement_condition(token *where);
+
+        shared_ptr<expr> for_statement_increment(token *where);
     };
 
 
