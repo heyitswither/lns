@@ -37,7 +37,7 @@ CHK $? "Unable to create link to executable"
 printf " done\n"
 
 cd scripts
-sudo bash ./install_libraries.sh
+sudo bash ./install_libraries_local.sh
 
 cd ..
 
