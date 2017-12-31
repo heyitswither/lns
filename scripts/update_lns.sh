@@ -22,6 +22,6 @@ CHK $? "Unable to clone the repository"
 printf "done.\n"
 
 echo "Calling the install script..."
-bash "lns_temp/install/install.sh"
+bash "lns_temp/scripts/install.sh"
 
 rm -f -r lns_temp

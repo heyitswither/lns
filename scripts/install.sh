@@ -36,12 +36,12 @@ sudo ln -s /lns/lns /usr/bin/
 CHK $? "Unable to create link to executable"
 printf " done\n"
 
-cd install
+cd scripts
 sudo bash ./install_libraries.sh
 
 cd ..
 
-sudo cp install/update_lns.sh /lns/
+sudo cp scripts/update_lns.sh /lns/
 
 printf "Installing manual entry..."
 sudo cp manual/lns.1 /usr/share/man/man1/
