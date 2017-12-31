@@ -19,7 +19,6 @@ rm -f -r lns_temp
 printf "Cloning the repository..."
 git clone https://github.com/lorenzonotaro/lns.git lns_temp
 CHK $? "Unable to clone the repository"
-printf "done.\n"
 
 echo "Calling the install script..."
 bash "lns_temp/scripts/install_local.sh"
