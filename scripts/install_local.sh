@@ -43,7 +43,7 @@ cd ..
 
 printf "Copying scripts..."
 sudo cp scripts/update_lns.sh /lns/
-sudo cp scripts/check_revision.sh
+sudo cp scripts/check_revision.sh /lns/
 printf " done\n"
 
 printf "Installing manual entry..."
