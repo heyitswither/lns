@@ -38,5 +38,9 @@ const char *lns::invalid_operator_exception::what() const throw(){
 lns::invalid_operator_exception::invalid_operator_exception(string op, string type) : op(op), type(type) {}
 
 const char *lns::parse_exception::what() const throw(){
-    return concat({"\nParsing concluded with errors."});
+    return "\nParsing concluded with errors.";
+}
+
+const char *lns::cmd_processor_unavailable::what() const throw() {
+    return concat({FATAL_ERROR_S, ": couldn't call system(), command processor unavailable."});
 }

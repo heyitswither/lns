@@ -9,6 +9,7 @@
 #include "defs.h"
 #include "options.h"
 #include <initializer_list>
+
 #define FATAL_ERROR_UNFORMATTED   "Fatal error"
 #define PARSE_ERROR_UNFORMATTED   "Parse error"
 #define RUNTIME_ERROR_UNFORMATTED "Runtime error"
@@ -66,5 +67,10 @@ namespace lns {
     class parse_exception : public std::exception {
         const char *what() const throw() override;
     };
+
+    class cmd_processor_unavailable : public std::exception {
+        const char *what() const throw() override;
+    };
 }
+
 #endif //CPPLNS_EXCEPTIONS_H
