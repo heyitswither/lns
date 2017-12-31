@@ -8,7 +8,6 @@
 signed char update() {
     if (!system(nullptr)) throw lns::cmd_processor_unavailable();
     int update_required = check_update();
-    std::cout << update_required;
     switch (update_required) {
         case 256:
             std::cout << "The interpreter is up to date. Do you want to update anyway? ";

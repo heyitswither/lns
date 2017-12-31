@@ -22,6 +22,12 @@ namespace lns{
 
     static char * file = nullptr;
     static auto start_time = high_resolution_clock::now(),parsing_time = high_resolution_clock::now(),execution_time = high_resolution_clock::now();
+
+    void version() {
+        cout << "lns revision no. " << to_string(REVISION_NUMBER) << endl;
+        exit(EXIT_SUCCESS);
+    }
+
     void option(string& o){
         if(o == "i" || o == "-ignore-unresolved"){
             ignore_unresolved = true;
@@ -41,6 +47,8 @@ namespace lns{
             no_format = true;
         } else if (o == "u" || o == "-update") {
             update_option = true;
+        } else if (o == "v" || o == "-version") {
+            version();
         }else{
             throw unknown_option_exception(o);
         }

@@ -32,6 +32,12 @@ don't use special ANSI escape codes in error messages (for shells that don't sup
 .TP
 .BR \-d ", " \-\-debugger
 start the program in debugger mode. See the \fBDebugger\fR section for info.
+.TP
+.BR \-u ", " \-\-update
+check, download and install updates from the \fIGitHub\fR repository.
+.TP
+.BR \-v ", " \-\-version
+Print the program version and exit.
 .SH DEBUGGER
 The debugger mode allows the user to set breakpoints in the execution. When a break point gets hit, the program enters break mode and the debugger console starts up, which allows the user to check the program status, which includes watching variables and checking the call stack. To start the debugger, use the \fI-d\fR command line option.
 .TP
@@ -40,7 +46,7 @@ The debugger mode allows the user to set breakpoints in the execution. When a br
 The debugger commands are the following:
 .TP
 .TP
-.BR load "|" l " "\fIfile\fR ":"
+.BR load "|" l " "\fIfile\fR ":" /b
 load and parse a script file.
 .TP
 .BR run "|" r ":"
