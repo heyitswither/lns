@@ -8,14 +8,15 @@
 signed char update() {
     if (!system(nullptr)) throw lns::cmd_processor_unavailable();
     int update_required = check_update();
+    std::cout << update_required;
     switch (update_required) {
-        case 0:
+        case 256:
             std::cout << "The interpreter is up to date. Do you want to update anyway? ";
             break;
-        case 1:
+        case 512:
             std::cout << "Do you want to install it? ";
             break;
-        case 2:
+        case 768:
             std::cout << "An error occurred while checking updates. Do you want to attempt to install anyway? ";
             break;
     }
@@ -26,7 +27,7 @@ signed char update() {
     } while (s != "y" && s != "n" && s != "Y" && s != "N");
 
     if (s == "y" || s == "Y") {
-        if (system("bash " LNS_INSTALL_LOCATION "update_lns.sh") == 0) return 0;
+        if (system("bash -c \"" LNS_INSTALL_LOCATION "update_lns.sh\"") == 0) return 0;
         std::cout << "\nInstallation failed." << std::endl;
         return FATAL_ERROR;
     }
