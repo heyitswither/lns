@@ -12,4 +12,5 @@
 
 signed char update();
 
+void check_update();
 #endif //CPPLNS_UPDATE_H
