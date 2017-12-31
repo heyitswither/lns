@@ -1,13 +1,6 @@
-//
-// Created by lorenzo on 11/8/17.
-//
 
 #ifndef CPPLNS_DEBUG_H
 #define CPPLNS_DEBUG_H
-
-#define BP_DELIMITER string(":") /*The delimiter to be used in breakpoint files*/
-#define MAX_BREAKPOINTS 128
-#define MAX_WATCHES 32
 
 #include <string>
 #include <sstream>
@@ -16,6 +9,12 @@
 #include "interpreter.h"
 #include "scanner.h"
 #include "parser.h"
+#include "revision.h"
+
+#define DEBUGGER_STARTING "\n>>>>>>>>lns debugger rev" << std::to_string(REVISION_NUMBER) << "<<<<<<<<\n      All rights reserved.      \n\n\n"
+#define BP_DELIMITER string(":") /*The delimiter to be used in breakpoint files*/
+#define MAX_BREAKPOINTS 128
+#define MAX_WATCHES 32
 
 namespace lns {
 

@@ -10,8 +10,7 @@
 #include "signals.h"
 #include "update.h"
 
-#define INTERPRETER_VERSION "0.2"
-#define PROGRAM_START_SIGN "LNS v" INTERPRETER_VERSION ". All rights reserved.\n"
+#define PROGRAM_STARTING "LNS rev" << std::to_string(REVISION_NUMBER) << " interactive mode.\n"
 
 void register_signal_handlers();
 
@@ -100,7 +99,7 @@ namespace lns{
         string source;
         const char filename[] = "stdin";
         interpreter *i = new interpreter();
-        cout << PROGRAM_START_SIGN << endl;
+        cout << PROGRAM_STARTING;
         while(true){
             cin.clear();
             cout << "> ";
@@ -147,6 +146,7 @@ int main(const int argc, const char* argv[]) {
         } else if (lns::update_option) {
             return update();
         }else if(lns::file == nullptr){
+            check_update();
             lns::run_prompt();
         }else{
             lns::run_file(lns::file);

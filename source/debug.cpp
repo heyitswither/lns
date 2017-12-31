@@ -409,7 +409,7 @@ void debug::broken_loop() {
 }
 
 void lns::debug::start() {
-    cout << "\n>>>>>>>>lns debugger v1.0<<<<<<<<\n      All rights reserved.      \n\n\n";
+    cout << DEBUGGER_STARTING;
     interpreter = new debugger(this);
     if (file != nullptr)
         try {
