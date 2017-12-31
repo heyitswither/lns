@@ -10,7 +10,7 @@
 #include "signals.h"
 #include "update.h"
 
-#define PROGRAM_STARTING "LNS rev" << std::to_string(REVISION_NUMBER) << " interactive mode.\n"
+#define PROGRAM_STARTING "lns rev. " << std::to_string(REVISION_NUMBER) << ", interactive mode.\n"
 
 void register_signal_handlers();
 

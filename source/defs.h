@@ -28,7 +28,9 @@
 #define DCAST_ASNCHK(a,b,c) ((DCAST_ASN(a,b,c)) != nullptr)
 #define DCAST_CHK(b,c) (DCAST(b,c) != nullptr)
 
-#define LNS_LIBRARY_LOCATION "/lns/lib/"
+#define LNS_INSTALL_LOCATION "/lns/"
+#define LNS_LIBRARY_LOCATION LNS_INSTALL_LOCATION "lib/"
+
 #define S(s) *new std::string(#s)
 
 #define CHARSTR(c) string(1,c)

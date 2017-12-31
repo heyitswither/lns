@@ -26,7 +26,7 @@ signed char update() {
     } while (s != "y" && s != "n" && s != "Y" && s != "N");
 
     if (s == "y" || s == "Y") {
-        if (system("bash /lns/update_lns.sh") == 0) return 0;
+        if (system("bash " LNS_INSTALL_LOCATION "update_lns.sh") == 0) return 0;
         std::cout << "\nInstallation failed." << std::endl;
         return FATAL_ERROR;
     }
@@ -34,7 +34,7 @@ signed char update() {
 }
 
 int check_update() {
-    std::string s("bash /lns/check_revision.sh ");
+    std::string s("bash " LNS_INSTALL_LOCATION "check_revision.sh ");
     s += std::to_string(REVISION_NUMBER);
     return system(s.c_str());
 }
