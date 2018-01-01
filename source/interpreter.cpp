@@ -41,7 +41,7 @@ void interpreter::execute_block(vector<shared_ptr<stmt>> stmts, runtime_environm
 }
 
 object *interpreter::visit_member_expr(member_expr *c) {
-    object *o = evaluate(const_cast<expr *>(c->container_name.get()));
+    object *o = evaluate(c->container_name.get());
     if (o->type == CONTEXT_T) {
         return DCAST(context*, o)->get(c->member_identifier, c->file);
     }else if(o->type == EXCEPTION_T){
@@ -54,27 +54,28 @@ object *interpreter::visit_member_expr(member_expr *c) {
 }
 
 object *interpreter::visit_member_assign_expr(member_assign_expr *c) {
-    object *o = evaluate(const_cast<expr *>(c->container_name.get()));
+    object *o = evaluate(c->container_name.get());
     if (o->type != CONTEXT_T) {
         throw runtime_exception(c->member_identifier, OBJECT_NOT_CONTEXT);
     }
-    object *value = evaluate(const_cast<expr *>(c->value.get()));
+    object *value = evaluate(c->value.get());
     dynamic_cast<context *>(o)->assign(c->member_identifier, c->op,
                                        clone_or_keep(value, c->value->type, c->member_identifier), c->file);
     return value;
 }
 
 object *interpreter::visit_assign_expr(assign_expr *a) {
-    object *value = evaluate(const_cast<expr *>(a->value.get()));
+    object *value = evaluate(a->value.get());
     environment->assign(a->name, a->op, clone_or_keep(value, a->value->type, a->name), a->file);
     return value;
 }
 
 object *interpreter::visit_binary_expr(binary_expr *b) {
-    object *left = evaluate(const_cast<expr *>(b->left.get()));
+    object *left;
+    left = evaluate(b->left.get());
     if (left == nullptr)
         left = lns::GET_DEFAULT_NULL();
-    object *right = evaluate(const_cast<expr *>(b->right.get()));
+    object *right = evaluate(b->right.get());
     if (right == nullptr) {
         right = lns::GET_DEFAULT_NULL();
     }
@@ -124,7 +125,7 @@ object *interpreter::visit_binary_expr(binary_expr *b) {
 }
 
 object *interpreter::visit_call_expr(call_expr *c) {
-    object *callee = evaluate(const_cast<expr *>(c->callee.get()));
+    object *callee = evaluate(c->callee.get());
     vector<object *> args;
     callable *function = dynamic_cast<callable *>(callee);
     if (function == nullptr) throw runtime_exception(c->paren, INVALID_CALL_TARGET);
@@ -155,7 +156,7 @@ object *interpreter::visit_call_expr(call_expr *c) {
 }
 
 object *interpreter::visit_grouping_expr(grouping_expr *g) {
-    return evaluate(const_cast<expr *>(g->expression.get()));
+    return evaluate(g->expression.get());
 }
 
 object *interpreter::visit_literal_expr(literal_expr *l) {
@@ -163,7 +164,7 @@ object *interpreter::visit_literal_expr(literal_expr *l) {
 }
 
 object *interpreter::visit_unary_expr(unary_expr *u) {//
-    object *right = evaluate(const_cast<expr *>(u->right.get()));
+    object *right = evaluate(u->right.get());
     try {
         switch (u->op->type) {
             case PLUS_PLUS:
@@ -189,8 +190,8 @@ object *interpreter::visit_variable_expr(variable_expr *v) {
 }
 
 object *interpreter::visit_sub_script_expr(sub_script_expr *m) {
-    object *key = evaluate(const_cast<expr *>(m->key.get()));
-    object *eval = evaluate(const_cast<expr *>(m->name.get()));
+    object *key = evaluate(m->key.get());
+    object *eval = evaluate(m->name.get());
     if (eval->type == ARRAY_T) {
         return get_map_field(const_cast<token *>(m->where), eval, key);
     } else if (eval->type == STRING_T) {
@@ -246,11 +247,11 @@ object *interpreter::assign_map_field(const token *where, object *obj, const tok
 }
 
 object *interpreter::visit_sub_script_assign_expr(sub_script_assign_expr *a) {
-    object *key = evaluate(const_cast<expr *>(a->key.get()));
-    object *value = evaluate(const_cast<expr *>(a->value.get()));
+    object *key = evaluate(a->key.get());
+    object *value = evaluate(a->value.get());
     number_o* nr;
     if(DCAST_ASNCHK(nr,number_o*,key))
-        return assign_map_field(a->where, evaluate(const_cast<expr *>(a->name.get())), a->op, nr, value);
+        return assign_map_field(a->where, evaluate(a->name.get()), a->op, nr, value);
     else
         throw runtime_exception(a->where,KEY_MUST_BE_NUMBER);
 }
@@ -266,13 +267,13 @@ void interpreter::visit_block_stmt(block_stmt *b) {
 }
 
 void interpreter::visit_s_for_each_stmt(s_for_each_stmt *s) {
-    object *container = evaluate(const_cast<expr *>(s->container.get()));
+    object *container = evaluate(s->container.get());
     if(container->type == ARRAY_T){
         auto DCAST_ASN(array,array_o*,container);
         environment->define(s->identifier,new null_o(),false,V_UNSPECIFIED,s->file);
         for(const auto &a : array->values){
             environment->assign(s->identifier, token_type::EQUAL, a.second, s->file);
-            execute(const_cast<stmt *>(s->body.get()));
+            execute(s->body.get());
         }
         environment->clear_var(s->identifier);
     }else{
@@ -282,10 +283,10 @@ void interpreter::visit_s_for_each_stmt(s_for_each_stmt *s) {
 
 
 void interpreter::visit_s_for_stmt(s_for_stmt *s) {
-    execute(const_cast<stmt *>(s->init.get()));
-    while (is_bool_true_eq(evaluate(const_cast<expr *>(s->condition.get())))) {
-        execute(const_cast<stmt *>(s->body.get()));
-        evaluate(const_cast<expr *>(s->increment.get()));
+    execute(s->init.get());
+    while (is_bool_true_eq(evaluate(s->condition.get()))) {
+        execute(s->body.get());
+        evaluate(s->increment.get());
     }
 }
 
@@ -314,20 +315,20 @@ void interpreter::visit_function_stmt(function_stmt *f) {
 }
 
 void interpreter::visit_if_stmt(if_stmt *i) {
-    object *eval = evaluate(const_cast<expr *>(i->condition.get()));
+    object *eval = evaluate(i->condition.get());
     //boolean definitions for the language are in function is_bool_true_eq()
     if (is_bool_true_eq(eval)) {
-        execute(const_cast<stmt *>(i->thenBranch.get()));
+        execute(i->thenBranch.get());
         return;
     }
     if (i->elseBranch != nullptr && i->elseBranch->type != NULL_STMT_T) {
-        execute(const_cast<stmt *>(i->elseBranch.get()));
+        execute(i->elseBranch.get());
     }
 }
 
 void interpreter::visit_return_stmt(return_stmt *r) {
     object *value = lns::GET_DEFAULT_NULL();
-    if (r->value->type != NULL_EXPR_T) value = evaluate(const_cast<expr *>(r->value.get()));
+    if (r->value->type != NULL_EXPR_T) value = evaluate(r->value.get());
     throw return_signal(value, r->keyword);
 }
 
@@ -341,7 +342,7 @@ void interpreter::visit_continue_stmt(continue_stmt *c) {
 
 void interpreter::visit_var_stmt(var_stmt *v) {
     if (v->initializer->type != NULL_EXPR_T) {
-        object *val = evaluate(const_cast<expr *>(v->initializer.get()));
+        object *val = evaluate(v->initializer.get());
         environment->define(const_cast<token *>(v->name), clone_or_keep(val, v->initializer->type, v->name), v->isfinal,
                             v->vis, v->file);
     }else{
@@ -351,9 +352,9 @@ void interpreter::visit_var_stmt(var_stmt *v) {
 
 void interpreter::visit_s_while_stmt(s_while_stmt *s) {
     object *o;
-    while (is_bool_true_eq(o = evaluate(const_cast<expr *>(s->condition.get())))) {
+    while (is_bool_true_eq(o = evaluate(s->condition.get()))) {
         try {
-            execute(const_cast<stmt *>(s->body.get()));
+            execute(s->body.get());
         } catch (break_signal b) {
             break;
         } catch (continue_signal s) {
@@ -466,7 +467,7 @@ void interpreter::visit_exception_decl_stmt(exception_decl_stmt *e) {
 
 void interpreter::visit_raise_stmt(raise_stmt *r) {
     exception_definition* exc;
-    if ((exc = dynamic_cast<exception_definition *>(evaluate(const_cast<expr *>(r->name.get())))) == nullptr) {
+    if ((exc = dynamic_cast<exception_definition *>(evaluate(r->name.get()))) == nullptr) {
         throw runtime_exception(r->where,RAISE_NOT_EXCEPTION);
     }
     map<string,object*> fields = *new map<string,object*>();
