@@ -48,9 +48,9 @@
 #define EXCEPTION_PREVIOUSLY_DEFIDED(file,line) lns::concat({"exception previously defined at ", file, std::to_string(line)})
 #define RAISE_NOT_EXCEPTION "only exceptions can be raised"
 #define HANDLE_NOT_EXCEPTION "only exceptions can be handled"
-#define VARIABLE_NOT_VISIBLE(var) lns::concat({"variable \"", var, "\" is not visible in the current file"})
-#define VARIABLE_UNDEFINED(var) lns::concat({"variable \"", var, "\" is undefined"})
-#define VARIABLE_ALREADY_DEFINED(var) lns::concat({"variable \"", var, "\" is already defined"})
-#define VARIABLE_FINAL(var) lns::concat({"variable \"", var, "\" is final"})
+#define VARIABLE_NOT_VISIBLE(var) lns::concat({"\"", var, "\" is not visible in the current file"})
+#define VARIABLE_UNDEFINED(var) lns::concat({"\"", var, "\" is undefined"})
+#define VARIABLE_ALREADY_DEFINED(var) lns::concat({"\"", var, "\" is already defined"})
+#define VARIABLE_FINAL(var) lns::concat({"\"", var, "\" is final"})
 
 #endif //CPPLNS_ERROR_MESSAGE_H
