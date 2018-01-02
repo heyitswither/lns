@@ -47,6 +47,8 @@ namespace lns{
             no_format = true;
         } else if (o == "u" || o == "-update") {
             update_option = true;
+        } else if (o == "-no-std") {
+            no_std_option = true;
         } else if (o == "v" || o == "-version") {
             version();
         }else{
@@ -116,7 +118,7 @@ namespace lns{
         vector<shared_ptr<stmt>> past;
         cout << PROGRAM_STARTING;
         interpreter i;
-        i.interpret(p.parse(true));
+        i.interpret(p.parse(!no_std_option));
         while(true){
             cin.clear();
             cout << "> ";
@@ -140,7 +142,7 @@ namespace lns{
             ss << file.rdbuf();
             source = ss.str();
             interpreter i;
-            run(filename, source, i, p, true);
+            run(filename, source, i, p, !no_std_option);
         }else{
             throw file_not_found_exception(filename);
         }

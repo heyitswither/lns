@@ -27,8 +27,11 @@ terminate the program after parsing the code.
 .BR \-i ", " \-\-ignore\-unresolved
 ignore inaccessible file errors in use statements.
 .TP
+.BR \-\-no\-std
+do not automatically include LNS_PATH/lib/std.lns. \fBWarning:\fR pre-defined functions and constants that are normally include won't be present.
+.TP
 .BR \-f ", " \-\-no\-format
-don't use special ANSI escape codes in error messages (for shells that don't support ANSI).
+do not use special ANSI escape codes in error messages (for shells that don't support ANSI).
 .TP
 .BR \-d ", " \-\-debugger
 start the program in debugger mode. See the \fBDebugger\fR section for info.
