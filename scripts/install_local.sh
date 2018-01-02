@@ -50,7 +50,7 @@ sudo cp scripts/check_revision.sh /lns/
 printf " done\n"
 
 printf "Installing manual entry..."
-sudo cp manual/lns.1 /usr/share/man/man1/
+sudo cp man/lns.1 /usr/share/man/man1/
 printf " done\n"
 
 echo "Installation completed."
