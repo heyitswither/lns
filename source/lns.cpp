@@ -71,14 +71,14 @@ namespace lns{
             }
         }
     }
-    void run(const char* filename,string& source, interpreter * i, bool load_std){
+
+    void run(const char *filename, string &source, interpreter &i, parser &parser, bool ld_std) {
         scanner scn (filename,source);
         vector<token*> tokens = scn.scan_tokens(true);
-        vector<shared_ptr<stmt>> stmts;
         if(had_parse_error) throw parse_exception();
         start_time = high_resolution_clock::now();
-        parser parser(tokens);
-        stmts = parser.parse(load_std);
+        parser.reset(tokens);
+        vector<shared_ptr<stmt>> stmts = parser.parse(ld_std);
         parsing_time = high_resolution_clock::now();
         if(parse_only){
             if(time_count) cout << "\nParsing time: " << std::setprecision(5) << duration_cast<microseconds>(parsing_time - start_time).count()/1000 << "ms.\n";
@@ -86,8 +86,7 @@ namespace lns{
         }
         //cout << "Total statements: " << to_string(stmts.size()) << endl;
         if(had_parse_error) throw parse_exception();
-        if(i == nullptr) i = new interpreter();
-        i->interpret(stmts);
+        i.interpret(stmts);
         execution_time = high_resolution_clock::now();
         if(time_count){
             cout << endl;
@@ -101,23 +100,32 @@ namespace lns{
         had_parse_error = false;
         had_runtime_error = false;
     }
+
+    void move_statements(std::vector<shared_ptr<stmt>> &new_, std::vector<shared_ptr<stmt>> &past) {
+        auto iterator = std::next(new_.begin(), new_.size());
+        std::move(new_.begin(), iterator, std::back_inserter(past));
+        new_.erase(new_.begin(), iterator);
+    }
+
     void run_prompt(){
         lns::prompt = true;
-        bool load_std = true;
         string source;
         const char filename[] = "stdin";
-        interpreter *i = new interpreter();
+        scanner s("", *new string(""));
+        parser p(s.scan_tokens(true));
+        vector<shared_ptr<stmt>> past;
         cout << PROGRAM_STARTING;
+        interpreter i;
+        i.interpret(p.parse(true));
         while(true){
             cin.clear();
             cout << "> ";
             getline(cin,source);
             try {
-                run(filename,source,i,load_std);
-                load_std = false;
-            }catch(std::exception e){
-
-            }
+                p.use_allowed = true;
+                move_statements(p.statements, past);
+                run(filename, source, i, p, false);
+            } catch (std::exception &e) {}
             reinit_errors();
         }
     }
@@ -126,11 +134,13 @@ namespace lns{
         ifstream file (filename);
         string source;
         stringstream ss;
+        parser p;
         if(file.is_open()){
             stringstream ss;
             ss << file.rdbuf();
             source = ss.str();
-            run(filename,source, nullptr,true);
+            interpreter i;
+            run(filename, source, i, p, true);
         }else{
             throw file_not_found_exception(filename);
         }

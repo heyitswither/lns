@@ -99,8 +99,7 @@ void scanner::number() {
     double value;
     stringstream ss(lexeme);
     ss >> value;
-    number_o *n = new number_o(value);
-    add_token(type, n);
+    add_token(type, make_shared<number_o>(value));
 }
 
 void scanner::identifier() {
@@ -219,14 +218,14 @@ void scanner::scan_token() {
     }
 }
 
-void scanner::add_token(token_type type, object *f) {
+void scanner::add_token(token_type type, shared_ptr<object> f) {
     std::string text = source.substr(start, current - start);
     token *t = new token(type, text, f, filename, line);
     tokens.push_back(t);
 }
 
 void scanner::add_token(token_type type) {
-    add_token(type, nullptr);
+    add_token(type, shared_ptr<null_o>());
 }
 
 bool scanner::match(char expected) {
@@ -242,7 +241,7 @@ char scanner::peek() {
 }
 
 void scanner::string_() {
-    string& s = *new string();
+    string s;
     while (true) {
         if (is_at_end()) break;
         if (peek() == '\"') break;
@@ -291,7 +290,7 @@ void scanner::string_() {
         return;
     }
     advance();
-    add_token(STRING, new string_o(s));
+    add_token(STRING, make_shared<string_o>(s));
 }
 
 

@@ -25,9 +25,8 @@ bool lns::string_o::operator==(const lns::object &o) const {
     return (value == dynamic_cast<const string_o *>(&o)->value);
 }
 
-lns::object *lns::string_o::operator+=(const lns::object &o) {
+void lns::string_o::operator+=(const lns::object &o) {
     this->value += o.str();
-    return this;
 }
 
 bool lns::string_o::operator>(const lns::object &o) const {
@@ -50,52 +49,54 @@ bool lns::string_o::operator<(const lns::object &o) const {
     return this->value < dynamic_cast<const string_o &>(o).value;
 }
 
-lns::object *lns::string_o::operator+(const lns::object &o) const {
-    return new string_o(this->value + o.str());
+shared_ptr<object> lns::string_o::operator+(const lns::object &o) const {
+    return make_shared<string_o>(this->value + o.str());
 }
 
-lns::object *lns::string_o::operator/(const lns::object &o) const {
+shared_ptr<object> lns::string_o::operator/(const lns::object &o) const {
     if(o.type != STRING_T)
         return GET_DEFAULT_NULL();
-    auto *map = new array_o();
+    auto map = make_shared<array_o>();
     unsigned long i = 0;
     unsigned long current;
     string partial = this->value;
     while((current = partial.find(o.str())) != string::npos){
-        map->values[i++] = new string_o(partial.substr(0, current));
+        map->values[i++] = make_shared<string_o>(partial.substr(0, current));
         partial = partial.substr(current + 1,partial.size()-1);
     }
-    map->values[i++] = new string_o(move(partial));
+    map->values[i++] = make_shared<string_o>(partial);
     return map;
 }
 
-object *string_o::clone() const {
-    return new string_o(*new string(this->value));
+shared_ptr<object> string_o::clone() const {
+    return make_shared<string_o>(this->value);
 }
 
-string_o::string_o() : object(STRING_T), value(*new string()){
+string_o::string_o() : object(STRING_T) {}
 
+shared_ptr<object> number_o::clone() const {
+    return make_shared<number_o>(this->value);
 }
 
-object *number_o::clone() const {
-    return new number_o(this->value);
+shared_ptr<object> null_o::clone() const {
+    return make_shared<null_o>();
 }
-object *null_o::clone() const {
-    return new null_o();
+
+shared_ptr<object> bool_o::clone() const {
+    return make_shared<bool_o>(this->value);
 }
-object *bool_o::clone() const{
-    return new bool_o(this->value);
-}
-object *array_o::clone() const {
-    array_o* map = new array_o();
+
+shared_ptr<object> array_o::clone() const {
+    auto map = make_shared<array_o>();
     map->values = this->values;
     return map;
 }
 
-object *callable::clone() const {
+shared_ptr<object> callable::clone() const {
     return nullptr;
 }
-object *context::clone() const {
+
+shared_ptr<object> context::clone() const {
     return nullptr;
 }
 
@@ -104,7 +105,7 @@ lns::number_o::number_o(double value) : object(objtype::NUMBER_T), value(value) 
 string lns::number_o::str() const {
     stringstream ss;
     ss << value;
-    return *new string(ss.str());
+    return ss.str();
 }
 
 bool lns::number_o::operator==(const lns::object &o) const {
@@ -132,75 +133,71 @@ bool lns::number_o::operator<(const lns::object &o) const {
     return this->value < dynamic_cast<const number_o &>(o).value;
 }
 
-lns::object *lns::number_o::operator+=(const lns::object &o) {
+void lns::number_o::operator+=(const lns::object &o) {
     if (!check_type(NUMBER_T, *this, o))WRONG_OP(+=);
     this->value += dynamic_cast<const number_o &>(o).value;
-    return this;
 }
 
-lns::object *lns::number_o::operator-=(const lns::object &o) {
+void lns::number_o::operator-=(const lns::object &o) {
     if (!check_type(NUMBER_T, *this, o)) WRONG_OP(-=);
     this->value -= dynamic_cast<const number_o &>(o).value;
-    return this;
 }
 
-lns::object *lns::number_o::operator*=(const lns::object &o) {
+void lns::number_o::operator*=(const lns::object &o) {
     if (!check_type(NUMBER_T, *this, o)) WRONG_OP(*=);
     this->value *= dynamic_cast<const number_o &>(o).value;
-    return this;
 }
 
-lns::object *lns::number_o::operator/=(const lns::object &o) {
+void lns::number_o::operator/=(const lns::object &o) {
     if (!check_type(NUMBER_T, *this, o)) WRONG_OP(/=);
     this->value /= dynamic_cast<const number_o &>(o).value;
-    return this;
 }
 
-lns::object *lns::number_o::operator+(const lns::object &o) const {
+shared_ptr<object> lns::number_o::operator+(const lns::object &o) const {
     if (!check_type(NUMBER_T, *this, o))  if(!(o.type == STRING_T)) WRONG_OP(+);
     if(o.type == STRING_T)
-        return new string_o(this->str() + o.str());
-    return new number_o(this->value + dynamic_cast<const number_o &>(o).value);
+        return make_shared<string_o>(this->str() + o.str());
+    return make_shared<number_o>(this->value + dynamic_cast<const number_o &>(o).value);
 }
 
-lns::object *lns::number_o::operator-(const lns::object &o) const {
+shared_ptr<object> lns::number_o::operator-(const lns::object &o) const {
     if (!check_type(NUMBER_T, *this, o)) WRONG_OP(-);
-    return new number_o(this->value - dynamic_cast<const number_o &>(o).value);
+    return make_shared<number_o>(this->value - dynamic_cast<const number_o &>(o).value);
 }
 
-lns::object *lns::number_o::operator*(const lns::object &o) const {
+shared_ptr<object> lns::number_o::operator*(const lns::object &o) const {
     if (!check_type(NUMBER_T, *this, o)) WRONG_OP(+);
-    return new number_o(this->value * dynamic_cast<const number_o &>(o).value);
+    return make_shared<number_o>(this->value * dynamic_cast<const number_o &>(o).value);
 }
 
-lns::object *lns::number_o::operator/(const lns::object &o) const {
+shared_ptr<object> lns::number_o::operator/(const lns::object &o) const {
     if (!check_type(NUMBER_T, *this, o)) WRONG_OP(+);
-    return new number_o(this->value / dynamic_cast<const number_o &>(o).value);
+    return make_shared<number_o>(this->value / dynamic_cast<const number_o &>(o).value);
 }
 
-lns::object *lns::number_o::operator^(const lns::object &o) const {
+shared_ptr<object> lns::number_o::operator^(const object &o) const {
     if (!check_type(NUMBER_T, *this, o)) WRONG_OP(+);
-    return new number_o(pow(this->value, dynamic_cast<const number_o &>(o).value));
+    return make_shared<number_o>(pow(this->value, dynamic_cast<const number_o &>(o).value));
 }
 
-lns::object *lns::number_o::operator-() const {
-    return new number_o(-this->value);
+shared_ptr<object> lns::number_o::operator-() const {
+    return make_shared<number_o>(-this->value);
 }
 
-lns::object *lns::number_o::operator++() {
-    return new number_o(++this->value);
+shared_ptr<object> lns::number_o::operator++() {
+    return make_shared<number_o>(++this->value);
 }
 
-lns::object *lns::number_o::operator--() {
-    return new number_o(--this->value);
+shared_ptr<object> lns::number_o::operator--() {
+    return make_shared<number_o>(--this->value);
 }
 
-lns::object *lns::number_o::operator++(int) {
-    return new number_o(this->value++);
+shared_ptr<object> lns::number_o::operator++(int) {
+    return make_shared<number_o>(this->value++);
 }
 
-lns::object *lns::number_o::operator--(int) {
-    return new number_o(this->value++);
+shared_ptr<object> lns::number_o::operator--(int) {
+    return make_shared<number_o>(this->value++);
 }
 
 lns::bool_o::bool_o(bool value) : object(objtype::BOOL_T), value(value) {}
@@ -220,13 +217,13 @@ bool lns::bool_o::operator||(const lns::object &o) const {
     return this->value || dynamic_cast<const bool_o &>(o).value;
 }
 
-lns::object *lns::bool_o::operator!() const {
-    return new bool_o(!this->value);
+shared_ptr<object> lns::bool_o::operator!() const {
+    return make_shared<bool_o>(!this->value);
 }
 
 
-lns::object *lns::bool_o::operator+(const lns::object &o) const {
-    if(o.type == STRING_T) return new string_o(this->str() + o.str());
+shared_ptr<object> lns::bool_o::operator+(const lns::object &o) const {
+    if (o.type == STRING_T) return make_shared<string_o>(this->str() + o.str());
     WRONG_OP(+)
 }
 
@@ -248,8 +245,8 @@ bool array_o::operator==(const object &o) const {
 }
 
 
-object *array_o::operator+(const object &o) const {
-    if(o.type == STRING_T) return new string_o(this->str() + o.str());
+shared_ptr<object> array_o::operator+(const object &o) const {
+    if (o.type == STRING_T) return make_shared<string_o>(this->str() + o.str());
     WRONG_OP(+)
 }
 
@@ -275,12 +272,12 @@ const bool array_o::contains_key(double s) {
     return values.find(s) != values.end();
 }
 
-token::token(token_type type, string lexeme, object *literal, const char *filename, int line) : type(type),
-                                                                                                lexeme(std::move(
+token::token(token_type type, string lexeme, shared_ptr<object> literal, const char *filename, int line) : type(type),
+                                                                                                           lexeme(std::move(
                                                                                                         lexeme)),
-                                                                                                literal(literal),
-                                                                                                filename(filename),
-                                                                                                line(line) {}
+                                                                                                           literal(literal),
+                                                                                                           filename(filename),
+                                                                                                           line(line) {}
 
 string token::format() const {
     stringstream ss;
@@ -291,10 +288,11 @@ string token::format() const {
     return *new string(ss.str());
 }
 
-stack_call::stack_call(const char *filename, const int line, const string &method, const bool native) : filename(filename), line(line),
-                                                                                     method(method) , native(native){}
+stack_call::stack_call(const char *filename, const int line, const string method, const bool native) : filename(
+        filename), line(line),
+                                                                                                       method(method) , native(native){}
 
-return_signal::return_signal(object *value, const token *keyword) : value(value), keyword(keyword) {}
+return_signal::return_signal(std::shared_ptr<object> value, const token *keyword) : value(value), keyword(keyword) {}
 
 const char *lns::return_signal::what() const throw(){
     return exception::what();
@@ -322,17 +320,16 @@ bool context::operator==(const object &o) const {
     return false;
 }
 
-set<callable *> & context::declare_natives() const{
-    std::set<callable*>& natives = *new std::set<callable*>();
+std::set<callable *> context::declare_natives() const {
+    std::set<callable *> natives;
     function_container* f;
     callable* clb;
     for(const auto &elem : this->values){
-        if(DCAST_ASNCHK(f,function_container*,elem.second.value)){
-            std::set<callable*>& temp = f->declare_natives();
+        if (DCAST_ASNCHK(f, function_container*, elem.second.value.get())) {
+            std::set<callable *> temp = f->declare_natives();
             natives.insert(temp.begin(),temp.end());
-        }
-        if(elem.second.value->type == NATIVE_CALLABLE_T)
-            natives.insert(DCAST(callable*,elem.second.value));
+        } else if (elem.second.value->type == NATIVE_CALLABLE_T)
+            natives.insert(DCAST(callable*, elem.second.value.get()));
     }
     return natives;
 }
@@ -346,7 +343,8 @@ lns::runtime_environment::runtime_environment() : enclosing(nullptr), values(std
 lns::runtime_environment::runtime_environment(runtime_environment *enc) : enclosing(enc),
                                                                           values(std::map<std::string, variable>()) {}
 
-object *runtime_environment::get(const token *name, const char *accessing_file) {
+shared_ptr<object> runtime_environment::get(const token *name, const char *accessing_file) {
+    //cout << "runtime_environment::get " << name->lexeme << " from " << name->filename << ":" << to_string(name->line) << " at " << static_cast<const void *>(this) << endl;
     if (contains_key(name->lexeme)) {
         variable s = values[name->lexeme];
         if(s.visibility_ == V_LOCAL){
@@ -362,7 +360,8 @@ object *runtime_environment::get(const token *name, const char *accessing_file) 
 }
 
 
-void runtime_environment::define(const token *name, object *o, bool is_final, visibility vis, const char *def_file) {
+void runtime_environment::define(const token *name, shared_ptr<object> o, bool is_final, visibility vis,
+                                 const char *def_file) {
     if (contains_key(name->lexeme)) {
         throw runtime_exception(name, VARIABLE_ALREADY_DEFINED(name->lexeme));
     }
@@ -376,11 +375,12 @@ void runtime_environment::define(const token *name, object *o, bool is_final, vi
 }
 
 
-object* lns::GET_DEFAULT_NULL() {
-    return new null_o();
+std::shared_ptr<object> lns::GET_DEFAULT_NULL() {
+    return make_shared<null_o>();
 }
 
-void runtime_environment::assign(const token *name, token_type op, object *obj, const char *assigning_file) {
+void
+runtime_environment::assign(const token *name, token_type op, std::shared_ptr<object> obj, const char *assigning_file) {
     if (contains_key(name->lexeme)) {
         if (values[name->lexeme].is_final) {
             throw runtime_exception(name, VARIABLE_FINAL(name->lexeme));
@@ -422,19 +422,6 @@ void runtime_environment::assign(const token *name, token_type op, object *obj, 
     throw runtime_exception(name, VARIABLE_UNDEFINED(name->lexeme));
 }
 
-bool runtime_environment::is_valid_object_type(objtype objtype) {
-    switch (objtype) {
-        case NUMBER_T:
-        case STRING_T:
-        case BOOL_T:
-        case NULL_T:
-        case CALLABLE_T:
-        case ARRAY_T:
-            return true;
-    }
-    return false;
-}
-
 bool runtime_environment::is_native(callable *ptr) {
     return natives.find(ptr) != natives.end();
 }
@@ -444,8 +431,9 @@ void runtime_environment::reset() {
     if (enclosing != nullptr) enclosing->reset();
 }
 
-void runtime_environment::define(const std::string &name, object *o, bool is_final,visibility vis, const char *def_file) {
-    values.insert(std::pair<string, lns::variable>(name, *new lns::variable(vis,is_final, o, def_file)));
+void runtime_environment::define(const std::string &name, std::shared_ptr<object> o, bool is_final, visibility vis,
+                                 const char *def_file) {
+    values.insert(std::pair<string, lns::variable>(name, variable(vis, is_final, o, def_file)));
 }
 
 void runtime_environment::add_natives(const std::set<callable *> &natives) {
@@ -469,16 +457,24 @@ const variable& variable::operator=(const variable &v) {
     return *this;
 }
 
-variable::variable(lns::visibility vis, bool is_final, object *value, const char *def_file) : visibility_ (vis), value(value), is_final(is_final), def_file(def_file) {}
+variable::variable(lns::visibility vis, bool is_final, std::shared_ptr<object> value, const char *def_file)
+        : visibility_(vis), value(value), is_final(is_final), def_file(def_file) {}
 
 
-lns::runtime_exception::runtime_exception(const lns::token *token, const char *m) : native_throw(false),message(m), token(token) {}
+lns::runtime_exception::runtime_exception(const lns::token *token, std::string m) : native_throw(false), message(m),
+                                                                                    token(token) {}
 
 const char *lns::runtime_exception::what() const throw(){
-    return message;
+    return message.c_str();
 }
 
-runtime_exception::runtime_exception(const char* filename, int line, const char *message) : native_throw(true), message(message), token(new lns::token(UNRECOGNIZED,STR(""),new null_o(),filename,line)){}
+runtime_exception::runtime_exception(const char *filename, int line, std::string message) : native_throw(true),
+                                                                                            message(message),
+                                                                                            token(new lns::token(
+                                                                                                    UNRECOGNIZED,
+                                                                                                    STR(""),
+                                                                                                    make_shared<null_o>(),
+                                                                                                    filename, line)) {}
 const char *lns::best_file_path(const char *filename) {
     if(file_exists(filename)) return filename;
     auto buf = (char*) malloc(1024 * sizeof(char));
@@ -536,10 +532,11 @@ const char *lns::type_to_string(object_type t) {
 
 function_container::function_container(objtype type) : object(type) {}
 
-incode_exception::incode_exception(const lns::token *token, const std::string &name,
-                                   const std::map<std::string, lns::object *> &fields) : lns::runtime_exception(token, name.c_str()), lns::object(EXCEPTION_T), fields(fields), calls_bypassed(0) {}
+incode_exception::incode_exception(const lns::token *token, std::string name,
+                                   const std::map<std::string, std::shared_ptr<object>> fields)
+        : lns::runtime_exception(token, name), lns::object(EXCEPTION_T), fields(fields), calls_bypassed(0) {}
 
-object *incode_exception::get(std::string &key) {
+std::shared_ptr<object> incode_exception::get(std::string &key) {
     if(fields.find(key) != fields.end()) return this->fields[key];
     return nullptr;
 }
@@ -554,8 +551,8 @@ std::string incode_exception::str() const {
     return s.str();
 }
 
-object *incode_exception::clone() const {
-    return nullptr;
+shared_ptr<object> incode_exception::clone() const {
+    return make_shared<incode_exception>(token, message, fields);
 }
 
 const char *incode_exception::what() const throw() {
@@ -586,7 +583,7 @@ bool exception_definition::operator==(const object &o) const {
     return false;
 }
 
-object *exception_definition::clone() const {
+shared_ptr<object> exception_definition::clone() const {
     return nullptr;
 }
 

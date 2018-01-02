@@ -3,21 +3,22 @@
 //
 #include "defs.h"
 using namespace lns;
+using namespace std;
 class exit_c : public native_callable{
 public:
     exit_c() : native_callable(1) {}
 
-    const std::string &name() const override {
-        return S(exitc);
+    const std::string name() const override {
+        return string("exitc");
     }
 
-    object *call(std::vector<object *> &args) override {
-        number_o *n = dynamic_cast<number_o *>(args[0]);
+    shared_ptr <object> call(std::vector <shared_ptr<object>> &args) override {
+        number_o *n = dynamic_cast<number_o *>(args[0].get());
         std::exit(n == nullptr ? 0 : n->value);
     }
 };
 
 
-extern "C" object* supplier(){
-    return new exit_c;
+extern "C" shared_ptr <object> supplier() {
+    return make_shared<exit_c>();
 }

@@ -38,7 +38,7 @@ void lns::debugger::watch(string &str) {
     expr *e;
     try {
         e = parse_expression(str);
-        object *eval = this->evaluate(e);
+        shared_ptr<object> eval = this->evaluate(e);
         cout << str << " --> " << (eval->type == STRING_T ? ("\"" + eval->str() + "\"") : eval->str()) << endl;
     } catch (int) {
         cout << "The expression contains syntax errors." << endl;
@@ -209,7 +209,7 @@ void debugger::watch_all() {
         found = true;
         cout << "Watch #" << i << ": " << watches[i]->text << " --> ";
         try {
-            object *eval = evaluate(watches[i]->e);
+            shared_ptr<object> eval = evaluate(watches[i]->e);
             cout << (eval->type == STRING_T ? ("\"" + eval->str() + "\"") : eval->str()) << endl;
         } catch (int) {
             cout << "the expression contains syntax errors." << endl;

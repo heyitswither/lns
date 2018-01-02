@@ -4,17 +4,19 @@
 #include "defs.h"
 
 using namespace lns;
+using namespace std;
+
 class type_c : public native_callable{
 public:
     type_c() : native_callable(1) {}
 
-    const std::string &name() const override {
-        return S(type);
+    const std::string name() const override {
+        return string("type");
     }
 
-    object *call(std::vector<object *> &args) override {
-        object *o = args[0];
-        string_o *type = new string_o("");
+    shared_ptr <object> call(std::vector <shared_ptr<object>> &args) override {
+        object *o = args[0].get();
+        auto type = make_shared<string_o>();
         switch (o->type) {
             case NUMBER_T:
                 type->value = "number";
@@ -39,7 +41,7 @@ public:
                 type->value = "callable";
                 break;
             case EXCEPTION_DEFINITION_T:
-                type->value = "";
+                type->value = "exception_definition";
                 break;
             case EXCEPTION_T:
                 type->value = "exception";
@@ -53,6 +55,6 @@ public:
 };
 
 
-extern "C" object* supplier(){
-    return new type_c;
+extern "C" shared_ptr <object> supplier() {
+    return make_shared<type_c>();
 }

@@ -4,21 +4,22 @@
 
 #include "defs.h"
 using namespace lns;
+using namespace std;
 class array_c : public native_callable{
 public:
     array_c() : native_callable(0) {}
 
-    const std::string &name() const override {
-        return S(array);
+    const std::string name() const override {
+        return string("array");
     }
 
-    object *call(std::vector<object *> &args) override {
-        return new array_o;
+    shared_ptr <object> call(std::vector <shared_ptr<object>> &args) override {
+        return make_shared<array_o>();
     }
 };
 
 
-extern "C" object* supplier(){
-    return new array_c;
+extern "C" shared_ptr <object> supplier() {
+    return make_shared<array_c>();
 }
 

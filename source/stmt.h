@@ -387,63 +387,83 @@ class default_stmt_visitor : public stmt_visitor {
 public:
 void visit_block_stmt(block_stmt *b) override {
 std::cout << "block_stmt" << std::endl;
+    return;
 }
 void visit_expression_stmt(expression_stmt *e) override {
 std::cout << "expression_stmt" << std::endl;
+    return;
 }
 void visit_function_stmt(function_stmt *f) override {
 std::cout << "function_stmt" << std::endl;
+    return;
 }
 void visit_context_stmt(context_stmt *c) override {
 std::cout << "context_stmt" << std::endl;
+    return;
 }
 void visit_if_stmt(if_stmt *i) override {
 std::cout << "if_stmt" << std::endl;
+    return;
 }
 void visit_return_stmt(return_stmt *r) override {
 std::cout << "return_stmt" << std::endl;
+    return;
 }
 void visit_break_stmt(break_stmt *b) override {
 std::cout << "break_stmt" << std::endl;
+    return;
 }
 void visit_continue_stmt(continue_stmt *c) override {
 std::cout << "continue_stmt" << std::endl;
+    return;
 }
 void visit_var_stmt(var_stmt *v) override {
 std::cout << "var_stmt" << std::endl;
+    return;
 }
 void visit_s_while_stmt(s_while_stmt *s) override {
 std::cout << "s_while_stmt" << std::endl;
+    return;
 }
 void visit_s_for_stmt(s_for_stmt *s) override {
 std::cout << "s_for_stmt" << std::endl;
+    return;
 }
 void visit_s_for_each_stmt(s_for_each_stmt *s) override {
 std::cout << "s_for_each_stmt" << std::endl;
+    return;
 }
 void visit_exception_decl_stmt(exception_decl_stmt *e) override {
 std::cout << "exception_decl_stmt" << std::endl;
+    return;
 }
 void visit_raise_stmt(raise_stmt *r) override {
 std::cout << "raise_stmt" << std::endl;
+    return;
 }
 void visit_uses_native_stmt(uses_native_stmt *u) override {
 std::cout << "uses_native_stmt" << std::endl;
+    return;
 }
 void visit_handle_stmt(handle_stmt *h) override {
 std::cout << "handle_stmt" << std::endl;
+    return;
 }
 void visit_begin_handle_stmt(begin_handle_stmt *b) override {
 std::cout << "begin_handle_stmt" << std::endl;
+    return;
 }
 void visit_constructor_stmt(constructor_stmt *c) override {
 std::cout << "constructor_stmt" << std::endl;
+    return;
 }
 void visit_class_decl_stmt(class_decl_stmt *c) override {
 std::cout << "class_decl_stmt" << std::endl;
+    return;
 }
 void visit_null_stmt(null_stmt *n) override {
 std::cout << "null_stmt" << std::endl;
+    return;
 }
 };
 }

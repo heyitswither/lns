@@ -19,7 +19,8 @@ class expr{
 public:
 
 expr(int line, const char* file, expr_type type) : type(type), line(line), file(file){}
-virtual object* accept(expr_visitor* v) = 0;
+
+    virtual shared_ptr<object> accept(expr_visitor *v) = 0;
 expr_type type;
  int line; const char* file;
 };
@@ -38,19 +39,31 @@ class array_expr;
 class null_expr;
 class expr_visitor{
 public:
-virtual object* visit_assign_expr(assign_expr *a) = 0;
-virtual object* visit_binary_expr(binary_expr *b) = 0;
-virtual object* visit_call_expr(call_expr *c) = 0;
-virtual object* visit_grouping_expr(grouping_expr *g) = 0;
-virtual object* visit_literal_expr(literal_expr *l) = 0;
-virtual object* visit_unary_expr(unary_expr *u) = 0;
-virtual object* visit_variable_expr(variable_expr *v) = 0;
-virtual object* visit_sub_script_expr(sub_script_expr *s) = 0;
-virtual object* visit_sub_script_assign_expr(sub_script_assign_expr *s) = 0;
-virtual object* visit_member_expr(member_expr *m) = 0;
-virtual object* visit_member_assign_expr(member_assign_expr *m) = 0;
-virtual object* visit_array_expr(array_expr *a) = 0;
-virtual object* visit_null_expr(null_expr *n) = 0;
+    virtual shared_ptr<object> visit_assign_expr(assign_expr *a) = 0;
+
+    virtual shared_ptr<object> visit_binary_expr(binary_expr *b) = 0;
+
+    virtual shared_ptr<object> visit_call_expr(call_expr *c) = 0;
+
+    virtual shared_ptr<object> visit_grouping_expr(grouping_expr *g) = 0;
+
+    virtual shared_ptr<object> visit_literal_expr(literal_expr *l) = 0;
+
+    virtual shared_ptr<object> visit_unary_expr(unary_expr *u) = 0;
+
+    virtual shared_ptr<object> visit_variable_expr(variable_expr *v) = 0;
+
+    virtual shared_ptr<object> visit_sub_script_expr(sub_script_expr *s) = 0;
+
+    virtual shared_ptr<object> visit_sub_script_assign_expr(sub_script_assign_expr *s) = 0;
+
+    virtual shared_ptr<object> visit_member_expr(member_expr *m) = 0;
+
+    virtual shared_ptr<object> visit_member_assign_expr(member_assign_expr *m) = 0;
+
+    virtual shared_ptr<object> visit_array_expr(array_expr *a) = 0;
+
+    virtual shared_ptr<object> visit_null_expr(null_expr *n) = 0;
 };
 
 class assign_expr : public expr {
@@ -61,7 +74,8 @@ const token_type op;
 
     assign_expr(const char *file, const int line, const token *name, const token_type op, const shared_ptr<expr> value)
             : expr(line, file, ASSIGN_EXPR_T), name(name), op(op), value(value) {}
-object* accept(expr_visitor *v) override{
+
+    shared_ptr<object> accept(expr_visitor *v) override {
 return v->visit_assign_expr(this);
 }
 };
@@ -76,7 +90,8 @@ const token* op;
 
     binary_expr(const char *file, const int line, const shared_ptr<expr> left, const token *op,
                 const shared_ptr<expr> right) : expr(line, file, BINARY_EXPR_T), left(left), op(op), right(right) {}
-object* accept(expr_visitor *v) override{
+
+    shared_ptr<object> accept(expr_visitor *v) override {
 return v->visit_binary_expr(this);
 }
 };
@@ -92,7 +107,8 @@ const token* paren;
     call_expr(const char *file, const int line, const shared_ptr<expr> callee, const token *paren,
               const vector<shared_ptr<expr>> args) : expr(line, file, CALL_EXPR_T), callee(callee), paren(paren),
                                                      args(args) {}
-object* accept(expr_visitor *v) override{
+
+    shared_ptr<object> accept(expr_visitor *v) override {
 return v->visit_call_expr(this);
 }
 };
@@ -107,7 +123,8 @@ public:
                                                                                                        GROUPING_EXPR_T),
                                                                                                   expression(
                                                                                                           expression) {}
-object* accept(expr_visitor *v) override{
+
+    shared_ptr<object> accept(expr_visitor *v) override {
 return v->visit_grouping_expr(this);
 }
 };
@@ -116,9 +133,13 @@ return v->visit_grouping_expr(this);
 
 class literal_expr : public expr {
 public:
-const object* value;
-explicit literal_expr(const char* file,const int line, const object* value) : expr(line, file, LITERAL_EXPR_T), value(value) {}
-object* accept(expr_visitor *v) override{
+    const shared_ptr<object> value;
+
+    explicit literal_expr(const char *file, const int line, const shared_ptr<object> value) : expr(line, file,
+                                                                                                   LITERAL_EXPR_T),
+                                                                                              value(value) {}
+
+    shared_ptr<object> accept(expr_visitor *v) override {
 return v->visit_literal_expr(this);
 }
 };
@@ -134,7 +155,8 @@ const operator_location location;
     unary_expr(const char *file, const int line, const token *op, const operator_location location,
                const shared_ptr<expr> right) : expr(line, file, UNARY_EXPR_T), op(op), location(location),
                                                right(right) {}
-object* accept(expr_visitor *v) override{
+
+    shared_ptr<object> accept(expr_visitor *v) override {
 return v->visit_unary_expr(this);
 }
 };
@@ -145,7 +167,8 @@ class variable_expr : public expr {
 public:
 const token* name;
 explicit variable_expr(const char* file,const int line, const token* name) : expr(line, file, VARIABLE_EXPR_T), name(name) {}
-object* accept(expr_visitor *v) override{
+
+    shared_ptr<object> accept(expr_visitor *v) override {
 return v->visit_variable_expr(this);
 }
 };
@@ -161,7 +184,8 @@ const token* where;
     sub_script_expr(const char *file, const int line, const token *where, const shared_ptr<expr> name,
                     const shared_ptr<expr> key) : expr(line, file, SUB_SCRIPT_EXPR_T), where(where), name(name),
                                                   key(key) {}
-object* accept(expr_visitor *v) override{
+
+    shared_ptr<object> accept(expr_visitor *v) override {
 return v->visit_sub_script_expr(this);
 }
 };
@@ -185,7 +209,8 @@ const token_type op;
                                                                                                             op(op),
                                                                                                             key(key),
                                                                                                             value(value) {}
-object* accept(expr_visitor *v) override{
+
+    shared_ptr<object> accept(expr_visitor *v) override {
 return v->visit_sub_script_assign_expr(this);
 }
 };
@@ -199,7 +224,8 @@ const token* member_identifier;
 
     member_expr(const char *file, const int line, const shared_ptr<expr> container_name, const token *member_identifier)
             : expr(line, file, MEMBER_EXPR_T), container_name(container_name), member_identifier(member_identifier) {}
-object* accept(expr_visitor *v) override{
+
+    shared_ptr<object> accept(expr_visitor *v) override {
 return v->visit_member_expr(this);
 }
 };
@@ -219,7 +245,8 @@ const token* member_identifier;
                                                                                        container_name(container_name),
                                                                                        op(op), member_identifier(
                     member_identifier), value(value) {}
-object* accept(expr_visitor *v) override{
+
+    shared_ptr<object> accept(expr_visitor *v) override {
 return v->visit_member_assign_expr(this);
 }
 };
@@ -229,12 +256,13 @@ return v->visit_member_assign_expr(this);
 class array_expr : public expr {
 public:
 const token* open_brace;
-    const vector<pair<shared_ptr<expr>, shared_ptr<expr>>> &pairs;
+    const vector<pair<shared_ptr<expr>, shared_ptr<expr>>> pairs;
 
     array_expr(const char *file, const int line, const token *open_brace,
-               const vector<pair<shared_ptr<expr>, shared_ptr<expr>>> &pairs) : expr(line, file, ARRAY_EXPR_T),
-                                                                                open_brace(open_brace), pairs(pairs) {}
-object* accept(expr_visitor *v) override{
+               const vector<pair<shared_ptr<expr>, shared_ptr<expr>>> pairs) : expr(line, file, ARRAY_EXPR_T),
+                                                                               open_brace(open_brace), pairs(pairs) {}
+
+    shared_ptr<object> accept(expr_visitor *v) override {
 return v->visit_array_expr(this);
 }
 };
@@ -245,7 +273,8 @@ class null_expr : public expr {
 public:
 const token* where;
 explicit null_expr(const char* file,const int line, const token* where) : expr(line, file, NULL_EXPR_T), where(where) {}
-object* accept(expr_visitor *v) override{
+
+    shared_ptr<object> accept(expr_visitor *v) override {
 return v->visit_null_expr(this);
 }
 };
@@ -253,57 +282,69 @@ return v->visit_null_expr(this);
 
 class default_expr_visitor : public expr_visitor {
 public:
-object* visit_assign_expr(assign_expr *a) override {
+    shared_ptr<object> visit_assign_expr(assign_expr *a) override {
 std::cout << "assign_expr" << std::endl;
-return nullptr;
-}
-object* visit_binary_expr(binary_expr *b) override {
+        return make_shared<null_o>();
+    }
+
+    shared_ptr<object> visit_binary_expr(binary_expr *b) override {
 std::cout << "binary_expr" << std::endl;
-return nullptr;
-}
-object* visit_call_expr(call_expr *c) override {
+        return make_shared<null_o>();
+    }
+
+    shared_ptr<object> visit_call_expr(call_expr *c) override {
 std::cout << "call_expr" << std::endl;
-return nullptr;
-}
-object* visit_grouping_expr(grouping_expr *g) override {
+        return make_shared<null_o>();
+    }
+
+    shared_ptr<object> visit_grouping_expr(grouping_expr *g) override {
 std::cout << "grouping_expr" << std::endl;
-return nullptr;
-}
-object* visit_literal_expr(literal_expr *l) override {
+        return make_shared<null_o>();
+    }
+
+    shared_ptr<object> visit_literal_expr(literal_expr *l) override {
 std::cout << "literal_expr" << std::endl;
-return nullptr;
-}
-object* visit_unary_expr(unary_expr *u) override {
+        return make_shared<null_o>();
+    }
+
+    shared_ptr<object> visit_unary_expr(unary_expr *u) override {
 std::cout << "unary_expr" << std::endl;
-return nullptr;
-}
-object* visit_variable_expr(variable_expr *v) override {
+        return make_shared<null_o>();
+    }
+
+    shared_ptr<object> visit_variable_expr(variable_expr *v) override {
 std::cout << "variable_expr" << std::endl;
-return nullptr;
-}
-object* visit_sub_script_expr(sub_script_expr *s) override {
+        return make_shared<null_o>();
+    }
+
+    shared_ptr<object> visit_sub_script_expr(sub_script_expr *s) override {
 std::cout << "sub_script_expr" << std::endl;
-return nullptr;
-}
-object* visit_sub_script_assign_expr(sub_script_assign_expr *s) override {
+        return make_shared<null_o>();
+    }
+
+    shared_ptr<object> visit_sub_script_assign_expr(sub_script_assign_expr *s) override {
 std::cout << "sub_script_assign_expr" << std::endl;
-return nullptr;
-}
-object* visit_member_expr(member_expr *m) override {
+        return make_shared<null_o>();
+    }
+
+    shared_ptr<object> visit_member_expr(member_expr *m) override {
 std::cout << "member_expr" << std::endl;
-return nullptr;
-}
-object* visit_member_assign_expr(member_assign_expr *m) override {
+        return make_shared<null_o>();
+    }
+
+    shared_ptr<object> visit_member_assign_expr(member_assign_expr *m) override {
 std::cout << "member_assign_expr" << std::endl;
-return nullptr;
-}
-object* visit_array_expr(array_expr *a) override {
+        return make_shared<null_o>();
+    }
+
+    shared_ptr<object> visit_array_expr(array_expr *a) override {
 std::cout << "array_expr" << std::endl;
-return nullptr;
-}
-object* visit_null_expr(null_expr *n) override {
+        return make_shared<null_o>();
+    }
+
+    shared_ptr<object> visit_null_expr(null_expr *n) override {
 std::cout << "null_expr" << std::endl;
-return nullptr;
+        return make_shared<null_o>();
 }
 };
 }

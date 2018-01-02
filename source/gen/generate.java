@@ -19,16 +19,16 @@ public class generate {
                 "binary    : shared_ptr<expr> left, token* op, shared_ptr<expr> right",
                 "call	   : shared_ptr<expr> callee, token* paren, vector<shared_ptr<expr>> args",
                 "grouping  : shared_ptr<expr> expression",
-                "literal   : object* value",
+                "literal   : shared_ptr<object> value",
                 "unary     : token* op, operator_location location, shared_ptr<expr> right",
                 "variable  : token* name",
                 "sub_script : token* where, shared_ptr<expr> name, shared_ptr<expr> key",
                 "sub_script_assign : token* where, shared_ptr<expr> name, token_type op, shared_ptr<expr> key, shared_ptr<expr> value",
                 "member : shared_ptr<expr> container_name, token* member_identifier",
                 "member_assign : shared_ptr<expr> container_name, token_type op, token* member_identifier, shared_ptr<expr> value",
-                "array     : token* open_brace, vector<pair<shared_ptr<expr>,shared_ptr<expr>>>& pairs",
+                "array     : token* open_brace, vector<pair<shared_ptr<expr>,shared_ptr<expr>>> pairs",
                 "null      : token* where"
-        ), Arrays.asList("<utility>","<memory>"), "object*");
+        ), Arrays.asList("<utility>","<memory>"), "shared_ptr<object>","make_shared<null_o>()");
         defineAst(outputDir, "stmt", Arrays.asList(
                 "block      : vector<shared_ptr<stmt>> statements",
                 "expression : shared_ptr<expr> exprs",
@@ -50,10 +50,10 @@ public class generate {
                 "constructor : token* keyword, vector<token*> parameters, vector<shared_ptr<stmt>> body, visibility vis",
                 "class_decl : token* name, vector<shared_ptr<function_stmt>> methods, vector<shared_ptr<constructor_stmt>> constructors, vector<shared_ptr<var_stmt>> variables, visibility vis",
                 "null       : token* where"
-        ), Arrays.asList("\"expr.h\"","<memory>"), "void");
+        ), Arrays.asList("\"expr.h\"","<memory>"), "void","");
     }
 
-    public static void defineAst(String outputDir, String baseName, List<String> types, List<String> addIncludes, String vReturnType) throws IOException {
+    public static void defineAst(String outputDir, String baseName, List<String> types, List<String> addIncludes, String vReturnType, String vReturnValue) throws IOException {
         String path = outputDir + baseName + ".h";
         PrintWriter writer = new PrintWriter(path, "UTF-8");
         writer.println("#ifndef LNS_" + baseName.toUpperCase() + "_H");
@@ -90,7 +90,7 @@ public class generate {
             String fields = type.split(":")[1].trim();
             defineType(writer,baseName,className,fields,vReturnType);
         }
-        defineDefaultVisitor(writer,baseName,vReturnType,types);
+        defineDefaultVisitor(writer,baseName,vReturnType,vReturnValue,types);
         writer.println("}"); // namespace
         writer.println("#endif");
         writer.close();
@@ -105,14 +105,14 @@ public class generate {
         }
         writer.println("};");    }
 
-    private static void defineDefaultVisitor(PrintWriter writer,String baseName, String vReturnType, List<String> types) {
+    private static void defineDefaultVisitor(PrintWriter writer,String baseName, String vReturnType, String vReturnValue, List<String> types) {
         writer.println("class default_" + baseName + "_visitor : public " + visitorName + " {");
                 writer.println("public:");
                 for(String type : types){
                     String className = type.split(":")[0].trim() + "_" + baseName;
                     writer.println(vReturnType + " visit_" + className + "(" + className + " *" + className.charAt(0) + ") override {");
                     writer.println("std::cout << \"" + className + "\" << std::endl;");
-                    if(vReturnType.endsWith("*")) writer.println("return nullptr;");
+                    writer.println("return " + vReturnValue + ";");
                     writer.println("}");
                 }
         writer.println("};");

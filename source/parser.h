@@ -27,9 +27,7 @@ namespace lns {
     private:
         int start;
         int current;
-        bool use_allowed = true;
         vector<token *> tokens;
-        vector<shared_ptr<stmt> > statements;
 
         bool match(initializer_list<token_type> types);
 
@@ -106,7 +104,7 @@ namespace lns {
     public:
         explicit parser(vector<token *> tokens);
 
-        parser() = delete;
+        parser();
 
         vector<shared_ptr<stmt> > parse(bool ld_std);
 
@@ -141,6 +139,9 @@ namespace lns {
         shared_ptr<expr> for_statement_condition(token *where);
 
         shared_ptr<expr> for_statement_increment(token *where);
+
+        vector<shared_ptr<stmt> > statements;
+        bool use_allowed = true;
     };
 
 

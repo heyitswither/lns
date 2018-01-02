@@ -16,7 +16,7 @@
 #include <unordered_map>
 #include <exception>
 #include "cstring"
-
+#include <memory>
 
 #define NATIVE_RUNTIME_EXC(msg) throw runtime_exception(__FILE__,__LINE__,*new std::string(msg));
 #define STR(S) *new string(S)
@@ -164,7 +164,7 @@ namespace lns {
 
         virtual bool operator||(const object &o) const { WRONG_OP(or) };
 
-        virtual object *operator!() const { WRONG_OP_UN(not) };
+        virtual std::shared_ptr<object> operator!() const { WRONG_OP_UN(not) };
 
         virtual bool operator>(const object &o) const { WRONG_OP(>) };
 
@@ -174,35 +174,35 @@ namespace lns {
 
         virtual bool operator<(const object &o) const{ WRONG_OP(<) };
 
-        virtual object *operator+=(const object &o){ WRONG_OP(+=) };
+        virtual void operator+=(const object &o) { WRONG_OP(+=) };
 
-        virtual object *operator-=(const object &o){ WRONG_OP(-=) };
+        virtual void operator-=(const object &o) { WRONG_OP(-=) };
 
-        virtual object *operator*=(const object &o){ WRONG_OP(*=) };
+        virtual void operator*=(const object &o) { WRONG_OP(*=) };
 
-        virtual object *operator/=(const object &o){ WRONG_OP(/=) };
+        virtual void operator/=(const object &o) { WRONG_OP(/=) };
 
-        virtual object *operator+(const object &o) const{ WRONG_OP(+) };
+        virtual std::shared_ptr<object> operator+(const object &o) const { WRONG_OP(+) };
 
-        virtual object *operator-(const object &o) const{ WRONG_OP(-) };
+        virtual std::shared_ptr<object> operator-(const object &o) const { WRONG_OP(-) };
 
-        virtual object *operator*(const object &o) const{ WRONG_OP(*) };
+        virtual std::shared_ptr<object> operator*(const object &o) const { WRONG_OP(*) };
 
-        virtual object *operator/(const object &o) const{ WRONG_OP(/) };
+        virtual std::shared_ptr<object> operator/(const object &o) const { WRONG_OP(/) };
 
-        virtual object *operator^(const object &o) const{ WRONG_OP(^) };
+        virtual std::shared_ptr<object> operator^(const object &o) const { WRONG_OP(^) };
 
-        virtual object *operator-() const{ WRONG_OP_UN(-) };
+        virtual std::shared_ptr<object> operator-() const { WRONG_OP_UN(-) };
 
-        virtual object *operator++(){ WRONG_OP_UN(++) };
+        virtual std::shared_ptr<object> operator++() { WRONG_OP_UN(++) };
 
-        virtual object *operator--(){ WRONG_OP_UN(--) };
+        virtual std::shared_ptr<object> operator--() { WRONG_OP_UN(--) };
 
-        virtual object *operator++(int){ WRONG_OP_UN(++) };
+        virtual std::shared_ptr<object> operator++(int) { WRONG_OP_UN(++) };
 
-        virtual object *operator--(int){ WRONG_OP_UN(--) };
+        virtual std::shared_ptr<object> operator--(int) { WRONG_OP_UN(--) };
 
-        virtual object *clone() const = 0;
+        virtual std::shared_ptr<object> clone() const = 0;
     };
 
     bool check_type(object_type type, const object &o1, const object &o);
@@ -211,7 +211,7 @@ namespace lns {
     public:
         std::string value;
 
-        object *clone() const override;
+        std::shared_ptr<object> clone() const override;
 
         explicit string_o(std::string value);
 
@@ -221,7 +221,7 @@ namespace lns {
 
         bool operator==(const object &o) const override;
 
-        object *operator+=(const object &o) override;
+        void operator+=(const object &o) override;
 
         bool operator>(const object &o) const override;
 
@@ -231,9 +231,9 @@ namespace lns {
 
         bool operator<(const object &o) const override;
 
-        object *operator+(const object &o) const override;
+        std::shared_ptr<object> operator+(const object &o) const override;
 
-        virtual object *operator/(const object &o) const;
+        virtual std::shared_ptr<object> operator/(const object &o) const;
     };
 
     class number_o : public object {
@@ -254,35 +254,35 @@ namespace lns {
 
         bool operator<(const object &o) const override;
 
-        object *operator+=(const object &o) override;
+        void operator+=(const object &o) override;
 
-        object *operator-=(const object &o) override;
+        void operator-=(const object &o) override;
 
-        object *operator*=(const object &o) override;
+        void operator*=(const object &o) override;
 
-        object *operator/=(const object &o) override;
+        void operator/=(const object &o) override;
 
-        object *operator+(const object &o) const override;
+        std::shared_ptr<object> operator+(const object &o) const override;
 
-        object *operator-(const object &o) const override;
+        std::shared_ptr<object> operator-(const object &o) const override;
 
-        object *operator*(const object &o) const override;
+        std::shared_ptr<object> operator*(const object &o) const override;
 
-        object *operator/(const object &o) const override;
+        std::shared_ptr<object> operator/(const object &o) const override;
 
-        object *operator^(const object &o) const override;
+        std::shared_ptr<object> operator^(const object &o) const override;
 
-        object *operator-() const override;
+        std::shared_ptr<object> operator-() const override;
 
-        object *operator++() override;
+        std::shared_ptr<object> operator++() override;
 
-        object *operator--() override;
+        std::shared_ptr<object> operator--() override;
 
-        object *operator++(int) override;
+        std::shared_ptr<object> operator++(int) override;
 
-        object *operator--(int) override;
+        std::shared_ptr<object> operator--(int) override;
 
-        object *clone() const;
+        std::shared_ptr<object> clone() const;
     };
 
     class bool_o : public object {
@@ -301,11 +301,11 @@ namespace lns {
 
         bool operator||(const object &o) const override;
 
-        object *operator!() const override;
+        std::shared_ptr<object> operator!() const override;
 
-        object *operator+(const object &o) const override;
+        std::shared_ptr<object> operator+(const object &o) const override;
 
-        object *clone() const override;
+        std::shared_ptr<object> clone() const override;
     };
 
     class null_o : public object {
@@ -316,7 +316,7 @@ namespace lns {
 
         bool operator==(const object &o) const override;
 
-        object *clone() const override;
+        std::shared_ptr<object> clone() const override;
     };
 
     class array_o : public object {
@@ -324,7 +324,7 @@ namespace lns {
     public:
         explicit array_o();
 
-        std::map<double, object *> values;
+        std::map<double, std::shared_ptr<object>> values;
 
         bool operator==(const object &o) const override;
 
@@ -332,9 +332,9 @@ namespace lns {
 
         const bool contains_key(double t);
 
-        object *clone() const;
+        std::shared_ptr<object> clone() const;
 
-        object *operator+(const object &o) const override;
+        std::shared_ptr<object> operator+(const object &o) const override;
     };
 
     class variable {
@@ -342,22 +342,22 @@ namespace lns {
         const bool is_final;
         const visibility visibility_;
         const char *def_file;
-        object *value;
+        std::shared_ptr<object> value;
 
         explicit variable();
 
-        variable(lns::visibility vis, bool is_final,object *value, const char *def_file);
+        variable(lns::visibility vis, bool is_final, std::shared_ptr<object> value, const char *def_file);
 
         const variable& operator=(variable const &v);
     };
 
     class token {
     public:
-        token(token_type type, std::string lexeme, object *literal, const char *filename, int line);
+        token(token_type type, std::string lexeme, std::shared_ptr<object> literal, const char *filename, int line);
 
         token_type type;
         std::string lexeme;
-        object *literal;
+        std::shared_ptr<object> literal;
         const char *filename;
         int line;
 
@@ -371,18 +371,22 @@ namespace lns {
         callable() = delete;
         callable(bool is_native);
         virtual const parameter_declaration& arity() const = 0;
-        virtual const std::string& name() const = 0;
-        virtual object *call(std::vector<object *> &args) = 0;
+
+        virtual const std::string name() const = 0;
+
+        virtual std::shared_ptr<object> call(std::vector<std::shared_ptr<object>> &args) = 0;
         bool operator==(const object &o) const override;
         std::string str() const override;
-        object *clone() const override;
+
+        std::shared_ptr<object> clone() const override;
 
     };
 
     class function_container : public object{
     public:
         explicit function_container(objtype type);
-        virtual std::set<callable*>& declare_natives() const = 0;
+
+        virtual std::set<callable *> declare_natives() const = 0;
     };
 
     class native_callable : public callable{
@@ -397,9 +401,10 @@ namespace lns {
     public:
         const char *filename;
         const int line;
-        const std::string &method;
+        const std::string method;
         const bool native;
-        stack_call(const char *filename, const int line, const std::string &method, const bool native);
+
+        stack_call(const char *filename, const int line, const std::string method, const bool native);
     };
 
     class runtime_environment {
@@ -417,15 +422,16 @@ namespace lns {
 
         explicit runtime_environment(runtime_environment *enc);
 
-        object *get(const token *name, const char *accessing_file);
+        std::shared_ptr<object> get(const token *name, const char *accessing_file);
 
-        void define(const token *name, object *o, bool is_final, visibility visibility, const char* def_file);
+        void define(const token *name, std::shared_ptr<object> o, bool is_final, visibility visibility,
+                    const char *def_file);
 
-        void define(const std::string &name, object *o, bool is_final, visibility vis, const char *def_file);
+        void
+        define(const std::string &name, std::shared_ptr<object> o, bool is_final, visibility vis, const char *def_file);
 
-        void assign(const token *name, token_type op, object *obj, const char *assigning_file);
+        void assign(const token *name, token_type op, std::shared_ptr<object> obj, const char *assigning_file);
 
-        bool is_valid_object_type(objtype objtype);
 
         bool clear_var(const token *name);
 
@@ -446,19 +452,19 @@ namespace lns {
 
         bool operator==(const object &o) const override;
 
-        object *clone() const override;
+        std::shared_ptr<object> clone() const override;
 
-        std::set<callable *> &declare_natives() const override;
+        std::set<callable *> declare_natives() const override;
     };
 
 
 
     class return_signal : public std::exception {
     public:
-        object *value;
+        std::shared_ptr<lns::object> value;
         const token *keyword;
 
-        return_signal(object *value, const token *keyword);
+        return_signal(std::shared_ptr<object> value, const token *keyword);
 
         const char *what() const throw() override;
     };
@@ -481,7 +487,7 @@ namespace lns {
         explicit continue_signal(const token *keyword);
     };
 
-    object *GET_DEFAULT_NULL();
+    std::shared_ptr<object> GET_DEFAULT_NULL();
 
     inline bool check_type(object_type type, const object &o1, const object &o) {
         return (o1.type == type && o.type == type);
@@ -489,29 +495,33 @@ namespace lns {
 
     class runtime_exception : public std::exception {
     public:
-        const char *message;
+        std::string message;
         bool native_throw;
         const lns::token *token;
-        runtime_exception(const char *filename, int line, const char* message);
-        runtime_exception(const lns::token *token, const char *m);
+
+        runtime_exception(const char *filename, int line, std::string message);
+
+        runtime_exception(const lns::token *token, std::string m);
 
         const char *what() const throw() override;
     };
 
     class incode_exception : public lns::runtime_exception, public lns::object{
     private:
-        std::map<std::string,lns::object*> fields;
+        std::map<std::string, std::shared_ptr<object> > fields;
     public:
         int calls_bypassed;
-        incode_exception(const lns::token *token, const std::string &m, const std::map<std::string,lns::object*>& fields);
 
-        object *get(std::string &key);
+        incode_exception(const lns::token *token, std::string m,
+                         const std::map<std::string, std::shared_ptr<object>> fields);
+
+        std::shared_ptr<object> get(std::string &key);
 
         bool operator==(const object &o) const override;
 
         std::string str() const override;
 
-        object *clone() const override;
+        std::shared_ptr<object> clone() const override;
 
         const char *what() const throw() override;
     };
@@ -530,7 +540,7 @@ namespace lns {
 
         bool operator==(const object &o) const override;
 
-        object *clone() const override;
+        std::shared_ptr<object> clone() const override;
     };
 
     const char *concat(std::initializer_list<std::__cxx11::string> ss);

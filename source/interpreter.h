@@ -26,19 +26,14 @@ namespace lns {
     public:
         virtual void execute(stmt *s);
 
-        vector<stack_call *>& stack_trace;
+        vector<stack_call *> stack_trace;
     public:
         void visit_s_for_each_stmt(s_for_each_stmt *s) override;
 
-        object *visit_array_expr(array_expr *a) override;
+        shared_ptr<object> visit_array_expr(array_expr *a) override;
 
     protected:
-        object *evaluate(expr *e);
-
-    private:
-        stmt_visitor *dsv;
-        expr_visitor *dev;
-
+        std::shared_ptr<object> evaluate(expr *e);
 
     public:
         static bool is_bool_true_eq(object *o);
@@ -48,9 +43,9 @@ namespace lns {
 
         void execute_block(vector<shared_ptr<stmt>> stmts, runtime_environment *env);
 
-        object *visit_member_expr(member_expr *c) override;
+        shared_ptr<object> visit_member_expr(member_expr *c) override;
 
-        object *visit_member_assign_expr(member_assign_expr *c) override;
+        shared_ptr<object> visit_member_assign_expr(member_assign_expr *c) override;
 
         void visit_handle_stmt(handle_stmt *h) override;
 
@@ -58,31 +53,34 @@ namespace lns {
 
         void visit_raise_stmt(raise_stmt *r) override;
 
-        object *visit_assign_expr(assign_expr *a) override; //
+        shared_ptr<object> visit_assign_expr(assign_expr *a) override; //
 
-        object *visit_binary_expr(binary_expr *b) override; //
+        shared_ptr<object> visit_binary_expr(binary_expr *b) override; //
 
-        object *visit_call_expr(call_expr *c) override; //
+        shared_ptr<object> visit_call_expr(call_expr *c) override; //
 
-        object *visit_grouping_expr(grouping_expr *g) override; //
+        shared_ptr<object> visit_grouping_expr(grouping_expr *g) override; //
 
-        object *visit_literal_expr(literal_expr *l) override;//
+        shared_ptr<object> visit_literal_expr(literal_expr *l) override;//
 
-        object *visit_unary_expr(unary_expr *u) override;
+        shared_ptr<object> visit_unary_expr(unary_expr *u) override;
 
-        object *visit_variable_expr(variable_expr *v) override; //
+        shared_ptr<object> visit_variable_expr(variable_expr *v) override; //
 
-        object *get_map_field(token *where, object *obj, object *key);
+        std::shared_ptr<object> get_map_field(token *where, std::shared_ptr<object> obj, std::shared_ptr<object> key);
 
-        object *visit_sub_script_expr(sub_script_expr *m) override; //
+        shared_ptr<object> visit_sub_script_expr(sub_script_expr *m) override; //
 
-        object *assign_map_field(const token *where, object *obj, const token_type op, number_o* key, object *value);
+        std::shared_ptr<object>
+        assign_map_field(const token *where, std::shared_ptr<object> obj, const token_type op, const number_o *key,
+                         std::shared_ptr<object> value);
 
-        object *visit_sub_script_assign_expr(sub_script_assign_expr *a) override;//
+        shared_ptr<object> visit_sub_script_assign_expr(sub_script_assign_expr *a) override;//
 
-        object *visit_null_expr(null_expr *n) override; //
+        shared_ptr<object> visit_null_expr(null_expr *n) override; //
 
         void visit_block_stmt(block_stmt *b) override; //
+
         void visit_s_for_stmt(s_for_stmt *s) override;
 
     public:
@@ -115,21 +113,23 @@ namespace lns {
 
         interpreter();
 
-        void interpret(vector<shared_ptr<stmt>> &statements);
+        void interpret(vector<shared_ptr<stmt>> statements);
 
-        object *clone_or_keep(object *obj, const expr_type type, const token *where);
+        std::shared_ptr<object> clone_or_keep(std::shared_ptr<object> obj, const expr_type type, const token *where);
 
         void visit_exception_decl_stmt(exception_decl_stmt *e) override;
 
     };
 
+    /*111*/
     class function : public callable{
         const lns::function_stmt* declaration;
         interpreter* i;
     public:
-        const std::string & name()const;
+        const std::string name() const;
         const parameter_declaration& arity() const;
-        object* call(std::vector<object *> &args);
+
+        shared_ptr<object> call(std::vector<shared_ptr<object>> &args);
         explicit function(interpreter* i, const lns::function_stmt *f);
 
         string str() const override;

@@ -367,7 +367,7 @@ shared_ptr<expr> parser::array() {
             shared_ptr<expr> e2 = expression(true);
             pairs.emplace_back(pair<shared_ptr<expr>, shared_ptr<expr>>(e1, e2));
         } else {
-            shared_ptr<expr> e2 = make_shared<literal_expr>(e1->file, e1->line, new number_o(i));
+            shared_ptr<expr> e2 = make_shared<literal_expr>(e1->file, e1->line, make_shared<number_o>(i));
             pairs.emplace_back(pair<shared_ptr<expr>, shared_ptr<expr>>(e2, e1));
         }
         ++i;
@@ -499,9 +499,11 @@ shared_ptr<expr> parser::special_assignment(bool nested) {
 }
 
 shared_ptr<expr> parser::primary(bool nested) {
-    if (match({FALSE})) return make_shared<literal_expr>(previous()->filename, previous()->line, new bool_o(false));
-    if (match({TRUE})) return make_shared<literal_expr>(previous()->filename, previous()->line, new bool_o(true));
-    if (match({NUL})) return make_shared<literal_expr>(previous()->filename, previous()->line, new null_o());
+    if (match({FALSE}))
+        return make_shared<literal_expr>(previous()->filename, previous()->line, make_shared<bool_o>(false));
+    if (match({TRUE}))
+        return make_shared<literal_expr>(previous()->filename, previous()->line, make_shared<bool_o>(true));
+    if (match({NUL})) return make_shared<literal_expr>(previous()->filename, previous()->line, make_shared<null_o>());
     if (match({NUMBER, STRING}))
         return make_shared<literal_expr>(previous()->filename, previous()->line, previous()->literal);
     if (match({IDENTIFIER})) {
@@ -519,7 +521,8 @@ shared_ptr<expr> parser::primary(bool nested) {
 parser::parser(vector<token *> tokens) : tokens(tokens), start(0), current(0), use_allowed(true) {}
 
 vector<shared_ptr<stmt>> parser::parse(bool ld_std) {
-    if (ld_std) ld_stmts(STR("std"), peek());
+    if (ld_std)
+        ld_stmts(STR("std"), peek());
     while (!is_at_end()) {
         try {
             statements.push_back(declaration());
@@ -603,7 +606,7 @@ shared_ptr<stmt> parser::begin_handle_statement() {
     do {
         if (peek()->type == END) break;
         shared_ptr<expr> e_iden = expression(true);
-        token *name = new token(UNRECOGNIZED, string(), new null_o(), e_iden->file, e_iden->line);
+        token *name = new token(UNRECOGNIZED, string(), make_shared<null_o>(), e_iden->file, e_iden->line);
         if (match({BIND}))
             name = consume(IDENTIFIER, EXPECTED_AFTER("variable name","'bind'"));
         vector<shared_ptr<stmt>> hstmts;
@@ -679,3 +682,5 @@ parameter_declaration parser::parameters() {
     }
     return decl;
 }
+
+parser::parser() : tokens(vector<token *>()) {}
