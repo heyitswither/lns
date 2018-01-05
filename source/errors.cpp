@@ -4,7 +4,6 @@
 
 #include <iostream>
 #include "errors.h"
-#include "options.h"
 
 
 using namespace std;
@@ -21,7 +20,7 @@ void errors::runtime_error(lns::runtime_exception &error, std::vector<lns::stack
     if (lns::silent_execution || lns::silent_full) return;
     lns::token *t = const_cast<token *>(error.token);
     auto *first = new lns::stack_call(t->filename, t->line, t->lexeme,error.native_throw);
-    string &stringstack = gen_stack_trace_desc(first, stack);
+    string stringstack = gen_stack_trace_desc(first, stack);
     cerr << RUNTIME_ERROR_S << " in file ";
     cerr << t->filename << ":" << t->line;
     cerr << ": ";
@@ -31,34 +30,23 @@ void errors::runtime_error(lns::runtime_exception &error, std::vector<lns::stack
     exit_status = DCAST_CHK(lns::incode_exception*,&error) ? UNHANDLED_EXCEPTION : RUNTIME_ERROR;
 }
 
-string &errors::gen_stack_trace_desc(lns::stack_call *first_call, std::vector<lns::stack_call *> &stack) {
-    string &s = *new std::string(""), s2 = *new std::string("");
-    if (stack.empty()) return s;
-    string method;
-    const char *filename;
-    int line;
+string errors::gen_stack_trace_desc(lns::stack_call *first_call, std::vector<lns::stack_call *> &stack) {
+    stringstream ss;
+    if (stack.empty()) return string();
     lns::stack_call *current = nullptr;
+    ss << "Stack trace (last calls first):\n";
+    if (!first_call->native)
+        ss << "       at token \"" + first_call->method + "\" (" + first_call->filename + ":" +
+              to_string(first_call->line) + "), in\n";
     while (!stack.empty()) {
         current = stack.back();
-        method = current->method;
-        filename = current->filename;
-        line = current->line;
-        s2 += "       ";
-        if(current->native) s2+="in native ";
-        s2 += "function ";
-        s2 += method;
-        s2 += "(), called at ";
-        s2 += filename;
-        s2 += ":";
-        s2 += to_string(line);
-        s2 += " by\n";
+        ss << "       ";
+        if (current->native) ss << "in native ";
+        ss << "function " << current->method << "(), called at " << current->filename << ":" << to_string(current->line)
+           << " by\n";
         stack.pop_back();
     }
-    s += "Stack trace (last calls first):\n";
-    if(!first_call->native)
-        s += "       at token \"" + first_call->method + "\" (" + first_call->filename + ":" + to_string(first_call->line) + "), in\n";
-
-    s += s2;
+    string s = ss.str();
     s = s.substr(0, s.size() - 4) + ".\n";
     return s;
 }

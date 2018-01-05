@@ -28,7 +28,7 @@ namespace errors {
 
     void runtime_error(lns::runtime_exception &error, std::vector<lns::stack_call *> &stack);
 
-    std::string &gen_stack_trace_desc(lns::stack_call *first_call, std::vector<lns::stack_call *> &stack);
+    std::string gen_stack_trace_desc(lns::stack_call *first_call, std::vector<lns::stack_call *> &stack);
 
 }
 #endif //CPPLNS_ERRORS_H
