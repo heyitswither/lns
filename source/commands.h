@@ -31,7 +31,7 @@ namespace lns {
 
     class command_handler {
 
-        /*Grant access to methods in this class to comand_interpreter*/
+        /*Grant access to methods in this class to command_interpreter*/
         friend class command_interpreter;
 
     protected:
@@ -57,6 +57,8 @@ namespace lns {
         virtual void load_break_points(std::string &basic_string) = 0;
 
         virtual void action(lns::action action) = 0;
+
+        virtual void trace(unsigned long limit) = 0;
 
         virtual void exit() = 0;
     };
@@ -98,6 +100,9 @@ namespace lns {
         /*parses command exit*/
         void exit();
 
+        /*parse command trace*/
+        void trace();
+
         /*returns the remainder of the current input*/
         std::string &line();
 
@@ -123,6 +128,7 @@ namespace lns {
         /*interprets the input: consumes the first token and calls the right method to parse the rest of the line*/
         void interpret(std::string &input);
     };
+
 }
 
 #endif //CPPLNS_COMMAND_HANDLER_H

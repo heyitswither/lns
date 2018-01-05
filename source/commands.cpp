@@ -109,9 +109,10 @@ string lns::command_interpreter::syntax(const string &command) {
         return "    - exit | e | quit | q";
     if (command == "step")
         return "    - step in|out|over";
-    if (command == "continue") {
+    if (command == "continue")
         return "    - continue";
-    }
+    if (command == "trace")
+        return "    - trace|t|stack [limit]";
     return "";
 }
 
@@ -131,6 +132,8 @@ void lns::command_interpreter::help() {
          << syntax("continue") << endl << endl
          << "step: \n"
          << syntax("step") << endl << endl
+         << "trace: \n"
+         << syntax("trace") << endl << endl
          << "exit: \n"
          << syntax("exit") << endl << endl;
 }
@@ -169,6 +172,7 @@ void lns::command_interpreter::interpret(string &input) {
         else if (command == "step" || command == "s") step();
         else if (command == "continue" || command == "c") continue_();
         else if (command == "help" || command == "h") help();
+        else if (command == "trace" || command == "where" || command == "t" || command == "stack") trace();
         else throw "";
     } catch (const char *e) {
         if (string(e).empty())
@@ -194,4 +198,16 @@ string &lns::command_interpreter::consume(){
     string& b = advance_or_throw();
     if(has_next()) throw 1;
     return b;
+}
+
+void lns::command_interpreter::trace() {
+    string s;
+    if (!(s = advance()).empty()) {
+        stringstream ss(s);
+        int i;
+        ss >> i;
+        if (ss.fail())
+            throw "trace";
+        handler->trace(static_cast<unsigned long>(i));
+    } else handler->trace(0);
 }

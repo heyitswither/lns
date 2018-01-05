@@ -86,6 +86,9 @@ namespace lns {
         /*Exits the program*/
         void exit() override;
 
+        /*Prints the stack trace*/
+        void trace(unsigned long limit) override;
+
         /*Opens the specified file and returns its content as a string*/
         string &open_file(const char *filename);
 
@@ -110,6 +113,7 @@ namespace lns {
         /*Prints the first line to stdout, calls broken_loop()*/
         void start();
 
+        void print_stack_trace(vector<stack_call *> &vector, unsigned long limit);
     };
 
 
@@ -122,6 +126,10 @@ namespace lns {
         lns::debug *debug_env;
         int bp_id;
     public:
+
+        const char *break_file;
+
+        int break_line;
 
         lns::action current_action;
 

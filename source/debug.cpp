@@ -157,6 +157,8 @@ void debugger::remove_break_point(int id) {
 void debugger::execute(stmt *s) {
     breakpoint *bp;
     if((bp = check_bp(s)) != nullptr){
+        break_file = s->file;
+        break_line = s->line;
         debug_env->break_(false,bp,bp_id);
     }
     interpreter::execute(s);
@@ -417,4 +419,39 @@ void lns::debug::start() {
         }
     broken = true;
     broken_loop();
+}
+
+void debug::trace(unsigned long limit) {
+    if (!started)
+        cout << "The debugger hasn't started yet. Use the command 'run' to start the debugger" << endl;
+    else
+        debug::print_stack_trace(interpreter->stack_trace, limit);
+}
+
+void debug::print_stack_trace(std::vector<lns::stack_call *> &stack, unsigned long limit) {
+    stringstream ss;
+    if (stack.empty()) return;
+    lns::stack_call *current = nullptr;
+    if (limit == 0) limit = stack.size();
+    ss << "Current stack trace (last calls first):\n";
+    ss << "       at file \"" << interpreter->break_file << "\", line " + to_string(interpreter->break_line)
+       << ", in\n";
+    long i;
+    for (i = stack.size() - 1; i >= 0 && (stack.size() - 1 - i) < limit; --i) {
+        current = stack[i];
+        ss << "       ";
+        if (current->native) ss << "in native ";
+        ss << "function " << current->method << "(), called at " << current->filename << ":" << to_string(current->line)
+           << " by\n";
+    }
+    string stack_trace = ss.str();
+    stack_trace = stack_trace.substr(0, stack_trace.size() - 4);
+    if (i + 1 > 0) {
+        stack_trace += "\n       ... (";
+        stack_trace += to_string(i + 1);
+        stack_trace += " calls were omitted)";
+        stack_trace += "\n";
+    }
+    else stack_trace += ".";
+    cout << stack_trace << "\n" << endl;
 }
