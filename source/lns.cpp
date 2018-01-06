@@ -118,7 +118,8 @@ namespace lns{
         vector<shared_ptr<stmt>> past;
         cout << PROGRAM_STARTING;
         interpreter i;
-        i.interpret(p.parse(!no_std_option));
+        auto stmts = p.parse(!no_std_option);
+        i.interpret(stmts);
         while(true){
             cin.clear();
             cout << "> ";

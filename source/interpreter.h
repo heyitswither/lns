@@ -113,12 +113,15 @@ namespace lns {
 
         interpreter();
 
-        void interpret(vector<shared_ptr<stmt>> statements);
+        void interpret(vector<shared_ptr<stmt>> &statements);
 
         std::shared_ptr<object> clone_or_keep(std::shared_ptr<object> obj, const expr_type type, const token *where);
 
         void visit_exception_decl_stmt(exception_decl_stmt *e) override;
 
+        void interpret_stmts0(vector<shared_ptr<stmt>> &vector);
+
+        virtual void terminate0();
     };
 
     /*111*/

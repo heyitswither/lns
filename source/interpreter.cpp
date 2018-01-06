@@ -399,7 +399,12 @@ void interpreter::visit_context_stmt(context_stmt *c) {
 
 interpreter::interpreter() : stack_trace(vector<stack_call *>()) {}
 
-void interpreter::interpret(vector<shared_ptr<stmt>> statements) {
+void interpreter::interpret(vector<shared_ptr<stmt>> &statements) {
+    interpret_stmts0(statements);
+    this->terminate0();
+}
+
+void interpreter::interpret_stmts0(vector<shared_ptr<stmt>> &statements) {
     try {
         int i;
         shared_ptr<stmt> s;
@@ -420,6 +425,9 @@ void interpreter::interpret(vector<shared_ptr<stmt>> statements) {
         runtime_exception e(s.keyword, CAN_ONLY_BE_USED_IN("break statements","loops"));
         errors::runtime_error(e, stack_trace);
     }
+}
+
+void interpreter::terminate0() {
     if(errors::had_runtime_error && !lns::prompt) std::exit(errors::exit_status);
 }
 
@@ -520,6 +528,7 @@ void interpreter::visit_constructor_stmt(constructor_stmt *c) {
 void interpreter::visit_class_decl_stmt(class_decl_stmt *c) {
 
 }
+
 
 const parameter_declaration& lns::function::arity() const {
     return declaration->parameters;

@@ -241,6 +241,13 @@ inline int debugger::current_depth() {
     return static_cast<int>(stack_trace.size());
 }
 
+void debugger::terminate0() {
+    if (errors::had_runtime_error)
+        cout << "\nThe execution terminated due to a runtime error.\n" << endl;
+    else
+        cout << "\nExecution terminated successfully.\n" << endl;
+}
+
 
 void debug::action(lns::action action) {
     if (!started)
@@ -280,7 +287,6 @@ void debug::run() {
         cout << "Running script...\n\n";
         interpreter->interpret(stmts);
         interpreter->reset();
-        cout << "\nExecution terminated successfully.\n" << endl;
         broken = true;
         started = false;
     }

@@ -119,6 +119,10 @@ namespace lns {
 
     class debugger : public interpreter{
     private:
+    public:
+        void terminate0() override;
+
+    private:
         breakpoint *breakpoints[MAX_BREAKPOINTS];
         lns::watch *watches[MAX_WATCHES];
         scanner expr_scanner;
