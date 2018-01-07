@@ -239,7 +239,7 @@ namespace lns {
 
     class number_o : public object {
     public:
-        double value;
+        long double value;
 
         explicit number_o(double value);
 
