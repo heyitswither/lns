@@ -428,7 +428,7 @@ namespace lns {
         virtual void define(const token *name, std::shared_ptr<object> o, bool is_final, visibility visibility,
                             const char *def_file);
 
-        void
+        virtual void
         define(const std::string &name, std::shared_ptr<object> o, bool is_final, visibility vis, const char *def_file);
 
         void assign(const token *name, token_type op, std::shared_ptr<object> obj, const char *assigning_file);
@@ -449,6 +449,9 @@ namespace lns {
     public:
         explicit context(runtime_environment *previous) : runtime_environment(previous), function_container(CONTEXT_T) {}
 
+        void define(const std::string &name, std::shared_ptr<object> o, bool is_final, visibility vis,
+                    const char *def_file) override;
+
         std::string str() const override;
 
         bool operator==(const object &o) const override;
@@ -456,6 +459,9 @@ namespace lns {
         std::shared_ptr<object> clone() const override;
 
         std::set<callable *> declare_natives() const override;
+
+        void define(const token *name, std::shared_ptr<object> o, bool is_final, visibility visibility,
+                    const char *def_file) override;
     };
 
 

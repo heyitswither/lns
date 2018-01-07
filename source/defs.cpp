@@ -334,6 +334,18 @@ std::set<callable *> context::declare_natives() const {
     return natives;
 }
 
+void context::define(const token *name, std::shared_ptr<object> o, bool is_final, visibility vis,
+                     const char *def_file) {
+    if (contains_key(name->lexeme))
+        throw runtime_exception(name, VARIABLE_ALREADY_DEFINED(name->lexeme));
+    define(name->lexeme, o, is_final, vis, def_file);
+}
+
+void context::define(const std::string &name, std::shared_ptr<object> o, bool is_final, visibility vis,
+                     const char *def_file) {
+    runtime_environment::define(name, o, is_final, vis, def_file);
+}
+
 bool lns::runtime_environment::contains_key(const std::string name) {
     return values.find(name) != values.end();
 }
