@@ -1,0 +1,50 @@
+dpcheck this
+
+use "errors"
+use natives "natives/time_unix_timestamp.so" bind local __unix_timestamp
+
+global context Time
+
+    /*Returns the current time in the UNIX timestamp format*/
+    global function now()
+        return __unix_timestamp()
+    end
+
+    global function sleep(ms)
+
+    end
+end
+
+global class Stopwatch
+    local var timeStart
+    local var stepsCount
+    local var partials
+
+    global function start()
+        timeStart = Time.now()
+        stepsCount = 0
+        partials = array()
+    end
+
+    global function partial()
+        checkStarted()
+        return (partials[stepsCount++] = Time.now() - timeStart)
+    end
+
+    global function getPartials()
+        return partials
+    end
+
+    global function stop()
+        checkStarted()
+        var temp = timeStart
+        timeStart = null
+        return Time.now() - temp
+    end
+
+    local function checkStarted()
+        if timeStart == null then
+            raise IllegalStateException with message = "stopwatch not started"
+        end
+    end
+end
