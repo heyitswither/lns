@@ -34,7 +34,7 @@
 /* INTERPRETER ERRORS */
 #define EXCEPTION_NO_MEMBER(name,member) lns::concat({"exception \"",name,"\" has no member named \"", member, "\""})
 #define OBJECT_NOT_CONTAINER "object is not a container"
-#define OBJECT_NOT_CONTEXT "object is not a context"
+#define OBJECT_NOT_AN_ASSIGNABLE_CONTAINER "object is not an assignable container"
 #define INVALID_CALL_TARGET "invalid call target"
 #define WRONG_ARG_NR(exp,got) lns::concat({"expected ", std::to_string(exp), " argument", exp == 1 ? "" : "s", " but got ", std::to_string(got)})
 #define WRONG_ARG_NR_BETWEEN(exp1,exp2,got) lns::concat({"expected between ", std::to_string(exp1), " and ",std::to_string(exp2), " arguments but got ", std::to_string(got)})
@@ -52,5 +52,8 @@
 #define VARIABLE_UNDEFINED(var) lns::concat({"\"", var, "\" is undefined"})
 #define VARIABLE_ALREADY_DEFINED(var) lns::concat({"\"", var, "\" is already defined"})
 #define VARIABLE_FINAL(var) lns::concat({"\"", var, "\" is final"})
-
+#define RETURN_STMT_VALUE_IN_CONSTRUCTOR "return values are not allowed in constructors (--permissive)"
+#define OBJECT_NOT_A_CLASS "object is not a class"
+#define CONSTRUCTOR_NOT_FOUND(args) lns::concat({"class doesn't have a constructor that takes ", to_string(args), " arguments"})
+#define THIS_OUTSIDE_OF_CLASS "cannot use 'this' outside of a class method"
 #endif //CPPLNS_ERROR_MESSAGE_H
