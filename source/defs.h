@@ -116,12 +116,13 @@ namespace lns {
         CONSTRUCTOR,
         UNRECOGNIZED,
         QUESTION_MARK,
+        NEW,
         EOF_
     };
 
     enum objtype {
         NUMBER_T, STRING_T, BOOL_T, NULL_T, ARRAY_T, CALLABLE_T, NATIVE_CALLABLE_T, CONTEXT_T, EXCEPTION_T,
-        EXCEPTION_DEFINITION_T, CLASS_DEFINITION_T, OBJECT_T, UNSPECIFIED
+        EXCEPTION_DEFINITION_T, CLASS_DEFINITION_T, INSTANCE_T, UNSPECIFIED
     };
 
     enum operator_location{
@@ -135,15 +136,15 @@ namespace lns {
     typedef objtype object_type;
 
 
-    const std::string KEYWORDS_S_VALUES[] = {"COMMA","LEFT_PAREN", "RIGHT_PAREN", "LEFT_SQR", "RIGHT_SQR","LEFT_BRACE","RIGHT_BRACE", "COMMA", "DOT", "COLON", "MINUS",
+    const std::string KEYWORDS_S_VALUES[] = {"COMMA", "LEFT_PAREN", "RIGHT_PAREN", "LEFT_SQR", "RIGHT_SQR", "LEFT_BRACE", "RIGHT_BRACE", "COMMA", "DOT", "COLON", "MINUS",
                                              "MINUS_EQUALS", "PLUS", "PLUS_EQUALS", "PLUS_PLUS", "MINUS_MINUS",
                                              "SLASH", "SLASH_EQUALS", "STAR", "STAR_EQUALS", "HAT", "BANG", "BANG_EQUAL",
                                              "EQUAL", "EQUAL_EQUAL", "GREATER", "GREATER_EQUAL", "LESS", "LESS_EQUAL",
                                              "IDENTIFIER", "STRING", "NUMBER", "NATIVES", "AND", "CLASS", "ELSE", "FALSE",
                                              "FUNCTION", "FOR", "FOREACH", "IF", "NUL", "OR", "XOR", "NOR", "NAND", "NOT", "RETURN",
-                                             "SUPER", "THIS", "TRUE", "VAR", "WHILE", "GLOBAL","LOCAL", "FINAL", "USE", "BREAK",
-                                             "CONTINUE", "CONTEXT", "BEGIN", "THEN", "DO", "END",  "DPCHECK", "IN", "BIND", "EXCEPTION", "WITH", "RAISE","HANDLE","CONSTRUCTOR", "UNRECOGNIZED", "QUESTION_MARK",
-                                             "EOF_"};
+                                             "SUPER", "THIS", "TRUE", "VAR", "WHILE", "GLOBAL", "LOCAL", "FINAL", "USE", "BREAK",
+                                             "CONTINUE", "CONTEXT", "BEGIN", "THEN", "DO", "END", "DPCHECK", "IN", "BIND", "EXCEPTION", "WITH", "RAISE", "HANDLE", "CONSTRUCTOR", "UNRECOGNIZED", "QUESTION_MARK",
+                                             "NEW", "EOF_"};
 
     const char* INVALID_OP(const char* OP, const lns::object_type t1, const lns::object_type* t2);
 
@@ -424,8 +425,8 @@ namespace lns {
 
         std::shared_ptr<object> get(const token *name, const char *accessing_file);
 
-        void define(const token *name, std::shared_ptr<object> o, bool is_final, visibility visibility,
-                    const char *def_file);
+        virtual void define(const token *name, std::shared_ptr<object> o, bool is_final, visibility visibility,
+                            const char *def_file);
 
         void
         define(const std::string &name, std::shared_ptr<object> o, bool is_final, visibility vis, const char *def_file);

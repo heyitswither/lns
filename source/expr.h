@@ -12,7 +12,21 @@ using namespace lns;
 
 namespace lns{
 enum expr_type{
-ASSIGN_EXPR_T, BINARY_EXPR_T, CALL_EXPR_T, GROUPING_EXPR_T, LITERAL_EXPR_T, UNARY_EXPR_T, VARIABLE_EXPR_T, SUB_SCRIPT_EXPR_T, SUB_SCRIPT_ASSIGN_EXPR_T, MEMBER_EXPR_T, MEMBER_ASSIGN_EXPR_T, ARRAY_EXPR_T, NULL_EXPR_T, 
+    ASSIGN_EXPR_T,
+    BINARY_EXPR_T,
+    CALL_EXPR_T,
+    GROUPING_EXPR_T,
+    LITERAL_EXPR_T,
+    UNARY_EXPR_T,
+    VARIABLE_EXPR_T,
+    SUB_SCRIPT_EXPR_T,
+    SUB_SCRIPT_ASSIGN_EXPR_T,
+    MEMBER_EXPR_T,
+    MEMBER_ASSIGN_EXPR_T,
+    ARRAY_EXPR_T,
+    NEW_EXPR_T,
+    THIS_EXPR_T,
+    NULL_EXPR_T,
 };
 class expr_visitor;
 class expr{
@@ -36,6 +50,10 @@ class sub_script_assign_expr;
 class member_expr;
 class member_assign_expr;
 class array_expr;
+
+    class new_expr;
+
+    class this_expr;
 class null_expr;
 class expr_visitor{
 public:
@@ -62,6 +80,10 @@ public:
     virtual shared_ptr<object> visit_member_assign_expr(member_assign_expr *m) = 0;
 
     virtual shared_ptr<object> visit_array_expr(array_expr *a) = 0;
+
+    virtual shared_ptr<object> visit_new_expr(new_expr *n) = 0;
+
+    virtual shared_ptr<object> visit_this_expr(this_expr *t) = 0;
 
     virtual shared_ptr<object> visit_null_expr(null_expr *n) = 0;
 };
@@ -268,6 +290,35 @@ return v->visit_array_expr(this);
 };
 
 
+    class new_expr : public expr {
+    public:
+        const token *keyword;
+        const shared_ptr<expr> class_;
+        const vector<shared_ptr<expr>> args;
+
+        new_expr(const char *file, const int line, const token *keyword, const shared_ptr<expr> class_,
+                 const vector<shared_ptr<expr>> args) : expr(line, file, NEW_EXPR_T), keyword(keyword), class_(class_),
+                                                        args(args) {}
+
+        shared_ptr<object> accept(expr_visitor *v) override {
+            return v->visit_new_expr(this);
+        }
+    };
+
+
+    class this_expr : public expr {
+    public:
+        const token *keyword;
+
+        explicit this_expr(const char *file, const int line, const token *keyword) : expr(line, file, THIS_EXPR_T),
+                                                                                     keyword(keyword) {}
+
+        shared_ptr<object> accept(expr_visitor *v) override {
+            return v->visit_this_expr(this);
+        }
+    };
+
+
 
 class null_expr : public expr {
 public:
@@ -339,6 +390,16 @@ std::cout << "member_assign_expr" << std::endl;
 
     shared_ptr<object> visit_array_expr(array_expr *a) override {
 std::cout << "array_expr" << std::endl;
+        return make_shared<null_o>();
+    }
+
+    shared_ptr<object> visit_new_expr(new_expr *n) override {
+        std::cout << "new_expr" << std::endl;
+        return make_shared<null_o>();
+    }
+
+    shared_ptr<object> visit_this_expr(this_expr *t) override {
+        std::cout << "this_expr" << std::endl;
         return make_shared<null_o>();
     }
 

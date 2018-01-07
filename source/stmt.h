@@ -333,11 +333,11 @@ v->visit_begin_handle_stmt(this);
 class constructor_stmt : public stmt {
 public:
 const token* keyword;
-    const vector<token *> parameters;
+    const parameter_declaration parameters;
     const vector<shared_ptr<stmt>> body;
 const visibility vis;
 
-    constructor_stmt(const char *file, const int line, const token *keyword, const vector<token *> parameters,
+    constructor_stmt(const char *file, const int line, const token *keyword, const parameter_declaration parameters,
                      const vector<shared_ptr<stmt>> body, const visibility vis) : stmt(line, file, CONSTRUCTOR_STMT_T),
                                                                                   keyword(keyword),
                                                                                   parameters(parameters), body(body),

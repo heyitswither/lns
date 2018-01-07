@@ -317,7 +317,7 @@ string context::str() const {
 }
 
 bool context::operator==(const object &o) const {
-    return false;
+    return this == &o;
 }
 
 std::set<callable *> context::declare_natives() const {
@@ -490,12 +490,13 @@ const char *lns::best_file_path(const char *filename) {
 callable::callable(bool is_native) : object(is_native ? NATIVE_CALLABLE_T : CALLABLE_T) {}
 
 bool callable::operator==(const object &o) const {
-    return false;
+    return this == &o;
 }
 
 string callable::str() const {
     stringstream s;
-    s << "<" << (this->type == NATIVE_CALLABLE_T ? "native_" : "") << "function@" << static_cast<const void *>(this) << ", name: \"" << name() << "\">";
+    s << "<" << (this->type == NATIVE_CALLABLE_T ? "native_" : "") << "callable@" << static_cast<const void *>(this)
+      << ", name: \"" << name() << "\">";
     return s.str();
 }
 
@@ -526,6 +527,8 @@ const char *lns::type_to_string(object_type t) {
         case CONTEXT_T:return "context";
         case NATIVE_CALLABLE_T: return "native_callable";
         case EXCEPTION_T: return "exception";
+        case INSTANCE_T:
+            return "object";
     }
     return "unknown";
 }
@@ -542,7 +545,7 @@ std::shared_ptr<object> incode_exception::get(std::string &key) {
 }
 
 bool incode_exception::operator==(const object &o) const {
-    return false;
+    return this == &o;
 }
 
 std::string incode_exception::str() const {

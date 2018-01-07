@@ -27,6 +27,8 @@ public class generate {
                 "member : shared_ptr<expr> container_name, token* member_identifier",
                 "member_assign : shared_ptr<expr> container_name, token_type op, token* member_identifier, shared_ptr<expr> value",
                 "array     : token* open_brace, vector<pair<shared_ptr<expr>,shared_ptr<expr>>> pairs",
+                "new        : token* keyword, shared_ptr<expr> class_, vector<shared_ptr<expr>> args",
+                "this      : token* keyword",
                 "null      : token* where"
         ), Arrays.asList("<utility>","<memory>"), "shared_ptr<object>","make_shared<null_o>()");
         defineAst(outputDir, "stmt", Arrays.asList(
@@ -47,7 +49,7 @@ public class generate {
                 "uses_native : token* where, string lib_name, token* bind, visibility vis",
                 "handle     :  shared_ptr<expr> exception_name, token* bind, vector<shared_ptr<stmt>> block",
                 "begin_handle : vector<shared_ptr<stmt>> body, vector<shared_ptr<handle_stmt>> handles",
-                "constructor : token* keyword, vector<token*> parameters, vector<shared_ptr<stmt>> body, visibility vis",
+                "constructor : token* keyword, parameter_declaration parameters, vector<shared_ptr<stmt>> body, visibility vis",
                 "class_decl : token* name, vector<shared_ptr<function_stmt>> methods, vector<shared_ptr<constructor_stmt>> constructors, vector<shared_ptr<var_stmt>> variables, visibility vis",
                 "null       : token* where"
         ), Arrays.asList("\"expr.h\"","<memory>"), "void","");
