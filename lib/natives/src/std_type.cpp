@@ -49,6 +49,8 @@ public:
             case CLASS:
                 type->value = "class";
                 break;
+            case INSTANCE_T:
+                type->value = "object";
         }
         return type;
     }
