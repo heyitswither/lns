@@ -88,7 +88,7 @@ vector<shared_ptr<stmt>> parser::context_block() {
     while (!check(END) && !is_at_end()) {
         shared_ptr<stmt> s = declaration();
         if (s->type == CONTEXT_STMT_T || s->type == VAR_STMT_T || s->type == FUNCTION_STMT_T ||
-            s->type == EXCEPTION_DECL_STMT_T) {
+            s->type == EXCEPTION_DECL_STMT_T || s->type == CLASS_DECL_STMT_T) {
             stmts.push_back(s);
             continue;
         }
