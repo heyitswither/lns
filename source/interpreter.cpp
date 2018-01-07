@@ -14,9 +14,9 @@ void lns::interpreter::execute(stmt *s) {
 
 shared_ptr<object> interpreter::evaluate(expr *e) {
     if (e == nullptr)
-        return lns::GET_DEFAULT_NULL();
+        return make_shared<null_o>();
     auto o = e->accept(this);
-    return o == nullptr ? lns::GET_DEFAULT_NULL() : o;
+    return o == nullptr ? make_shared<null_o>() : o;
 }
 
 bool interpreter::is_bool_true_eq(object *o) {
@@ -258,7 +258,7 @@ shared_ptr<object> interpreter::visit_sub_script_assign_expr(sub_script_assign_e
 }
 
 shared_ptr<object> interpreter::visit_null_expr(null_expr *n) {
-    return lns::GET_DEFAULT_NULL();
+    return make_shared<null_o>();
 }
 
 
@@ -328,9 +328,7 @@ void interpreter::visit_if_stmt(if_stmt *i) {
 }
 
 void interpreter::visit_return_stmt(return_stmt *r) {
-    std::shared_ptr<object> value = lns::GET_DEFAULT_NULL();
-    if (r->value->type != NULL_EXPR_T) value = evaluate(r->value.get());
-    throw return_signal(value, r->keyword);
+    throw return_signal(evaluate(r->value.get()), r->keyword);
 }
 
 void interpreter::visit_break_stmt(break_stmt *b) {

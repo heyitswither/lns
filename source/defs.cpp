@@ -428,7 +428,7 @@ runtime_environment::assign(const token *name, token_type op, std::shared_ptr<ob
         return;
     }
     if (enclosing != nullptr) {
-        return enclosing->assign(name, op, obj, nullptr);
+        return enclosing->assign(name, op, obj, assigning_file);
     }
     if (permissive) { return define(name, obj, false, V_UNSPECIFIED,assigning_file); }
     throw runtime_exception(name, VARIABLE_UNDEFINED(name->lexeme));
