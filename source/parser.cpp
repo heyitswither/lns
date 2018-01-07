@@ -158,7 +158,7 @@ shared_ptr<stmt> parser::declaration() {
             return function(vis);
         }
         if(match({CLASS})){
-            CHECK_ACCESS_SPEC_NOT_ALLOWED(is_final,"final","functions")
+            CHECK_ACCESS_SPEC_NOT_ALLOWED(is_final, "final", "classes")
             return class_(vis);
         }
         if(match({CONSTRUCTOR})) throw error(previous(),CONSTRUCTOR_OUTSIDE_OF_CLASS);
@@ -184,6 +184,12 @@ shared_ptr<stmt> parser::class_(visibility vis) {
         else throw error(peek(),CAN_ONLY_CONTAIN("classes","variables, methods and constructors"));
     }
     consume(END,EXPTOCLOSE("class declaration",keyword->line));
+    if (constructors.empty())
+        constructors.push_back(make_shared<constructor_stmt>(keyword->filename, keyword->line,
+                                                             new token(UNRECOGNIZED, "__implicit_constructor__",
+                                                                       make_shared<null_o>(), keyword->filename,
+                                                                       keyword->line), parameter_declaration(0),
+                                                             vector<shared_ptr<stmt>>(), V_UNSPECIFIED));
     return make_shared<class_decl_stmt>(keyword->filename, keyword->line, name, methods, constructors, variables, vis);
 }
 
@@ -400,10 +406,10 @@ shared_ptr<expr> parser::assignment(bool nested) {
                                                        array->key, value);
         }
         if (expr_.get()->type == MEMBER_EXPR_T) {
-            auto DCAST_ASN(container, member_assign_expr*, expr_.get());
+            auto DCAST_ASN(container, member_expr*, expr_.get());
             return make_shared<member_assign_expr>(container->file, container->line,
-                                                   container->container_name, op->type,
-                                                   const_cast<token *>(container->member_identifier), value);
+                                                   container->container_name, op->type, container->member_identifier,
+                                                   value);
         }
         throw error(op, INVALID_ASSIGNMENT_TARGET);
     }
@@ -462,13 +468,12 @@ shared_ptr<expr> parser::unary(bool nested) {
         shared_ptr<expr> right = unary(true);
         return make_shared<unary_expr>(op->filename, op->line, op, operator_location::PREFIX, right);
     }
-    return call(nested);
+    return call(nested, false);
 }
 
-shared_ptr<expr> parser::call(bool nested) {
+shared_ptr<expr> parser::call(bool nested, bool strict) {
     vector<shared_ptr<expr>> args;
-    shared_ptr<expr> expr = special_assignment(nested), *keyexpr;
-    token *identifier = previous();
+    shared_ptr<expr> expr = special_assignment(nested);
     while (true)
         if (match({LEFT_PAREN})) {
             if (!check(RIGHT_PAREN)) {
@@ -479,6 +484,7 @@ shared_ptr<expr> parser::call(bool nested) {
             token *paren = consume(RIGHT_PAREN, EXPECTED_AFTER("')'","arguments"));
             expr = make_shared<call_expr>(paren->filename, paren->line, expr, paren, args);
         } else break;
+    if (strict && expr->type != CALL_EXPR_T) throw error(previous(), EXPECTED("call expression"));
     return expr;
 }
 
@@ -499,6 +505,8 @@ shared_ptr<expr> parser::special_assignment(bool nested) {
 }
 
 shared_ptr<expr> parser::primary(bool nested) {
+    if (match({THIS}))
+        return make_shared<this_expr>(previous()->filename, previous()->line, previous());
     if (match({FALSE}))
         return make_shared<literal_expr>(previous()->filename, previous()->line, make_shared<bool_o>(false));
     if (match({TRUE}))
@@ -537,7 +545,16 @@ vector<shared_ptr<stmt>> parser::parse(bool ld_std) {
 
 shared_ptr<expr> parser::expression(bool nested) {
     if (match({LEFT_BRACE})) return array();
+    if (match({NEW})) return new_();
     return assignment(nested);
+}
+
+
+shared_ptr<expr> parser::new_() {
+    auto keyword = previous();
+    auto c = call(true, true);
+    auto DCAST_ASN(class_, call_expr*, c.get());
+    return make_shared<new_expr>(keyword->filename, keyword->line, keyword, class_->callee, class_->args);
 }
 
 shared_ptr<expr> parser::logical(bool nested) {
@@ -650,17 +667,11 @@ pair<visibility, bool> parser::get_access_specifiers() {
 shared_ptr<constructor_stmt> parser::constructor(visibility visibility) {
     token *keyword = previous();
     consume(LEFT_PAREN, EXPECTED_AFTER("'('","'constructor'"));
-    vector<token *> parameters;
-    if (!check(RIGHT_PAREN)) {
-        do {
-            token *t = consume(IDENTIFIER, EXPECTED("parameter name"));
-            parameters.push_back(t);
-        } while (match({COMMA}));
-    }
+    auto params = parameters();
     consume(RIGHT_PAREN, EXPECTED_AFTER("')'","parameter list"));
     try {
         vector<shared_ptr<stmt>> body = stmts_until({END});
-        return make_shared<constructor_stmt>(keyword->filename, keyword->line, keyword, parameters, body, visibility);
+        return make_shared<constructor_stmt>(keyword->filename, keyword->line, keyword, params, body, visibility);
     } catch (int) {
         int l = keyword->line;
         throw error(previous(), EXPTOCLOSE("constructor", l));

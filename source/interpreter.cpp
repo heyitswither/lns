@@ -49,18 +49,23 @@ shared_ptr<object> interpreter::visit_member_expr(member_expr *c) {
         std::shared_ptr<object> o2 = cast->get(const_cast<string &>(c->member_identifier->lexeme));
         if(o2 == nullptr) throw runtime_exception(c->member_identifier,EXCEPTION_NO_MEMBER(cast->message,c->member_identifier->lexeme));
         return o2;
+    } else if (o->type == INSTANCE_T) {
+        return DCAST(instance_o*, o.get())->get(c->member_identifier, c->file);
     }
     throw runtime_exception(c->member_identifier, OBJECT_NOT_CONTAINER);
 }
 
 shared_ptr<object> interpreter::visit_member_assign_expr(member_assign_expr *c) {
     auto o = evaluate(c->container_name.get());
-    if (o->type != CONTEXT_T) {
-        throw runtime_exception(c->member_identifier, OBJECT_NOT_CONTEXT);
-    }
     auto value = evaluate(c->value.get());
-    dynamic_cast<context *>(o.get())->assign(c->member_identifier, c->op,
-                                       clone_or_keep(value, c->value->type, c->member_identifier), c->file);
+    if (o->type == CONTEXT_T) {
+        DCAST(context*, o.get())->assign(c->member_identifier, c->op,
+                                         clone_or_keep(value, c->value->type, c->member_identifier), c->file);
+
+    } else if (o->type == INSTANCE_T) {
+        DCAST(instance_o*, o.get())->assign_field(c->member_identifier, c->op,
+                                                  clone_or_keep(value, c->value->type, c->member_identifier), c->file);
+    } else throw runtime_exception(c->member_identifier, OBJECT_NOT_AN_ASSIGNABLE_CONTAINER);
     return value;
 }
 
@@ -128,15 +133,10 @@ shared_ptr<object> interpreter::visit_call_expr(call_expr *c) {
     vector<shared_ptr<object>> args;
     callable *function = dynamic_cast<callable *>(callee.get());
     if (function == nullptr) throw runtime_exception(c->paren, INVALID_CALL_TARGET);
+    check_params(c->paren, function->arity(), c->args.size());
     int i = 0;
     for (; i < c->args.size(); i++) {
         args.push_back(evaluate(c->args[i].get()));
-    }
-    int total = function->arity().parameters.size();
-    int optional = function->arity().optional();
-    int required = total - optional;
-    if (args.size() < required || args.size() > total) {
-        throw runtime_exception(c->paren, total == required ? WRONG_ARG_NR(required,args.size()) : WRONG_ARG_NR_BETWEEN(required, total,args.size()));
     }
     stack_trace.push_back(
             new stack_call(c->paren->filename, c->paren->line, function->name(), globals->is_native(function)));
@@ -440,7 +440,12 @@ shared_ptr<object> interpreter::clone_or_keep(std::shared_ptr<object> obj, const
         case ASSIGN_EXPR_T:
         case SUB_SCRIPT_ASSIGN_EXPR_T:
         case MEMBER_ASSIGN_EXPR_T:
+        case THIS_EXPR_T:
+        case NEW_EXPR_T:
             return obj;
+        case VARIABLE_EXPR_T:
+            if (obj->type == INSTANCE_T) return obj;
+            break;
         default: break;
     }
     std::shared_ptr<object> ret = obj->clone();
@@ -521,14 +526,67 @@ void interpreter::visit_begin_handle_stmt(begin_handle_stmt *b) {
     }
 }
 
-void interpreter::visit_constructor_stmt(constructor_stmt *c) {
-
-}
+void interpreter::visit_constructor_stmt(constructor_stmt *c) {}
 
 void interpreter::visit_class_decl_stmt(class_decl_stmt *c) {
-
+    auto class_ = make_shared<class_definition>(c->name->lexeme, c->variables, c->methods, c->file);
+    vector<shared_ptr<constructor>> constructors;
+    for (auto &item : c->constructors)
+        constructors.emplace_back(make_shared<constructor>(this, class_.get(), item.get()));
+    class_->constructors = constructors;
+    environment->define(c->name, class_, true, c->vis, c->file);
 }
 
+shared_ptr<object> interpreter::visit_new_expr(new_expr *n) {
+    auto DCAST_ASN(class_, class_definition *, evaluate(n->class_.get()).get());
+    if (class_ == nullptr) throw runtime_exception(n->keyword, OBJECT_NOT_A_CLASS);
+    constructor *cstrt = nullptr;
+    for (auto &item : class_->constructors)
+        if (check_params(nullptr, item->arity(), n->args.size())) {
+            cstrt = item.get();
+            break;
+        }
+    if (!cstrt) throw runtime_exception(n->keyword, CONSTRUCTOR_NOT_FOUND(n->args.size()));
+    vector<shared_ptr<object>> args;
+    int i = 0;
+    for (; i < n->args.size(); i++) {
+        args.push_back(evaluate(n->args[i].get()));
+    }
+    stack_trace.push_back(
+            new stack_call(n->keyword->filename, n->keyword->line, cstrt->name(), globals->is_native(cstrt)));
+    try {
+        std::shared_ptr<object> p = cstrt->call(args);
+        stack_trace.pop_back();
+        return p;
+    } catch (incode_exception &ex) {
+        ++ex.calls_bypassed;
+        throw ex;
+    }
+}
+
+bool interpreter::check_params(const token *where, const parameter_declaration &declaration, unsigned long size) {
+    auto total = declaration.parameters.size();
+    auto optional = declaration.optional();
+    auto required = total - optional;
+    if (size < required || size > total)
+        if (where)
+            throw runtime_exception(where,
+                                    total == required ? WRONG_ARG_NR(required, size) : WRONG_ARG_NR_BETWEEN(required,
+                                                                                                            total,
+                                                                                                            size));
+        else
+            return false;
+    return true;
+}
+
+shared_ptr<object> interpreter::visit_this_expr(this_expr *t) {
+    try {
+        token tkn = token(token_type::UNRECOGNIZED, THIS_DEFINITION, make_shared<null_o>(), t->file, t->line);
+        return environment->get(&tkn, t->file);
+    } catch (runtime_exception &r) {
+        throw runtime_exception(t->keyword, THIS_OUTSIDE_OF_CLASS);
+    }
+}
 
 const parameter_declaration& lns::function::arity() const {
     return declaration->parameters;
@@ -555,8 +613,198 @@ const string lns::function::name() const {
 }
 
 string lns::function::str() const {
-    return callable::str();
+    stringstream s;
+    s << "<" << (this->type == NATIVE_CALLABLE_T ? "native_" : "") << "function@" << static_cast<const void *>(this)
+      << ", name: \"" << name() << "\">";
+    return s.str();
 }
 
 lns::function::function(interpreter *i, const lns::function_stmt *f) : i(i), declaration(f), callable(false) {}
 
+
+class_definition::class_definition(const string name,
+                                   const vector<shared_ptr<var_stmt>> &variables,
+                                   const vector<shared_ptr<function_stmt>> &methods, const char *def_file) : name(name),
+                                                                                                             function_container(
+                                                                                                                     CLASS_DEFINITION_T),
+                                                                                                             variables(
+                                                                                                                     variables),
+                                                                                                             methods(methods),
+                                                                                                             def_file(
+                                                                                                                     def_file) {}
+
+string class_definition::str() const {
+    stringstream s;
+    s << "<class@" << static_cast<const void *>(this) << ", name: \"" << name << "\">";
+    return s.str();
+}
+
+bool class_definition::operator==(const object &o) const {
+    return this == &o;
+}
+
+shared_ptr<object> class_definition::clone() const {
+    return nullptr;
+}
+
+set<callable *> class_definition::declare_natives() const {
+    return std::set<callable *>();
+}
+
+constructor::constructor(interpreter *i, const class_definition *container, const lns::constructor_stmt *decl)
+        : callable(false), container(container), i(i), declaration(decl) {}
+
+const parameter_declaration &constructor::arity() const {
+    return declaration->parameters;
+}
+
+const string constructor::name() const {
+    return container->name + ".constructor";
+}
+
+shared_ptr<object> constructor::call(std::vector<std::shared_ptr<object>> &args) {
+    shared_ptr<instance_o> instance = make_shared<instance_o>(container->name, i->globals);
+    runtime_environment *prev = i->environment;
+    i->environment = instance.get();
+
+    for (auto &item : container->variables)
+        item->accept(i);
+    for (auto &item : container->methods)
+        instance->define(item->name, make_shared<method>(i, item.get(), instance), true, item->vis, item->file);
+
+    i->environment = prev;
+
+    auto env = make_shared<runtime_environment>(i->environment);
+    env->define(THIS_DEFINITION, instance, true, V_UNSPECIFIED, container->def_file);
+    int j;
+    for (j = 0; j < declaration->parameters.parameters.size(); j++) {
+        auto o1 = j < args.size() ? args.at(j) : make_shared<null_o>();
+        env->define(declaration->parameters.parameters.at(j).name, o1, false, V_UNSPECIFIED, declaration->file);
+    }
+    try {
+        i->execute_block(declaration->body, env.get());
+    } catch (return_signal &r) {
+        if (r.value->type != NULL_T && !permissive)
+            throw runtime_exception(r.keyword, string(RETURN_STMT_VALUE_IN_CONSTRUCTOR));
+    }
+    return instance;
+}
+
+bool constructor::operator==(const object &o) const {
+    return this == &o;
+}
+
+string constructor::str() const {
+    stringstream s;
+    s << "<constructor@" << static_cast<const void *>(this) << ", params: " << declaration->parameters.parameters.size()
+      << ">";
+    return s.str();
+}
+
+shared_ptr<object> constructor::clone() const {
+    return callable::clone();
+}
+
+instance_o::instance_o(string class_, runtime_environment *globals) : object(INSTANCE_T), runtime_environment(globals),
+                                                                      class_(class_) {}
+
+instance_o::instance_o(string class_, runtime_environment *globals, map<string, variable> vars) : object(INSTANCE_T),
+                                                                                                  runtime_environment(
+                                                                                                          globals),
+                                                                                                  class_(class_) {
+    values = vars;
+}
+
+string instance_o::str() const {
+    stringstream s;
+    s << "<" << class_ << " instance@" << static_cast<const void *>(this) << ">";
+    return s.str();
+}
+
+shared_ptr<object> instance_o::clone() const {
+    return make_shared<instance_o>(this->class_, this->enclosing, this->values);
+}
+
+bool instance_o::operator==(const object &o) const {
+    return false;
+}
+
+shared_ptr<object> instance_o::operator+(const object &o) const {
+    return make_shared<string_o>(this->str() + o.str());
+}
+
+void
+instance_o::assign_field(const token *name, const token_type op, shared_ptr<object> obj, const char *assigning_file) {
+    if (contains_key(name->lexeme)) {
+        if (values[name->lexeme].is_final) {
+            throw runtime_exception(name, VARIABLE_FINAL(name->lexeme));
+        }
+        //values[name.lexeme]->isfinal = false;
+        try {
+            variable v = values[name->lexeme];
+            if (v.visibility_ == V_LOCAL) {
+                if (strcmp(v.def_file, assigning_file) != 0) {
+                    throw runtime_exception(name, VARIABLE_NOT_VISIBLE(name->lexeme));
+                }
+            }
+            switch (op) {
+                case EQUAL:
+                    values[name->lexeme].value = obj;
+                    break;
+                case PLUS_EQUALS:
+                    *v.value += *obj;
+                    break;
+                case MINUS_EQUALS:
+                    *v.value -= *obj;
+                    break;
+                case STAR_EQUALS:
+                    *v.value *= *obj;
+                    break;
+                case SLASH_EQUALS:
+                    *v.value /= *obj;
+                    break;
+            }
+        } catch (const char *s) {
+            throw runtime_exception(name, s);
+        }
+        return;
+    }
+    if (permissive) { return define(name, obj, false, V_UNSPECIFIED, assigning_file); }
+    throw runtime_exception(name, VARIABLE_UNDEFINED(name->lexeme));
+}
+
+void instance_o::define(const token *name, std::shared_ptr<object> o, bool is_final, visibility vis,
+                        const char *def_file) {
+    if (contains_key(name->lexeme)) {
+        throw runtime_exception(name, VARIABLE_ALREADY_DEFINED(name->lexeme));
+    }
+    runtime_environment::define(name->lexeme, o, is_final, vis, def_file);
+}
+
+method::method(interpreter *i, const function_stmt *f, shared_ptr<instance_o> instance) : function(i, f),
+                                                                                          instance(instance) {}
+
+shared_ptr<object> method::call(std::vector<shared_ptr<object>> &args) {
+    shared_ptr<runtime_environment> enclosing = make_shared<runtime_environment>(i->globals);
+    shared_ptr<runtime_environment> env = make_shared<runtime_environment>(instance.get());
+    env->define(THIS_DEFINITION, instance, true, V_UNSPECIFIED, declaration->file);
+    int j;
+    shared_ptr<object> o;
+    for (j = 0; j < declaration->parameters.parameters.size(); j++) {
+        o = j < args.size() ? args.at(j) : make_shared<null_o>();
+        env->define(declaration->parameters.parameters.at(j).name, o, false, V_UNSPECIFIED, declaration->file);
+    }
+    try {
+        i->execute_block(declaration->body, env.get());
+    } catch (return_signal &r) {
+        return r.value;
+    }
+    return lns::GET_DEFAULT_NULL();
+}
+
+string method::str() const {
+    stringstream s;
+    s << "<" << (this->type == NATIVE_CALLABLE_T ? "native_" : "") << "method@" << static_cast<const void *>(this)
+      << ", class: \"" << instance->class_ << "\", name: \"" << name() << "\">";
+    return s.str();
+}

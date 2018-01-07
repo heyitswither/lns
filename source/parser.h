@@ -95,7 +95,7 @@ namespace lns {
 
         shared_ptr<expr> unary(bool nested);
 
-        shared_ptr<expr> call(bool nested);
+        shared_ptr<expr> call(bool nested, bool strict);
 
         shared_ptr<expr> special_assignment(bool nested);
 
@@ -142,6 +142,8 @@ namespace lns {
 
         vector<shared_ptr<stmt> > statements;
         bool use_allowed = true;
+
+        shared_ptr<expr> new_();
     };
 
 

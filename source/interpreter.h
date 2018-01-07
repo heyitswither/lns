@@ -17,6 +17,7 @@
 #include <thread>
 
 
+#define THIS_DEFINITION string("#this#")
 #define RECURSION_LIMIT 1000
 
 namespace lns {
@@ -109,6 +110,10 @@ namespace lns {
 
         void visit_class_decl_stmt(class_decl_stmt *c) override;
 
+        shared_ptr<object> visit_new_expr(new_expr *n) override;
+
+        shared_ptr<object> visit_this_expr(this_expr *t) override;
+
     public:
 
         interpreter();
@@ -122,10 +127,13 @@ namespace lns {
         void interpret_stmts0(vector<shared_ptr<stmt>> &vector);
 
         virtual void terminate0();
+
+        bool check_params(const token *where, const parameter_declaration &declaration, unsigned long size);
     };
 
-    /*111*/
+
     class function : public callable{
+    protected:
         const lns::function_stmt* declaration;
         interpreter* i;
     public:
@@ -138,5 +146,81 @@ namespace lns {
         string str() const override;
     };
 
+    class constructor;
+
+    class class_definition : public function_container {
+    public:
+        const char *def_file;
+        const string name;
+        vector<shared_ptr<lns::function_stmt>> methods;
+        vector<shared_ptr<lns::constructor>> constructors;
+        vector<shared_ptr<lns::var_stmt>> variables;
+
+        class_definition(const string name,
+                         const vector<shared_ptr<var_stmt>> &variables,
+                         const vector<shared_ptr<function_stmt>> &methods, const char *def_file);
+
+        string str() const override;
+
+        bool operator==(const object &o) const override;
+
+        shared_ptr<object> clone() const override;
+
+        set<callable *> declare_natives() const override;
+    };
+
+    class constructor : public callable {
+    public:
+        const lns::constructor_stmt *declaration;
+        interpreter *i;
+        const lns::class_definition *container;
+
+        constructor(interpreter *i, const class_definition *container, const constructor_stmt *decl);
+
+        const parameter_declaration &arity() const override;
+
+        const string name() const override;
+
+        shared_ptr<object> call(std::vector<std::shared_ptr<object>> &args) override;
+
+        bool operator==(const object &o) const override;
+
+        string str() const override;
+
+        shared_ptr<object> clone() const override;
+    };
+
+    class instance_o : public object, public runtime_environment {
+    public:
+        instance_o(string class_, runtime_environment *globals, map<string, variable> vars);
+
+        string class_;
+
+        void define(const token *name, std::shared_ptr<object> o, bool is_final, visibility visibility,
+                    const char *def_file) override;
+
+        explicit instance_o(string class_, runtime_environment *globals);
+
+        string str() const override;
+
+        shared_ptr<object> clone() const override;
+
+        bool operator==(const object &o) const override;
+
+        shared_ptr<object> operator+(const object &o) const override;
+
+        void assign_field(const token *name, const token_type op, shared_ptr<object> obj, const char *assigning_file);
+    };
+
+    class method : public function {
+    public:
+        const shared_ptr<instance_o> instance;
+
+        method(interpreter *i, const function_stmt *f, shared_ptr<instance_o>);
+
+        shared_ptr<object> call(std::vector<shared_ptr<object>> &args) override;
+
+        string str() const override;
+    };
 }
 #endif //CPPLNS_INTERPRETER_H
