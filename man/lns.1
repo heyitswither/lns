@@ -27,6 +27,12 @@ terminate the program after parsing the code.
 .BR \-i ", " \-\-ignore\-unresolved
 ignore inaccessible file errors in use statements.
 .TP
+.BR \--use=\fIfiles...\fR
+load the specified files before execution.
+.TP
+.BR \-x=\fIcommand\fR
+execute the given \fIlns\fR code and exit.
+.TP
 .BR \-\-no\-std
 do not automatically include LNS_PATH/lib/std.lns. \fBWarning:\fR pre-defined functions and constants that are normally include won't be present.
 .TP
