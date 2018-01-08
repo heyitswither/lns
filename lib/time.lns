@@ -2,6 +2,7 @@ dpcheck this
 
 use "errors"
 use natives "natives/time_unix_timestamp.so" bind local __unix_timestamp
+use natives "natives/time_sleep.so" bind local __sleep
 
 global context Time
 
@@ -10,8 +11,31 @@ global context Time
         return __unix_timestamp()
     end
 
+    /*Sleeps for the specified amount of milliseconds*/
     global function sleep(ms)
+        checkArgumentType(ms,Number)
+        if ms < 0 then
+            raise RangeException with message = "Argument must be greater than 0 (given: " + ms + ")", given = ms
+        end
+        return __sleep(ms * 1000000) / 1000000
+    end
 
+    /*Sleeps for the specified amount of microseconds*/
+        global function microsleep(us)
+            checkArgumentType(us,Number)
+            if us < 0 then
+                raise RangeException with message = "Argument must be greater than 0 (given: " + us + ")", given = us
+            end
+            return __sleep(us * 1000) / 1000
+        end
+
+    /*Sleeps for the specified amount of nanoseconds*/
+    global function nanosleep(ns)
+        checkArgumentType(ns,Number)
+        if ns < 0 then
+            raise RangeException with message = "Argument must be greater than 0 (given: " + ns + ")", given = ns
+        end
+        return __sleep(ns)
     end
 end
 
