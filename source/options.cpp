@@ -15,3 +15,6 @@ bool lns::debugger_option = false;
 bool lns::no_format = false;
 bool lns::update_option = false;
 bool lns::no_std_option = false;
+bool lns::exec_from_command_line = false;
+std::string lns::command_line_source = std::string();
+std::vector<std::string> lns::command_line_use = std::vector<std::string>();

@@ -528,9 +528,14 @@ shared_ptr<expr> parser::primary(bool nested) {
 
 parser::parser(vector<token *> tokens) : tokens(tokens), start(0), current(0), use_allowed(true) {}
 
-vector<shared_ptr<stmt>> parser::parse(bool ld_std) {
-    if (ld_std)
-        ld_stmts(STR("std"), peek());
+vector<shared_ptr<stmt>> parser::parse(bool ld_std, vector<string> add_uses) {
+    token cmd_line_ref(UNRECOGNIZED, "__commandline__", make_shared<null_o>(), "__cmd__", 1);
+    try {
+        if (ld_std)
+            ld_stmts(STR("std"), &cmd_line_ref);
+        for (auto &s : add_uses)
+            ld_stmts(s, &cmd_line_ref);
+    } catch (int i) {}
     while (!is_at_end()) {
         try {
             statements.push_back(declaration());
@@ -587,14 +592,14 @@ void parser::ld_stmts(string s, lns::token *where) {
     stringstream ss;
     if (!file.is_open()) {
         if (lns::ignore_unresolved) return;
-        else throw error(where, USE_FILE_NOT_FOUND);
+        else throw error(where, USE_FILE_NOT_FOUND(filename));
     }
     ss << file.rdbuf();
     source = ss.str();
     scanner scanner(filename, source);
     vector<token *> &tkns = scanner.scan_tokens(true);
     parser p(tkns);
-    vector<shared_ptr<stmt>> toadd = p.parse(false);
+    vector<shared_ptr<stmt>> toadd = p.parse(false, vector<string>());
     int i = 0;
     for (; i < toadd.size(); i++) {
         statements.push_back(toadd[i]);

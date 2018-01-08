@@ -106,7 +106,7 @@ namespace lns {
 
         parser();
 
-        vector<shared_ptr<stmt> > parse(bool ld_std);
+        vector<shared_ptr<stmt> > parse(bool ld_std, vector<string> add_uses);
 
         shared_ptr<expr> expression(bool nested);
 
