@@ -6,6 +6,7 @@ global exception IndexException with message, index
 global exception InputException with message, expected
 global exception WrongFormatException with message, index
 global exception IllegalStateException with message
+global exception RangeException with message, given
 
 global function checkArgumentType(argument, t)
     if type(argument) == t then
