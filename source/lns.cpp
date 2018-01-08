@@ -28,6 +28,35 @@ namespace lns{
         exit(EXIT_SUCCESS);
     }
 
+    bool starts_with(string &text, const char *ptr) {
+        string start(ptr);
+        if (start.length() > 0 && text.length() > start.length()) {
+            for (int i = 0; i < start.length(); i++)
+                if (text[i] != start[i]) return false;
+            return true;
+        } else return false;
+    }
+
+
+    void parametric_option(string &o) {
+        if (starts_with(o, "x=")) {
+            exec_from_command_line = true;
+            command_line_source = o.substr(2, o.size());
+        } else if (starts_with(o, "-use=")) {
+            string sub = o.substr(5, o.size());
+            for (auto i = 0u; i < sub.length(); ++i) {
+                string s1;
+                while (sub[i] != ',') {
+                    s1 += sub[i++];
+                    if (i >= sub.length()) break;
+                }
+                lns::command_line_use.emplace_back(s1);
+            }
+        } else {
+            throw unknown_option_exception(o);
+        }
+    }
+
     void option(string& o){
         if(o == "i" || o == "-ignore-unresolved"){
             ignore_unresolved = true;
@@ -51,10 +80,11 @@ namespace lns{
             no_std_option = true;
         } else if (o == "v" || o == "-version") {
             version();
-        }else{
-            throw unknown_option_exception(o);
-        }
+        } else
+            parametric_option(o);
     }
+
+
     void inspect_args(int fc, const char **args){
         int i;
         string s;
@@ -74,13 +104,13 @@ namespace lns{
         }
     }
 
-    void run(const char *filename, string &source, interpreter &i, parser &parser, bool ld_std) {
+    void run(const char *filename, string &source, interpreter &i, parser &parser, bool ld_std, bool ld_additional) {
         scanner scn (filename,source);
         vector<token*> tokens = scn.scan_tokens(true);
         if(had_parse_error) throw parse_exception();
         start_time = high_resolution_clock::now();
         parser.reset(tokens);
-        vector<shared_ptr<stmt>> stmts = parser.parse(ld_std);
+        vector<shared_ptr<stmt>> stmts = parser.parse(ld_std, ld_additional ? lns::command_line_use : vector<string>());
         parsing_time = high_resolution_clock::now();
         if(parse_only){
             if(time_count) cout << "\nParsing time: " << std::setprecision(5) << duration_cast<microseconds>(parsing_time - start_time).count()/1000 << "ms.\n";
@@ -109,16 +139,16 @@ namespace lns{
         new_.erase(new_.begin(), iterator);
     }
 
-    void run_prompt(){
+    void run_interactive() {
         lns::prompt = true;
         string source;
         const char filename[] = "stdin";
-        scanner s("", *new string(""));
+        scanner s("", source);
         parser p(s.scan_tokens(true));
         vector<shared_ptr<stmt>> past;
         cout << PROGRAM_STARTING;
         interpreter i;
-        auto stmts = p.parse(!no_std_option);
+        auto stmts = p.parse(!no_std_option, lns::command_line_use);
         i.interpret(stmts);
         while(true){
             cin.clear();
@@ -127,7 +157,7 @@ namespace lns{
             try {
                 p.use_allowed = true;
                 move_statements(p.statements, past);
-                run(filename, source, i, p, false);
+                run(filename, source, i, p, false, false);
             } catch (std::exception &e) {}
             reinit_errors();
         }
@@ -143,10 +173,16 @@ namespace lns{
             ss << file.rdbuf();
             source = ss.str();
             interpreter i;
-            run(filename, source, i, p, !no_std_option);
+            run(filename, source, i, p, !no_std_option, true);
         }else{
             throw file_not_found_exception(filename);
         }
+    }
+
+    void run_cmd_line() {
+        parser p;
+        interpreter i;
+        run("stdin", lns::command_line_source, i, p, !no_std_option, true);
     }
 }
 
@@ -166,9 +202,11 @@ int main(const int argc, const char* argv[]) {
             d.start();
         } else if (lns::update_option) {
             return update();
-        }else if(lns::file == nullptr){
-            lns::run_prompt();
-        }else{
+        } else if (lns::exec_from_command_line) {
+            lns::run_cmd_line();
+        } else if (lns::file == nullptr) {
+            lns::run_interactive();
+        } else {
             lns::run_file(lns::file);
         }
     }catch(lns::parse_exception& e){

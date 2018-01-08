@@ -340,7 +340,7 @@ void debug::loadcode(const char *filename) {
     vector<token *> &tokens = code_scanner.scan_tokens(true);
     if (errors::had_parse_error) throw parse_exception();
     code_parser.reset(tokens);
-    vector<shared_ptr<stmt>> parsed = code_parser.parse(true);
+    vector<shared_ptr<stmt>> parsed = code_parser.parse(true, lns::command_line_use);
     if (errors::had_parse_error) throw parse_exception();
     this->stmts.clear();
     for (auto &s : parsed) {
