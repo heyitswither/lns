@@ -26,7 +26,7 @@
 #define INVALID_ASSIGNMENT_TARGET "invalid assignment target"
 #define WITHOUT(what,without) what " without " without
 #define MISSING_CLOSING(what) "missing closing " what
-#define USE_FILE_NOT_FOUND "use: file was not found or is inaccessible"
+#define USE_FILE_NOT_FOUND(filename) lns::concat({"use: file \"",filename,"\" was not found or is inaccessible"})
 #define DUPLICATE_ACCESS_SPEC(spec) "duplicate access specifier: '" spec "'"
 #define CONFILICTING_SPECS(a,b) "conflicting access specifiers '" a "' and '" b "'"
 #define NON_OPTIONAL_NOT_ALLOWED "required parameters must be before the optional ones"
