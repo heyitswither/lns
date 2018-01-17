@@ -48,6 +48,7 @@ token_type lns::get_token_type(string &key) {
     if (key == "handle") return HANDLE;
     if (key == "constructor") return CONSTRUCTOR;
     if (key == "new") return NEW;
+    if (key == "extends") return EXTENDS;
     return UNRECOGNIZED;
 }
 
