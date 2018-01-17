@@ -173,9 +173,9 @@ namespace lns {
     public:
         const lns::constructor_stmt *declaration;
         interpreter *i;
-        const lns::class_definition *container;
+        const std::shared_ptr<lns::class_definition> container;
 
-        constructor(interpreter *i, const class_definition *container, const constructor_stmt *decl);
+        constructor(interpreter *i, const shared_ptr<class_definition> container, const constructor_stmt *decl);
 
         const parameter_declaration &arity() const override;
 
@@ -192,14 +192,14 @@ namespace lns {
 
     class instance_o : public object, public runtime_environment {
     public:
-        instance_o(string class_, runtime_environment *globals, map<string, variable> vars);
+        instance_o(shared_ptr<class_definition> class_, runtime_environment *globals, map<string, variable> vars);
 
-        string class_;
+        shared_ptr<class_definition> class_;
 
         void define(const token *name, std::shared_ptr<object> o, bool is_final, visibility visibility,
                     const char *def_file) override;
 
-        explicit instance_o(string class_, runtime_environment *globals);
+        explicit instance_o(shared_ptr<class_definition> class_, runtime_environment *globals);
 
         string str() const override;
 

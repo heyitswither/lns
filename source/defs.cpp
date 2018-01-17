@@ -21,8 +21,7 @@ string lns::string_o::str() const {
 }
 
 bool lns::string_o::operator==(const lns::object &o) const {
-    if (o.type != STRING_T) return false;
-    return (value == dynamic_cast<const string_o *>(&o)->value);
+    return value == o.str();
 }
 
 void lns::string_o::operator+=(const lns::object &o) {
@@ -508,7 +507,7 @@ bool callable::operator==(const object &o) const {
 string callable::str() const {
     stringstream s;
     s << "<" << (this->type == NATIVE_CALLABLE_T ? "native_" : "") << "callable@" << static_cast<const void *>(this)
-      << ", name: \"" << name() << "\">";
+      << ", name: \"" << this->name() << "\">";
     return s.str();
 }
 

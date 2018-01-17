@@ -2,7 +2,7 @@
 // Created by lorenzo on 12/5/17.
 //
 #include "defs.h"
-
+#include "interpreter.h"
 using namespace lns;
 using namespace std;
 
@@ -46,11 +46,11 @@ public:
             case EXCEPTION_T:
                 type->value = "exception";
                 break;
-            case CLASS:
-                type->value = "class";
+            case CLASS_DEFINITION_T:
+                type->value = "class_definition";
                 break;
             case INSTANCE_T:
-                type->value = "object";
+                type->value = DCAST(instance_o * , o)->class_->str();
         }
         return type;
     }

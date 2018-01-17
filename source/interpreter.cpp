@@ -530,7 +530,7 @@ void interpreter::visit_class_decl_stmt(class_decl_stmt *c) {
     auto class_ = make_shared<class_definition>(c->name->lexeme, c->variables, c->methods, c->file);
     vector<shared_ptr<constructor>> constructors;
     for (auto &item : c->constructors)
-        constructors.emplace_back(make_shared<constructor>(this, class_.get(), item.get()));
+        constructors.emplace_back(make_shared<constructor>(this, class_, item.get()));
     class_->constructors = constructors;
     environment->define(c->name, class_, true, c->vis, c->file);
 }
@@ -649,7 +649,8 @@ set<callable *> class_definition::declare_natives() const {
     return std::set<callable *>();
 }
 
-constructor::constructor(interpreter *i, const class_definition *container, const lns::constructor_stmt *decl)
+constructor::constructor(interpreter *i, const shared_ptr<class_definition> container,
+                         const lns::constructor_stmt *decl)
         : callable(false), container(container), i(i), declaration(decl) {}
 
 const parameter_declaration &constructor::arity() const {
@@ -661,7 +662,7 @@ const string constructor::name() const {
 }
 
 shared_ptr<object> constructor::call(std::vector<std::shared_ptr<object>> &args) {
-    shared_ptr<instance_o> instance = make_shared<instance_o>(container->name, i->globals);
+    shared_ptr<instance_o> instance = make_shared<instance_o>(container, i->globals);
     runtime_environment *prev = i->environment;
     i->environment = instance.get();
 
@@ -703,19 +704,22 @@ shared_ptr<object> constructor::clone() const {
     return callable::clone();
 }
 
-instance_o::instance_o(string class_, runtime_environment *globals) : object(INSTANCE_T), runtime_environment(globals),
-                                                                      class_(class_) {}
+instance_o::instance_o(shared_ptr<class_definition> class_, runtime_environment *globals) : object(INSTANCE_T),
+                                                                                            runtime_environment(
+                                                                                                    globals),
+                                                                                            class_(class_) {}
 
-instance_o::instance_o(string class_, runtime_environment *globals, map<string, variable> vars) : object(INSTANCE_T),
-                                                                                                  runtime_environment(
+instance_o::instance_o(shared_ptr<class_definition> class_, runtime_environment *globals, map<string, variable> vars)
+        : object(INSTANCE_T),
+          runtime_environment(
                                                                                                           globals),
-                                                                                                  class_(class_) {
+          class_(class_) {
     values = vars;
 }
 
 string instance_o::str() const {
     stringstream s;
-    s << "<" << class_ << " instance@" << static_cast<const void *>(this) << ">";
+    s << "<" << class_->name << " instance@" << static_cast<const void *>(this) << ">";
     return s.str();
 }
 
