@@ -12,7 +12,12 @@ cd ..
 
 sudo rm -f -r /lns/lib
 sudo mkdir /lns/lib
-sudo cp source/defs.h lib/natives/src/
+
+for f in source/*.h
+do
+    sudo cp ${f} lib/natives/src/
+done
+
 
 cd lib/
 echo "Performing syntax check on libraries..."
@@ -24,8 +29,8 @@ do
     printf " done\n"
 done
 
-cd natives/
-printf "Removed any previously compiled .so files..."
+cd natives
+printf "Removing any previously compiled .so files..."
 for f in *.so
 do
     if [ ${f} = "*.so" ]; then
@@ -50,7 +55,10 @@ done
 
 cd ../../..
 
-sudo rm lib/natives/src/defs.h
+for f in lib/natives/src/*.h
+do
+    sudo rm -f ${f}
+done
 
 printf "Copying libraries..."
 sudo cp -r lib /lns/
