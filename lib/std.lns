@@ -14,7 +14,7 @@ global final var Callable = "callable"
 global final var Context = "context"
 global final var Null = "null"
 global final var ExceptionDefinition = "exception_declaration"
-global final var Class = "class"
+global final var Class = "class_definition"
 global final var Exception = "exception"
 
 /*Prints the argument to stdout and appends a line feed*/
