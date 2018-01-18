@@ -50,7 +50,7 @@ public class generate {
                 "handle     :  shared_ptr<expr> exception_name, token* bind, vector<shared_ptr<stmt>> block",
                 "begin_handle : vector<shared_ptr<stmt>> body, vector<shared_ptr<handle_stmt>> handles",
                 "constructor : token* keyword, parameter_declaration parameters, vector<shared_ptr<stmt>> body, visibility vis",
-                "class_decl : token* name, vector<shared_ptr<function_stmt>> methods, vector<shared_ptr<constructor_stmt>> constructors, vector<shared_ptr<var_stmt>> variables, visibility vis",
+                "class_decl : token* name, vector<shared_ptr<function_stmt>> methods, vector<shared_ptr<constructor_stmt>> constructors, vector<shared_ptr<var_stmt>> variables, shared_ptr<expr> super, visibility vis",
                 "null       : token* where"
         ), Arrays.asList("\"expr.h\"","<memory>"), "void","");
     }

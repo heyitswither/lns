@@ -173,6 +173,9 @@ shared_ptr<stmt> parser::declaration() {
 shared_ptr<stmt> parser::class_(visibility vis) {
     token* keyword = previous();
     token* name = consume(IDENTIFIER,EXPECTED("class name"));
+    shared_ptr<expr> super;
+    if (match({EXTENDS}))
+        super = expression(true);
     vector<shared_ptr<var_stmt>> variables;
     vector<shared_ptr<constructor_stmt>> constructors;
     vector<shared_ptr<function_stmt>> methods;
@@ -190,7 +193,8 @@ shared_ptr<stmt> parser::class_(visibility vis) {
                                                                        make_shared<null_o>(), keyword->filename,
                                                                        keyword->line), parameter_declaration(0),
                                                              vector<shared_ptr<stmt>>(), V_UNSPECIFIED));
-    return make_shared<class_decl_stmt>(keyword->filename, keyword->line, name, methods, constructors, variables, vis);
+    return make_shared<class_decl_stmt>(keyword->filename, keyword->line, name, methods, constructors, variables, super,
+                                        vis);
 }
 
 int parser::error(token *token, const char *message) {
