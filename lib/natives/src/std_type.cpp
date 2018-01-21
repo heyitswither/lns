@@ -51,6 +51,10 @@ public:
                 break;
             case INSTANCE_T:
                 type->value = DCAST(instance_o * , o)->class_->str();
+                break;
+            default:
+                type->value = "unknown";
+                break;
         }
         return type;
     }
