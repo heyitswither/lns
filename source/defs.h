@@ -31,7 +31,7 @@
 #define LNS_INSTALL_LOCATION "/lns/"
 #define LNS_LIBRARY_LOCATION LNS_INSTALL_LOCATION "lib/"
 
-#define S(s) *new std::string(#s)
+#define DEBUGGER_WATCHES_FILENAME "..##DEBUG_WATCH##.."
 
 #define CHARSTR(c) string(1,c)
 

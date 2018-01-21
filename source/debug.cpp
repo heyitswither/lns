@@ -186,7 +186,7 @@ expr *debugger::parse_expression(string &expression) {
     expr *e;
     lns::silent_full = true;
     errors::had_parse_error = false;
-    expr_scanner.reset("_expr_", expression);
+    expr_scanner.reset(DEBUGGER_WATCHES_FILENAME, expression);
     if (errors::had_parse_error) {
         errors::had_parse_error = false;
         lns::silent_full = false;

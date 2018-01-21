@@ -359,7 +359,7 @@ shared_ptr<object> runtime_environment::get(const token *name, const char *acces
     if (contains_key(name->lexeme)) {
         variable s = values[name->lexeme];
         if(s.visibility_ == V_LOCAL){
-            if(strcmp(s.def_file,accessing_file) != 0){
+            if (strcmp(s.def_file, accessing_file) != 0 && strcmp(DEBUGGER_WATCHES_FILENAME, accessing_file) != 0) {
                 throw runtime_exception(name, VARIABLE_NOT_VISIBLE(name->lexeme));
             }
         }
@@ -400,7 +400,7 @@ runtime_environment::assign(const token *name, token_type op, std::shared_ptr<ob
         try {
             variable v = values[name->lexeme];
             if(v.visibility_ == V_LOCAL){
-                if(strcmp(v.def_file,assigning_file) != 0){
+                if (strcmp(v.def_file, assigning_file) != 0 && strcmp(DEBUGGER_WATCHES_FILENAME, assigning_file) != 0) {
                     throw runtime_exception(name, VARIABLE_NOT_VISIBLE(name->lexeme));
                 }
             }

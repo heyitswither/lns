@@ -745,7 +745,7 @@ instance_o::assign_field(const token *name, const token_type op, shared_ptr<obje
         try {
             variable v = values[name->lexeme];
             if (v.visibility_ == V_LOCAL) {
-                if (strcmp(v.def_file, assigning_file) != 0) {
+                if (strcmp(v.def_file, assigning_file) != 0 && strcmp(DEBUGGER_WATCHES_FILENAME, assigning_file) != 0) {
                     throw runtime_exception(name, VARIABLE_NOT_VISIBLE(name->lexeme));
                 }
             }
