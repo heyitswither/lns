@@ -349,9 +349,10 @@ bool lns::runtime_environment::contains_key(const std::string name) {
     return values.find(name) != values.end();
 }
 
-lns::runtime_environment::runtime_environment() : enclosing(nullptr), values(std::map<std::string, variable>()) {}
+lns::runtime_environment::runtime_environment() : enclosing(shared_ptr<runtime_environment>()),
+                                                  values(std::map<std::string, variable>()) {}
 
-lns::runtime_environment::runtime_environment(runtime_environment *enc) : enclosing(enc),
+lns::runtime_environment::runtime_environment(shared_ptr<runtime_environment> enc) : enclosing(enc),
                                                                           values(std::map<std::string, variable>()) {}
 
 shared_ptr<object> runtime_environment::get(const token *name, const char *accessing_file) {

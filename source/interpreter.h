@@ -39,10 +39,10 @@ namespace lns {
     public:
         static bool is_bool_true_eq(object *o);
 
-        runtime_environment *globals = new runtime_environment();
-        runtime_environment *environment = globals;
+        std::shared_ptr<runtime_environment> globals = make_shared<runtime_environment>();
+        std::shared_ptr<runtime_environment> environment = globals;
 
-        void execute_block(vector<shared_ptr<stmt>> stmts, runtime_environment *env);
+        void execute_block(vector<shared_ptr<stmt>> stmts, std::shared_ptr<runtime_environment> env);
 
         shared_ptr<object> visit_member_expr(member_expr *c) override;
 
@@ -192,14 +192,15 @@ namespace lns {
 
     class instance_o : public object, public runtime_environment {
     public:
-        instance_o(shared_ptr<class_definition> class_, runtime_environment *globals, map<string, variable> vars);
+        instance_o(shared_ptr<class_definition> class_, std::shared_ptr<runtime_environment> globals,
+                   map<string, variable> vars);
 
         shared_ptr<class_definition> class_;
 
         void define(const token *name, std::shared_ptr<object> o, bool is_final, visibility visibility,
                     const char *def_file) override;
 
-        explicit instance_o(shared_ptr<class_definition> class_, runtime_environment *globals);
+        explicit instance_o(shared_ptr<class_definition> class_, std::shared_ptr<runtime_environment> globals);
 
         string str() const override;
 

@@ -412,7 +412,7 @@ namespace lns {
     class runtime_environment {
     protected:
         std::set <callable*> natives;
-        runtime_environment *enclosing;
+        std::shared_ptr<runtime_environment> enclosing;
         std::map<std::string, lns::variable> values;
 
         bool contains_key(std::string name);
@@ -422,7 +422,7 @@ namespace lns {
 
         //virtual ~runtime_environment();
 
-        explicit runtime_environment(runtime_environment *enc);
+        explicit runtime_environment(std::shared_ptr<runtime_environment> enc);
 
         std::shared_ptr<object> get(const token *name, const char *accessing_file);
 
@@ -448,7 +448,8 @@ namespace lns {
 
     class context : public lns::runtime_environment, public function_container {
     public:
-        explicit context(runtime_environment *previous) : runtime_environment(previous), function_container(CONTEXT_T) {}
+        explicit context(std::shared_ptr<runtime_environment> previous) : runtime_environment(previous),
+                                                                          function_container(CONTEXT_T) {}
 
         void define(const std::string &name, std::shared_ptr<object> o, bool is_final, visibility vis,
                     const char *def_file) override;

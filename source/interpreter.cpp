@@ -24,9 +24,9 @@ bool interpreter::is_bool_true_eq(object *o) {
     return DCAST(bool_o *,o)->value;
 }
 
-void interpreter::execute_block(vector<shared_ptr<stmt>> stmts, runtime_environment *env) {
+void interpreter::execute_block(vector<shared_ptr<stmt>> stmts, std::shared_ptr<runtime_environment> env) {
     if (stmts.empty()) return;
-    runtime_environment *previous = this->environment;
+    std::shared_ptr<runtime_environment> previous = this->environment;
     this->environment = env;
     int i;
     try {
@@ -170,7 +170,7 @@ shared_ptr<object> interpreter::visit_unary_expr(unary_expr *u) {//
             case MINUS_MINUS:
                 return u->location == PREFIX ? --(*right) : (*right)--;
             case NOT:
-                return make_shared<bool_o>(is_bool_true_eq(right.get()));
+                return make_shared<bool_o>(!is_bool_true_eq(right.get()));
             case MINUS:
                 return (-*right);
             default:
@@ -264,7 +264,7 @@ shared_ptr<object> interpreter::visit_null_expr(null_expr *n) {
 
 void interpreter::visit_block_stmt(block_stmt *b) {
     shared_ptr<runtime_environment> env = make_shared<runtime_environment>(this->environment);
-    execute_block(b->statements, env.get());
+    execute_block(b->statements, env);
 }
 
 void interpreter::visit_s_for_each_stmt(s_for_each_stmt *s) {
@@ -385,9 +385,9 @@ void interpreter::visit_uses_native_stmt(uses_native_stmt *u) {
 void interpreter::visit_null_stmt(null_stmt *n) {}
 
 void interpreter::visit_context_stmt(context_stmt *c) {
-    runtime_environment *previous = environment;
+    std::shared_ptr<runtime_environment> previous = environment;
     shared_ptr<context> ctx = make_shared<context>(previous);
-    environment = ctx.get();
+    environment = ctx;
     for (shared_ptr<stmt> s : c->body) {
         execute(s.get());
     }
@@ -498,7 +498,7 @@ void interpreter::visit_handle_stmt(handle_stmt *h) {} //this should remain empt
 
 void interpreter::visit_begin_handle_stmt(begin_handle_stmt *b) {
     try{
-        execute_block(b->body, make_shared<runtime_environment>(environment).get());
+        execute_block(b->body, make_shared<runtime_environment>(environment));
     }catch(incode_exception& e){
         bool found = false;
         exception_definition *def;
@@ -516,7 +516,7 @@ void interpreter::visit_begin_handle_stmt(begin_handle_stmt *b) {
                 auto env = make_shared<runtime_environment>(environment);
                 if (handle->bind->type != UNRECOGNIZED)
                     env->define(handle->bind, e.clone(), true, V_UNSPECIFIED, b->file);
-                execute_block(handle->block, env.get());
+                execute_block(handle->block, env);
                 break;
             }
         }
@@ -599,7 +599,7 @@ shared_ptr<object> lns::function::call(vector<shared_ptr<object>> &args) {
         env->define(declaration->parameters.parameters.at(j).name, o, false, V_UNSPECIFIED,declaration->file);
     }
     try {
-        i->execute_block(declaration->body, env.get());
+        i->execute_block(declaration->body, env);
     } catch (return_signal &r) {
         return r.value;
     }
@@ -663,8 +663,8 @@ const string constructor::name() const {
 
 shared_ptr<object> constructor::call(std::vector<std::shared_ptr<object>> &args) {
     shared_ptr<instance_o> instance = make_shared<instance_o>(container, i->globals);
-    runtime_environment *prev = i->environment;
-    i->environment = instance.get();
+    std::shared_ptr<runtime_environment> prev = i->environment;
+    i->environment = instance;
 
     for (auto &item : container->variables)
         item->accept(i);
@@ -681,7 +681,7 @@ shared_ptr<object> constructor::call(std::vector<std::shared_ptr<object>> &args)
         env->define(declaration->parameters.parameters.at(j).name, o1, false, V_UNSPECIFIED, declaration->file);
     }
     try {
-        i->execute_block(declaration->body, env.get());
+        i->execute_block(declaration->body, env);
     } catch (return_signal &r) {
         if (r.value->type != NULL_T && !permissive)
             throw runtime_exception(r.keyword, string(RETURN_STMT_VALUE_IN_CONSTRUCTOR));
@@ -704,12 +704,14 @@ shared_ptr<object> constructor::clone() const {
     return callable::clone();
 }
 
-instance_o::instance_o(shared_ptr<class_definition> class_, runtime_environment *globals) : object(INSTANCE_T),
-                                                                                            runtime_environment(
+instance_o::instance_o(shared_ptr<class_definition> class_, std::shared_ptr<runtime_environment> globals) : object(
+        INSTANCE_T),
+                                                                                                            runtime_environment(
                                                                                                     globals),
-                                                                                            class_(class_) {}
+                                                                                                            class_(class_) {}
 
-instance_o::instance_o(shared_ptr<class_definition> class_, runtime_environment *globals, map<string, variable> vars)
+instance_o::instance_o(shared_ptr<class_definition> class_, std::shared_ptr<runtime_environment> globals,
+                       map<string, variable> vars)
         : object(INSTANCE_T),
           runtime_environment(
                                                                                                           globals),
@@ -788,7 +790,7 @@ method::method(interpreter *i, const function_stmt *f, shared_ptr<instance_o> in
 
 shared_ptr<object> method::call(std::vector<shared_ptr<object>> &args) {
     shared_ptr<runtime_environment> enclosing = make_shared<runtime_environment>(i->globals);
-    shared_ptr<runtime_environment> env = make_shared<runtime_environment>(instance.get());
+    shared_ptr<runtime_environment> env = make_shared<runtime_environment>(instance);
     env->define(THIS_DEFINITION, instance, true, V_UNSPECIFIED, declaration->file);
     int j;
     shared_ptr<object> o;
@@ -797,7 +799,7 @@ shared_ptr<object> method::call(std::vector<shared_ptr<object>> &args) {
         env->define(declaration->parameters.parameters.at(j).name, o, false, V_UNSPECIFIED, declaration->file);
     }
     try {
-        i->execute_block(declaration->body, env.get());
+        i->execute_block(declaration->body, env);
     } catch (return_signal &r) {
         return r.value;
     }
