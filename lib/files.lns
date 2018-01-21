@@ -1,0 +1,166 @@
+dpcheck this
+
+use "errors"
+
+use natives "natives/file_open.so" bind local __open
+use natives "natives/file_strerr.so" bind local __strerr
+use natives "natives/file_getc.so" bind local __getc
+use natives "natives/file_close.so" bind local __close
+use natives "natives/file_puts.so" bind local __puts
+use natives "natives/file_flush.so" bind local __flush
+
+global exception FileAccessException with message, code
+global exception InvalidModeException with message, given
+
+global context FileMode
+    global final var READ = "r"
+    global final var WRITE = "w"
+    global final var APPEND = "a"
+    global final var READ_WRITE = "w+"
+    global final var READ_APPEND = "a+"
+end
+
+global class File
+    global var path
+    global var autoflush = true
+    local var cPointer = 0
+    local var is_open = false
+    local var mode
+    constructor(path?)
+        if path == null then
+            this.path = ""
+        else if type(path) != String then
+            raise TypeException with message = "Path must be a string", required = String, given = type(path)
+        else
+            this.path = path
+        end
+    end
+
+    global function open(mode?)
+
+        if this.is_open then
+            raise IllegalStateException with message = "file is already open"
+        end
+
+        if mode == null then
+            mode = FileMode.READ
+        end
+
+        if isValidFileMode(mode) then
+            this.cPointer = __open(this.path, mode)
+            if this.cPointer == null then
+                raise FileAccessException with message = "unable to open file: " + __strerr()
+            else
+                this.mode = mode
+                this.is_open = true
+            end
+        else
+            raise InvalidModeException with message = "'" + mode + "'", given = mode
+        end
+    end
+
+    global function close()
+        if not this.is_open then
+            raise IllegalStateException with message = "file is not open"
+        else if __close(cPointer) == true then
+            this.is_open = false
+        else
+            raise FileAccessException with message = "unable to close file"
+        end
+    end
+
+    global function read(chars?)
+        if not this.canRead() then
+            raise IllegalStateException with message = "file is not open or cannot be read in the current mode"
+        end
+        if chars == null then
+            chars = 1
+        end
+        var t = type(chars)
+        if t != Number then
+            raise TypeException with message = "argument must be number (given: " + t + ")", given = t
+        end
+        return readSafe0(chars)
+    end
+
+    global function readUntil(char)
+        if not this.canRead() then
+            raise IllegalStateException with message = "file is not open or cannot be read in the current mode"
+        end
+        var read
+        var buf = ""
+        while (read = __getc(cPointer)) != char do
+            if read == null then
+                return buf
+            end
+            buf += read
+        end
+        buf += read
+        return buf
+    end
+
+    global function readLine()
+        return readUntil("\n")
+    end
+
+    global function readAll()
+        if not this.canRead() then
+            raise IllegalStateException with message = "file is not open or cannot be read in the current mode"
+        end
+        var str = ""
+        var read
+        while (read = __getc(cPointer)) != null do
+            str += read
+        end
+        return str
+    end
+
+    global function write(object)
+        if not this.canWrite() then
+            raise IllegalStateException with message = "file is not open or cannot be written to in the current mode"
+        end
+        if not __puts(cPointer,object) then
+            raise FileAccessException with message = "unable to write to file"
+        end
+        if autoflush then
+            this.flush()
+        end
+    end
+
+    global function writeLine(object)
+        write(object + "\n")
+    end
+
+    global function flush()
+        if not is_open then
+            raise IllegalStateException with message = "file is not open"
+        end
+
+        return __flush(cPointer)
+    end
+
+    global function isOpen()
+        return is_open
+    end
+
+    global function canRead()
+        return is_open and mode != FileMode.WRITE and mode != FileMode.APPEND
+    end
+
+    global function canWrite()
+        return is_open and mode != FileMode.READ
+    end
+
+    local function isValidFileMode(mode)
+       if type(mode) != String then return false end
+       return mode == FileMode.READ or mode == FileMode.WRITE or mode == FileMode.APPEND or mode == FileMode.READ_APPEND or mode == FileMode.READ_WRITE
+    end
+
+    local function readSafe0(chars)
+        var str = ""
+        for var i = 0, i < chars, ++i do
+            str += __getc(cPointer)
+        end
+        return str
+    end
+end
