@@ -4,6 +4,8 @@
 #include "defs.h"
 #include <cmath>
 
+#define S(val) STR(#val)
+
 using namespace lns;
 using namespace std;
 
