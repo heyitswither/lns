@@ -53,12 +53,13 @@ do
     printf " done.\n"
 done
 
-cd ../../..
-
-for f in lib/natives/src/*.h
+for f in $(ls -1 | grep ".*\.h$" | grep -v "lib_.*" | tr "\n" " ")
 do
-    sudo rm -f ${f}
+    echo "Removing $f"
+    sudo rm ${f}
 done
+
+cd ../../..
 
 printf "Copying libraries..."
 sudo cp -r lib /lns/
