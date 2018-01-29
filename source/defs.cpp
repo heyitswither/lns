@@ -624,7 +624,7 @@ lns::parameter_declaration::parameter_declaration() : parameters(*new std::vecto
 const int lns::parameter_declaration::required() const{
     int required = 0;
     for(auto& item : parameters) {
-        if(item.nullable) break;
+        if (item.optional) break;
         ++required;
     }
     return required;
@@ -636,10 +636,11 @@ const int lns::parameter_declaration::optional() const{
 
 parameter_declaration::parameter_declaration(int nr) : parameter_declaration(){
     for(int i = 0; i < nr; i++)
-        parameters.push_back(*new parameter(*new string(std::to_string(i)),false));
+        parameters.push_back(parameter(string(std::to_string(i)), false, std::shared_ptr<expr>()));
 }
 
-parameter::parameter(string& name, bool nullable) : name(name), nullable(nullable) {}
+parameter::parameter(string name, bool optional, std::shared_ptr<expr> default_value) : name(name), optional(optional),
+                                                                                        default_value(default_value) {}
 
 native_callable::native_callable(int arity) : callable(true), parameters(*new parameter_declaration(arity)){}
 

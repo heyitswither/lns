@@ -18,16 +18,12 @@ global final var Class = "class_definition"
 global final var Exception = "exception"
 
 /*Prints the argument to stdout and appends a line feed*/
-function println(s?)
-    if s == null then
-        print("\n")
-    else
-        print(s + "\n")
-    end
+function println([s = ""])
+    print(s + "\n")
 end
 
 /*Exits the program with the specified exit code. If the argument is not given or is not a number, exit code will be 0*/
-function exit(b?)
+function exit([b])
     __exitcode(b)
 end
 

@@ -20,7 +20,7 @@ end
     argument 'base' is an array: returns a subarray of 'base', from index a (inclusive) to index b (exclusive).
   If b is not specified, the substring or subarray will contain elements until the end of the base string/array.
   */
-global function sub(base,a,b?)
+global function sub(base,a,[b])
     /*Store the length in a variable, so we don't have to make a call more than once*/
     var length = size(base)
 
@@ -91,12 +91,8 @@ function lastIndexOf(base, what)
 end
 
 /*Formats the string and prints to the standard output*/
-global function printf(fmt, args?)
-    if args == null then
-        print(fmt)
-    else
-        print(format(fmt,args))
-    end
+global function printf(fmt, [args = {}])
+    print(format(fmt,args))
 end
 
 /*Formats the objects in args and inserts them in a new string, following the given format */

@@ -26,24 +26,18 @@ global class File
     local var cPointer = 0
     local var is_open = false
     local var mode
-    constructor(path?)
-        if path == null then
-            this.path = ""
-        else if type(path) != String then
+    constructor([path = ""])
+        if type(path) != String then
             raise TypeException with message = "Path must be a string", required = String, given = type(path)
         else
             this.path = path
         end
     end
 
-    global function open(mode?)
+    global function open([mode = FileMode.READ])
 
         if this.is_open then
             raise IllegalStateException with message = "file is already open"
-        end
-
-        if mode == null then
-            mode = FileMode.READ
         end
 
         if isValidFileMode(mode) then
@@ -69,12 +63,9 @@ global class File
         end
     end
 
-    global function read(chars?)
+    global function read([chars = 1])
         if not this.canRead() then
             raise IllegalStateException with message = "file is not open or cannot be read in the current mode"
-        end
-        if chars == null then
-            chars = 1
         end
         var t = type(chars)
         if t != Number then

@@ -595,7 +595,7 @@ shared_ptr<object> lns::function::call(vector<shared_ptr<object>> &args) {
     int j;
     shared_ptr<object> o;
     for (j = 0; j < declaration->parameters.parameters.size(); j++) {
-        o = j < args.size() ? args.at(j) : make_shared<null_o>();
+        o = j < args.size() ? args.at(j) : declaration->parameters.parameters[j].default_value->accept(i);
         env->define(declaration->parameters.parameters.at(j).name, o, false, V_UNSPECIFIED,declaration->file);
     }
     try {
@@ -677,7 +677,7 @@ shared_ptr<object> constructor::call(std::vector<std::shared_ptr<object>> &args)
     env->define(THIS_DEFINITION, instance, true, V_UNSPECIFIED, container->def_file);
     int j;
     for (j = 0; j < declaration->parameters.parameters.size(); j++) {
-        auto o1 = j < args.size() ? args.at(j) : make_shared<null_o>();
+        auto o1 = j < args.size() ? args.at(j) : declaration->parameters.parameters[j].default_value->accept(i);
         env->define(declaration->parameters.parameters.at(j).name, o1, false, V_UNSPECIFIED, declaration->file);
     }
     try {
@@ -795,7 +795,7 @@ shared_ptr<object> method::call(std::vector<shared_ptr<object>> &args) {
     int j;
     shared_ptr<object> o;
     for (j = 0; j < declaration->parameters.parameters.size(); j++) {
-        o = j < args.size() ? args.at(j) : make_shared<null_o>();
+        o = j < args.size() ? args.at(j) : declaration->parameters.parameters[j].default_value->accept(i);
         env->define(declaration->parameters.parameters.at(j).name, o, false, V_UNSPECIFIED, declaration->file);
     }
     try {

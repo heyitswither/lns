@@ -39,6 +39,7 @@
 
 
 namespace lns {
+    class expr;
     class parameter_declaration;
 
     const char* best_file_path(const char* filename);
@@ -557,9 +558,11 @@ namespace lns {
 
     class parameter{
     public:
-        std::string& name;
-        bool nullable;
-        parameter(std::string& name, bool nullable);
+        std::string name;
+        bool optional;
+        std::shared_ptr<expr> default_value;
+
+        parameter(std::string name, bool optional, std::shared_ptr<expr> default_value);
     };
 
     class parameter_declaration{

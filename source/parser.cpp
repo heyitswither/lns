@@ -371,7 +371,7 @@ shared_ptr<expr> parser::array() {
     token *opening = previous();
     vector<pair<shared_ptr<expr>, shared_ptr<expr>>> pairs;
     int i = 0;
-    while (!is_at_end()) {
+    while (!is_at_end() && !check(RIGHT_BRACE)) {
         shared_ptr<expr> e1 = expression(true);
         if (match({COLON})) {
             shared_ptr<expr> e2 = expression(true);
@@ -692,12 +692,18 @@ parameter_declaration parser::parameters() {
     bool found_optional = false;
     if (!check(RIGHT_PAREN)) {
         do {
-            token *t = consume(IDENTIFIER, EXPECTED("parameter name"));
-            if(match({QUESTION_MARK}))
-                found_optional = true;
-            else
-                if(found_optional) throw error(previous(),NON_OPTIONAL_NOT_ALLOWED);
-            decl.parameters.push_back(*new parameter(t->lexeme,found_optional));
+            bool is_optional = match({LEFT_SQR});
+            if (found_optional && !is_optional)
+                throw error(previous(), NON_OPTIONAL_NOT_ALLOWED);
+            found_optional = is_optional;
+            auto t = consume(IDENTIFIER, EXPECTED("parameter name"));
+            shared_ptr<expr> default_value = make_shared<null_expr>(t->filename, t->line, t);
+            if (is_optional) {
+                if (match({EQUAL}))
+                    default_value = expression(true);
+                consume(RIGHT_SQR, EXPECTED("closing ']'"));
+            }
+            decl.parameters.push_back(parameter(t->lexeme, is_optional, default_value));
         } while (match({COMMA}));
     }
     return decl;
