@@ -34,7 +34,7 @@ load the specified files before execution.
 execute the given \fIlns\fR code and exit.
 .TP
 .BR \-\-no\-std
-do not automatically include LNS_PATH/lib/std.lns. \fBWarning:\fR pre-defined functions and constants that are normally include won't be present.
+do not automatically include LNS_PATH/lib/std.lns. \fBWarning:\fR pre-defined functions and constants that are normally included won't be present.
 .TP
 .BR \-f ", " \-\-no\-format
 do not use special ANSI escape codes in error messages (for shells that don't support ANSI).
@@ -48,7 +48,7 @@ check, download and install updates from the \fIGitHub\fR repository.
 .BR \-v ", " \-\-version
 Print the program version and exit.
 .SH DEBUGGER
-The debugger mode allows the user to set breakpoints in the execution. When a break point gets hit, the program enters break mode and the debugger console starts up, which allows the user to check the program status, which includes watching variables and checking the call stack. To start the debugger, use the \fI-d\fR command line option.
+The debugger mode allows the user to set breakpoints in the execution. When a break point is hit, the program enters break mode and the debugger console starts up, which allows the user to check the program status (watching variables checking the call stack, etc...). To start the debugger, use the \fI-d\fR command line option.
 .TP
 \fBNote\fR: the debugger ignores every other command line option except \fI-p\fR (permissive execution).
 .TP
@@ -114,4 +114,4 @@ Termination due to an unhandled exception.
 .BR 128 "+" \fIi\fR
 Termination due to signal no. \fIi\fR.
 .TP
-\fBNote:\fR if the function exitc() is called from inside the code with a return value, that value has precedence over this convention.
+\fBNote:\fR the lns function exit() has precedence over this convention.
