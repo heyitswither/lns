@@ -1,4 +1,5 @@
 # lns
+![Code preview](https://github.com/lorenzonotaro/lns/blob/master/extra/code_preview.gif?raw=true)
 
 *lns* is a scripting language written in C++.
 
