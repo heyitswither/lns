@@ -1,12 +1,13 @@
 #ifndef LNS_EXPR_H
 #define LNS_EXPR_H
 
-#include "defs.h"
+#include "utils.h"
 #include <list>
 #include <string>
 #include <iostream>
 #include <utility>
 #include <memory>
+#include "token.h"
 
 using namespace std;
 using namespace lns;

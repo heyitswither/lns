@@ -2,8 +2,6 @@
 // Created by lorenzo on 11/30/17.
 //
 #include "interpreter.h"
-#include "errors.h"
-#include <dlfcn.h>
 
 using namespace lns;
 
@@ -78,10 +76,10 @@ shared_ptr<object> interpreter::visit_assign_expr(assign_expr *a) {
 shared_ptr<object> interpreter::visit_binary_expr(binary_expr *b) {
     auto left = evaluate(b->left.get());
     if (left == nullptr)
-        left = lns::GET_DEFAULT_NULL();
+        left = make_shared<null_o>();
     auto right = evaluate(b->right.get());
     if (right == nullptr) {
-        right = lns::GET_DEFAULT_NULL();
+        right = make_shared<null_o>();
     }
     token_type type = b->op->type;
     try {
@@ -603,7 +601,7 @@ shared_ptr<object> lns::function::call(vector<shared_ptr<object>> &args) {
     } catch (return_signal &r) {
         return r.value;
     }
-    return lns::GET_DEFAULT_NULL();
+    return make_shared<null_o>();
 }
 
 const string lns::function::name() const {
@@ -803,7 +801,7 @@ shared_ptr<object> method::call(std::vector<shared_ptr<object>> &args) {
     } catch (return_signal &r) {
         return r.value;
     }
-    return lns::GET_DEFAULT_NULL();
+    return make_shared<null_o>();
 }
 
 string method::str() const {

@@ -5,7 +5,8 @@
 #ifndef CPPLNS_INTERPRETER_H
 #define CPPLNS_INTERPRETER_H
 
-#include "defs.h"
+#include <memory>
+#include "utils.h"
 #include "expr.h"
 #include "stmt.h"
 #include <vector>
@@ -15,7 +16,11 @@
 #include <string>
 #include <chrono>
 #include <thread>
-
+#include "primitives.h"
+#include "environments.h"
+#include "callable.h"
+#include "errors.h"
+#include <dlfcn.h>
 
 #define THIS_DEFINITION string("#this#")
 #define RECURSION_LIMIT 1000
@@ -130,7 +135,6 @@ namespace lns {
 
         bool check_params(const token *where, const parameter_declaration &declaration, unsigned long size);
     };
-
 
     class function : public callable{
     protected:

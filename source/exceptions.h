@@ -6,8 +6,9 @@
 
 #include <exception>
 #include <string>
-#include "defs.h"
+#include "utils.h"
 #include "options.h"
+#include "token.h"
 #include <initializer_list>
 
 #define FATAL_ERROR_UNFORMATTED   "Fatal error"
@@ -71,6 +72,68 @@ namespace lns {
     class cmd_processor_unavailable : public std::exception {
         const char *what() const throw() override;
     };
+
+    class return_signal : public std::exception {
+    public:
+        std::shared_ptr<lns::object> value;
+        const token *keyword;
+
+        return_signal(std::shared_ptr<object> value, const token *keyword);
+
+        const char *what() const throw() override;
+    };
+
+    class break_signal : public std::exception {
+    public:
+        const token *keyword;
+
+        explicit break_signal(const token *keyword);
+
+        const char *what() const throw() override;
+    };
+
+    class continue_signal : public std::exception {
+    public:
+        const token *keyword;
+
+        const char *what() const throw() override;
+
+        explicit continue_signal(const token *keyword);
+    };
+
+    class runtime_exception : public std::exception {
+    public:
+        std::string message;
+        bool native_throw;
+        const lns::token *token;
+
+        runtime_exception(const char *filename, int line, std::string message);
+
+        runtime_exception(const lns::token *token, std::string m);
+
+        const char *what() const throw() override;
+    };
+
+    class incode_exception : public lns::runtime_exception, public lns::object {
+    private:
+        std::map<std::string, std::shared_ptr<object> > fields;
+    public:
+        int calls_bypassed;
+
+        incode_exception(const lns::token *token, std::string m,
+                         const std::map<std::string, std::shared_ptr<object>> fields);
+
+        std::shared_ptr<object> get(std::string &key);
+
+        bool operator==(const object &o) const override;
+
+        std::string str() const override;
+
+        std::shared_ptr<object> clone() const override;
+
+        const char *what() const throw() override;
+    };
+
 }
 
 #endif //CPPLNS_EXCEPTIONS_H

@@ -5,7 +5,7 @@
 #ifndef CPPLNS_ERRORS_H
 #define CPPLNS_ERRORS_H
 
-#include "defs.h"
+#include "utils.h"
 #include "exceptions.h"
 #include "error_message.h"
 

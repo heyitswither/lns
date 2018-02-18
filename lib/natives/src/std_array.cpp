@@ -2,7 +2,8 @@
 // Created by lorenzo on 12/17/17.
 //
 
-#include "defs.h"
+#include "utils.h"
+#include "callable.h"
 using namespace lns;
 using namespace std;
 class array_c : public native_callable{

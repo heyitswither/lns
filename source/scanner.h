@@ -8,7 +8,8 @@
 #include <string>
 #include <vector>
 #include <map>
-#include "defs.h"
+#include "token.h"
+#include "utils.h"
 
 using namespace std;
 namespace lns {

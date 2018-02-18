@@ -5,7 +5,8 @@
 #ifndef LIB_FILES_COMMON_H
 #define LIB_FILES_COMMON_H
 
-#include "defs.h"
+#include "utils.h"
+#include "callable.h"
 #include <cstdio>
 
 class file_ptr_o : public lns::object {

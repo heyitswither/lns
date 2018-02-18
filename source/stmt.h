@@ -1,12 +1,14 @@
 #ifndef LNS_STMT_H
 #define LNS_STMT_H
 
-#include "defs.h"
+#include "utils.h"
 #include <list>
 #include <string>
 #include <iostream>
 #include "expr.h"
 #include <memory>
+#include "token.h"
+#include "primitives.h"
 
 using namespace std;
 using namespace lns;

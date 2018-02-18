@@ -2,7 +2,6 @@
 // Created by lorenzo on 11/30/17.
 //
 #include "debug.h"
-#include "errors.h"
 
 #define ARROW "---> "
 using namespace std;

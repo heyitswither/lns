@@ -5,7 +5,7 @@
 #define CPPLNS_COMMAND_HANDLER_H
 
 #include <string>
-#include "defs.h"
+#include "utils.h"
 #include <sstream>
 #include <iostream>
 #include "exceptions.h"
