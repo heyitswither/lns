@@ -1,6 +1,6 @@
 # lns
 
-*lns* is a simple scripting language written in C++.
+*lns* is a scripting language written in C++.
 
 Visit the Wiki section for information about the language, the command and the interpreter.
 
