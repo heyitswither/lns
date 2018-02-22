@@ -2,7 +2,10 @@
 // Created by lorenzo on 2/17/18.
 //
 
+#include <iomanip>
 #include "primitives.h"
+
+#define NUMBER_PRECISION 15
 
 using namespace lns;
 using namespace std;
@@ -133,7 +136,7 @@ lns::number_o::number_o(double value) : object(objtype::NUMBER_T), value(value) 
 
 string lns::number_o::str() const {
     stringstream ss;
-    ss << value;
+    ss << std::fixed << std::setprecision(NUMBER_PRECISION) << std::defaultfloat << value;
     return ss.str();
 }
 
