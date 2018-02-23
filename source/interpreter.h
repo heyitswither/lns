@@ -152,9 +152,14 @@ namespace lns {
 
     class constructor;
 
+    class instance_o;
+
+    class method;
+
     class class_definition : public function_container {
     public:
         const char *def_file;
+        interpreter *i;
         const string name;
         vector<shared_ptr<lns::function_stmt>> methods;
         vector<shared_ptr<lns::constructor>> constructors;
@@ -162,7 +167,7 @@ namespace lns {
 
         class_definition(const string name,
                          const vector<shared_ptr<var_stmt>> &variables,
-                         const vector<shared_ptr<function_stmt>> &methods, const char *def_file);
+                         const vector<shared_ptr<function_stmt>> &methods, const char *def_file, interpreter *);
 
         string str() const override;
 
@@ -171,6 +176,8 @@ namespace lns {
         shared_ptr<object> clone() const override;
 
         set<callable *> declare_natives() const override;
+
+        shared_ptr<method> getMethod(const token *name, const char *accessing_file, instance_o *instance);
     };
 
     class constructor : public callable {
@@ -214,14 +221,17 @@ namespace lns {
 
         shared_ptr<object> operator+(const object &o) const override;
 
+        shared_ptr<object> get(const token *name, const char *accessing_file) override;
+
         void assign_field(const token *name, const token_type op, shared_ptr<object> obj, const char *assigning_file);
+
     };
 
     class method : public function {
     public:
-        const shared_ptr<instance_o> instance;
+        instance_o *instance;
 
-        method(interpreter *i, const function_stmt *f, shared_ptr<instance_o>);
+        method(interpreter *i, const function_stmt *f, instance_o *instance);
 
         shared_ptr<object> call(std::vector<shared_ptr<object>> &args) override;
 

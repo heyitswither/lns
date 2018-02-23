@@ -41,7 +41,7 @@ namespace lns {
 
         explicit runtime_environment(std::shared_ptr<runtime_environment> enc);
 
-        std::shared_ptr<object> get(const token *name, const char *accessing_file);
+        virtual std::shared_ptr<object> get(const token *name, const char *accessing_file);
 
         virtual void define(const token *name, std::shared_ptr<object> o, bool is_final, visibility visibility,
                             const char *def_file);

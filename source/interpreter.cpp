@@ -525,7 +525,7 @@ void interpreter::visit_begin_handle_stmt(begin_handle_stmt *b) {
 void interpreter::visit_constructor_stmt(constructor_stmt *c) {}
 
 void interpreter::visit_class_decl_stmt(class_decl_stmt *c) {
-    auto class_ = make_shared<class_definition>(c->name->lexeme, c->variables, c->methods, c->file);
+    auto class_ = make_shared<class_definition>(c->name->lexeme, c->variables, c->methods, c->file, this);
     vector<shared_ptr<constructor>> constructors;
     for (auto &item : c->constructors)
         constructors.emplace_back(make_shared<constructor>(this, class_, item.get()));
@@ -620,14 +620,15 @@ lns::function::function(interpreter *i, const lns::function_stmt *f) : i(i), dec
 
 class_definition::class_definition(const string name,
                                    const vector<shared_ptr<var_stmt>> &variables,
-                                   const vector<shared_ptr<function_stmt>> &methods, const char *def_file) : name(name),
-                                                                                                             function_container(
+                                   const vector<shared_ptr<function_stmt>> &methods, const char *def_file,
+                                   interpreter *i) : name(name),
+                                                     function_container(
                                                                                                                      CLASS_DEFINITION_T),
-                                                                                                             variables(
+                                                     variables(
                                                                                                                      variables),
-                                                                                                             methods(methods),
-                                                                                                             def_file(
-                                                                                                                     def_file) {}
+                                                     methods(methods),
+                                                     def_file(
+                                                             def_file), i(i) {}
 
 string class_definition::str() const {
     stringstream s;
@@ -645,6 +646,16 @@ shared_ptr<object> class_definition::clone() const {
 
 set<callable *> class_definition::declare_natives() const {
     return std::set<callable *>();
+}
+
+shared_ptr<method>
+class_definition::getMethod(const token *name, const char *accessing_file, instance_o *instance) {
+    for (shared_ptr<function_stmt> m : methods)
+        if (m->name->lexeme == name->lexeme)
+            if (m->vis == V_GLOBAL || strcmp(accessing_file, m->file) == 0)
+                return make_shared<method>(i, m.get(), instance);
+            else throw runtime_exception(name, VARIABLE_NOT_VISIBLE(name->lexeme));
+    throw runtime_exception(name, VARIABLE_UNDEFINED(name->lexeme));
 }
 
 constructor::constructor(interpreter *i, const shared_ptr<class_definition> container,
@@ -666,8 +677,6 @@ shared_ptr<object> constructor::call(std::vector<std::shared_ptr<object>> &args)
 
     for (auto &item : container->variables)
         item->accept(i);
-    for (auto &item : container->methods)
-        instance->define(item->name, make_shared<method>(i, item.get(), instance), true, item->vis, item->file);
 
     i->environment = prev;
 
@@ -783,13 +792,23 @@ void instance_o::define(const token *name, std::shared_ptr<object> o, bool is_fi
     runtime_environment::define(name->lexeme, o, is_final, vis, def_file);
 }
 
-method::method(interpreter *i, const function_stmt *f, shared_ptr<instance_o> instance) : function(i, f),
+shared_ptr<object> instance_o::get(const token *name, const char *accessing_file) {
+    try {
+        return runtime_environment::get(name, accessing_file);
+    } catch (runtime_exception &) {
+        return class_->getMethod(name, accessing_file, this);
+    }
+}
+
+method::method(interpreter *i, const function_stmt *f, instance_o *instance) : function(i, f),
                                                                                           instance(instance) {}
 
 shared_ptr<object> method::call(std::vector<shared_ptr<object>> &args) {
+    auto ptr = shared_ptr<instance_o>();
+    shared_ptr<instance_o> inst = shared_ptr<instance_o>(shared_ptr<instance_o>{}, instance);
     shared_ptr<runtime_environment> enclosing = make_shared<runtime_environment>(i->globals);
-    shared_ptr<runtime_environment> env = make_shared<runtime_environment>(instance);
-    env->define(THIS_DEFINITION, instance, true, V_UNSPECIFIED, declaration->file);
+    shared_ptr<runtime_environment> env = make_shared<runtime_environment>(inst);
+    env->define(THIS_DEFINITION, inst, true, V_UNSPECIFIED, declaration->file);
     int j;
     shared_ptr<object> o;
     for (j = 0; j < declaration->parameters.parameters.size(); j++) {
@@ -807,6 +826,6 @@ shared_ptr<object> method::call(std::vector<shared_ptr<object>> &args) {
 string method::str() const {
     stringstream s;
     s << "<" << (this->type == NATIVE_CALLABLE_T ? "native_" : "") << "method@" << static_cast<const void *>(this)
-      << ", class: \"" << instance->class_ << "\", name: \"" << name() << "\">";
+      << ", class: \"" << instance->class_->str() << "\", name: \"" << name() << "\">";
     return s.str();
 }
