@@ -116,6 +116,8 @@ shared_ptr<object> interpreter::visit_binary_expr(binary_expr *b) {
                 return (*left * *right);
             case HAT:
                 return (*left ^ *right);
+            case MODULO:
+                return (*left % *right);
             default:
                 break;
         }

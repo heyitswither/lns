@@ -448,7 +448,7 @@ shared_ptr<expr> parser::addition(bool nested) {
 
 shared_ptr<expr> parser::multiplication(bool nested) {
     shared_ptr<expr> expr_ = power(nested), right;
-    while (match({SLASH, STAR})) {
+    while (match({SLASH, STAR, MODULO})) {
         token *op = previous();
         right = power(true);
         expr_ = make_shared<binary_expr>(op->filename, op->line, expr_, op, right);

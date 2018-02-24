@@ -184,6 +184,8 @@ void scanner::scan_token() {
             break;
         case '?':
             add_token(QUESTION_MARK);
+        case '%':
+            add_token(MODULO);
         case ' ':
         case '\r':
         case '\t':

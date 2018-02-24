@@ -212,6 +212,11 @@ shared_ptr<object> lns::number_o::operator^(const object &o) const {
     return make_shared<number_o>(pow(this->value, dynamic_cast<const number_o &>(o).value));
 }
 
+std::shared_ptr<object> number_o::operator%(const object &o) const {
+    if (!check_type(NUMBER_T, *this, o)) WRONG_OP(%);
+    return make_shared<number_o>((int) this->value % (int) dynamic_cast<const number_o &>(o).value);
+}
+
 shared_ptr<object> lns::number_o::operator-() const {
     return make_shared<number_o>(-this->value);
 }

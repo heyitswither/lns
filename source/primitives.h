@@ -72,6 +72,8 @@ namespace lns {
 
         virtual std::shared_ptr<object> operator^(const object &o) const { WRONG_OP(^) };
 
+        virtual std::shared_ptr<object> operator%(const object &o) const { WRONG_OP(%) };
+
         virtual std::shared_ptr<object> operator-() const { WRONG_OP_UN(-) };
 
         virtual std::shared_ptr<object> operator++() { WRONG_OP_UN(++) };
@@ -151,6 +153,8 @@ namespace lns {
         std::shared_ptr<object> operator/(const object &o) const override;
 
         std::shared_ptr<object> operator^(const object &o) const override;
+
+        std::shared_ptr<object> operator%(const object &o) const override;
 
         std::shared_ptr<object> operator-() const override;
 
