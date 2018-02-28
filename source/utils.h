@@ -45,7 +45,7 @@ namespace lns {
         stack_call(const char *filename, const int line, const std::string method, const bool native);
     };
 
-    const char *concat(std::initializer_list<std::__cxx11::string> ss);
+    const char *concat(std::initializer_list<std::string> ss);
 
     inline bool file_exists(const char *name);
 

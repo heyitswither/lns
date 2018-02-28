@@ -22,7 +22,7 @@ CHK $? "Unable to create install directory"
 printf " done\n"
 
 printf "Compiling executable..."
-sudo g++ -w -Wall -rdynamic -Wl,--no-as-needed -ldl -std=gnu++1z source/*.cpp -o ./lns
+sudo g++ -w -Wall -rdynamic -Wl,--no-as-needed -ldl source/*.cpp -o ./lns
 CHK $? "\nCompilation failed"
 printf " done\n"
 

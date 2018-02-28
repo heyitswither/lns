@@ -458,7 +458,7 @@ shared_ptr<object> interpreter::visit_array_expr(array_expr *a) {
     for(auto& pair : a->pairs){
         if (DCAST_ASNCHK(key, number_o*, evaluate(pair.first.get()).get())) {
             obj = evaluate(pair.second.get());
-            array->values.insert_or_assign(key->value, obj);
+            array->values.insert(std::pair<double, std::shared_ptr<object>>(key->value, obj));
         }else{
             throw runtime_exception(a->open_brace,KEY_MUST_BE_NUMBER);
         }
@@ -486,7 +486,7 @@ void interpreter::visit_raise_stmt(raise_stmt *r) {
         if(exc->fields.find(pair.first) == exc->fields.end())
             throw runtime_exception(r->where,EXCEPTION_NO_MEMBER(exc->name,pair.first));
         else
-            fields.insert(std::pair(pair.first, evaluate(pair.second.get())));
+            fields.insert(std::pair<std::string, shared_ptr<object>>(pair.first, evaluate(pair.second.get())));
 
     for(auto& key : exc->fields)
         if (fields.find(key) == fields.end()) fields[key] = make_shared<null_o>();
