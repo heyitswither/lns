@@ -55,7 +55,6 @@ done
 
 for f in $(ls -1 | grep ".*\.h$" | grep -v "lib_.*" | tr "\n" " ")
 do
-    echo "Removing $f"
     sudo rm ${f}
 done
 
